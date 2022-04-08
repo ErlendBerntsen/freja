@@ -18,6 +18,7 @@ public class GPSPoint {
     @Implement(number = {1,1}, copy = Copy.REMOVE_EVERYTHING)
     private double elevation;
 
+    @Implement(number = {1,1}, copy = Copy.REPLACE_SOLUTION, replacementId = "1")
     public GPSPoint(int time, double latitude, double longitude, double elevation) {
 
         // TODO - konstruktur

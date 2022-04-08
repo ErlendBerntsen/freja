@@ -159,7 +159,7 @@ public class ParserTest {
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("replacementId")){
                         String replacementId = pairs.getValue().asStringLiteralExpr().asString();
-                        parser.replaceSolution(annotatedNode.asMethodDeclaration(), replacementId);
+                        parser.replaceSolutionInMethodBody(annotatedNode.asMethodDeclaration(), replacementId);
                         assertTrue(annotatedNode.asMethodDeclaration()
                         .getBody().get()
                                 .getStatements().containsAll(parser.getSolutionReplacements().get(replacementId).getStatements()));

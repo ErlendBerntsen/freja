@@ -6,15 +6,14 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
-import no.hvl.annotations.Implement;
 
 
 import java.io.File;
@@ -33,7 +32,13 @@ public class Parser {
     private Map<String, BlockStmt> solutionReplacements = new HashMap<>();
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
-
+    private static final String IMPLEMENT_ANNOTATION_NAME = "Implement";
+    private static final String SOLUTION_REPLACEMENT_ANNOTATION_NAME = "SolutionReplacement";
+    private static final String SOLUTION_START_ANNOTATION_NAME = "SolutionStart";
+    private static final String SOLUTION_END_ANNOTATION_NAME = "SolutionEnd";
+    private static final String SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME = "id";
+    private static final String IMPLEMENT_ANNOTATION_ID_NAME = "replacementId";
+    private static final String IMPLEMENT_ANNOTATION_COPY_NAME = "copy";
 
     public Parser() {
         this.compilationUnits = new ArrayList<>();
@@ -93,13 +98,12 @@ public class Parser {
 
     public Map<String, BlockStmt> getAllSolutionReplacementsInFile(CompilationUnit file){
         //TODO ERror handling
-        //TODO fix hardcoded strings
         HashMap<String, BlockStmt> solutionReplacements = new HashMap<>();
-        getAnnotatedNodesInFile(file, "SolutionReplacement").stream()
+        getAnnotatedNodesInFile(file, SOLUTION_REPLACEMENT_ANNOTATION_NAME).stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .forEach(method ->
                         solutionReplacements.put(
-                                getAnnotationValue(method, "SolutionReplacement", "id")
+                                getAnnotationValue(method, SOLUTION_REPLACEMENT_ANNOTATION_NAME, SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME)
                                         .asStringLiteralExpr().asString()
                                 , method.asMethodDeclaration().getBody().get()));
         return solutionReplacements;
@@ -110,7 +114,7 @@ public class Parser {
         annotatedNodes.forEach(node -> file.replace(node, (Node) removeAnnotationFromNode(node, annotationName)));
     }
 
-    public NodeWithAnnotations removeAnnotationFromNode(NodeWithAnnotations node, String annotationName){
+    public NodeWithAnnotations<?> removeAnnotationFromNode(NodeWithAnnotations<?> node, String annotationName){
         NodeList<AnnotationExpr> annotations = new NodeList<>();
         for(var annotation : node.getAnnotations()){
             AnnotationExpr annotationExpr = (AnnotationExpr) annotation;
@@ -146,11 +150,22 @@ public class Parser {
         }
     }
 
-    public void replaceSolution(MethodDeclaration method, String replacementId){
+    public void replaceSolutionInMethodBody(CallableDeclaration<?> method, String replacementId){
+        //TODO preservation of comments?
+        if(method.isMethodDeclaration()){
+            var methodDeclaration = method.asMethodDeclaration();
+            methodDeclaration.setBody(replaceSolution(methodDeclaration.getBody().get(), replacementId));
+        }
+        else if (method.isConstructorDeclaration()){
+            var constructorDeclaration = method.asConstructorDeclaration();
+            constructorDeclaration.setBody(replaceSolution(constructorDeclaration.getBody(), replacementId));
+        }
+    }
+
+    private BlockStmt replaceSolution(BlockStmt methodBody, String replacementId){
         var solutionReplacement = solutionReplacements.get(replacementId);
         //TODO this comment is persisted. Should be deleted
         solutionReplacement.getStatements().getFirst().get().setLineComment(START_COMMENT);
-        var methodBody = method.getBody().get();
         var replacementBody = new BlockStmt();
         var isSolutionStatement = false;
         var methodHasEndStatement = false;
@@ -178,16 +193,20 @@ public class Parser {
             replacementBody.addOrphanComment(
                     new LineComment(methodBody.getStatements().getLast().get().getTokenRange().get(), END_COMMENT));
         }
-        method.setBody(replacementBody);
+        return replacementBody;
     }
 
-    public void replaceBody(MethodDeclaration method, String replacementId){
-        method.setBody(solutionReplacements.get(replacementId));
+    public void replaceBody(CallableDeclaration<?> method, String replacementId){
+        if(method.isMethodDeclaration()){
+            method.asMethodDeclaration().setBody(solutionReplacements.get(replacementId));
+        }
+        else if (method.isConstructorDeclaration()){
+            method.asConstructorDeclaration().setBody(solutionReplacements.get(replacementId));
+        }
     }
 
     public Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){
         //TODO ERror handling
-
         var annotation = node.getAnnotationByName(annotationName).get().asNormalAnnotationExpr();
         for(MemberValuePair pair : annotation.getPairs()){
             if(pair.getName().asString().equals(memberName)){
@@ -202,7 +221,7 @@ public class Parser {
             Expression expression = statement.asExpressionStmt().getExpression();
             if(expression.isVariableDeclarationExpr()){
                 VariableDeclarationExpr variableDeclarationExpr = expression.asVariableDeclarationExpr();
-                return "SolutionStart".equals(variableDeclarationExpr.getElementType().toString());
+                return SOLUTION_START_ANNOTATION_NAME.equals(variableDeclarationExpr.getElementType().toString());
             }
         }
         return false;
@@ -213,7 +232,7 @@ public class Parser {
             Expression expression = statement.asExpressionStmt().getExpression();
             if(expression.isVariableDeclarationExpr()){
                 VariableDeclarationExpr variableDeclarationExpr = expression.asVariableDeclarationExpr();
-                return "SolutionEnd".equals(variableDeclarationExpr.getElementType().toString());
+                return SOLUTION_END_ANNOTATION_NAME.equals(variableDeclarationExpr.getElementType().toString());
             }
         }
         return false;
@@ -221,27 +240,23 @@ public class Parser {
 
     public CompilationUnit modifyAllAnnotatedNodesInFile(CompilationUnit file, String annotationName){
         var annotatedNodes = getAnnotatedNodesInFile(file, annotationName);
-        annotatedNodes.forEach(annotatedNode -> {
-           modifyAnnotatedNode(annotatedNode);
-        });
+        annotatedNodes.forEach(this::modifyAnnotatedNode);
         return file;
     }
 
-    public void modifyAnnotatedNode(BodyDeclaration annotatedNode){
-        var copyValueExpression = getAnnotationValue(annotatedNode, "Implement", "copy");
+    public void modifyAnnotatedNode(BodyDeclaration<?> annotatedNode){
+        var copyValueExpression = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_COPY_NAME);
         var copyValue = Copy.getCopy(copyValueExpression.asFieldAccessExpr().getNameAsString());
         switch (copyValue){
             case REPLACE_SOLUTION -> {
-                //TODO Make constants
                 // TODO error handling
                 // TODO handle rest of cases
                 // TODO create test
-                // TODO handle constructor casting
-                var id = getAnnotationValue(annotatedNode, "Implement", "replacementId");
-                replaceSolution((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
+                var id = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_ID_NAME);
+                replaceSolutionInMethodBody(castToCallableDeclaration(annotatedNode), id.asStringLiteralExpr().asString());
             }
             case REPLACE_BODY -> {
-                var id = getAnnotationValue(annotatedNode, "Implement", "replacementId");
+                var id = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_ID_NAME);
                 replaceBody((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
             }
             case REMOVE_EVERYTHING -> {
@@ -249,10 +264,16 @@ public class Parser {
                 annotatedNode.removeForced();
             }
         }
-        removeAnnotationFromNode(annotatedNode, "Implement");
+        removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
     }
 
-
+    private CallableDeclaration<?> castToCallableDeclaration(BodyDeclaration<?> bodyDeclaration){
+        if(bodyDeclaration.isMethodDeclaration()){
+            return bodyDeclaration.asMethodDeclaration();
+        }else{
+            return bodyDeclaration.asConstructorDeclaration();
+        }
+    }
 
     public void print(){
         compilationUnits.forEach(compilationUnit -> compilationUnit.getTypes()

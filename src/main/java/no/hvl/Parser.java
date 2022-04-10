@@ -7,6 +7,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.*;
@@ -80,16 +81,16 @@ public class Parser {
         solutionReplacements = getAllSolutionReplacementsInFile(cu);
     }
 
-    public NodeList<BodyDeclaration<?>> getAllAnnotatedNodes(String annotationName){
-        NodeList<BodyDeclaration<?>> allAnnotatedNodes = new NodeList<>();
+    public List<BodyDeclaration<?>> getAllAnnotatedNodes(String annotationName){
+        List<BodyDeclaration<?>> allAnnotatedNodes = new ArrayList<>();
         for(CompilationUnit compilationUnit : compilationUnits){
             allAnnotatedNodes.addAll(getAnnotatedNodesInFile(compilationUnit, annotationName));
         }
         return allAnnotatedNodes;
     }
 
-    public NodeList<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
-        NodeList<BodyDeclaration<?>> annotatedNodes = new NodeList<>();
+    public List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
+        List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
         file.findAll(BodyDeclaration.class,
                 bodyDeclaration -> bodyDeclaration.getAnnotationByName(annotationName).isPresent())
                 .forEach(annotatedNodes::add);
@@ -163,8 +164,7 @@ public class Parser {
     }
 
     private BlockStmt replaceSolution(BlockStmt methodBody, String replacementId){
-        var solutionReplacement = solutionReplacements.get(replacementId);
-        //TODO this comment is persisted. Should be deleted
+        var solutionReplacement = solutionReplacements.get(replacementId).clone();
         solutionReplacement.getStatements().getFirst().get().setLineComment(START_COMMENT);
         var replacementBody = new BlockStmt();
         var isSolutionStatement = false;
@@ -260,8 +260,7 @@ public class Parser {
                 replaceBody((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
             }
             case REMOVE_EVERYTHING -> {
-                //TODO fix?
-                annotatedNode.removeForced();
+                annotatedNode.remove();
             }
         }
         removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
@@ -279,4 +278,5 @@ public class Parser {
         compilationUnits.forEach(compilationUnit -> compilationUnit.getTypes()
                 .forEach(typeDeclaration -> System.out.println(typeDeclaration.toString())));
     }
+
 }

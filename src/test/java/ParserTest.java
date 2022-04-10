@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -25,6 +26,9 @@ public class ParserTest {
     private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
     private static final String EXAMPLE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
     private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+
+    public ParserTest() throws IOException {
+    }
 
     @BeforeEach
     public void init() throws IOException {
@@ -141,8 +145,22 @@ public class ParserTest {
                 }
             }
         });
-        System.out.println(compilationUnit);
+    }
 
+    @Test
+    public void constructorShouldBeRemoved(){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var constructors = compilationUnit.findAll(ConstructorDeclaration.class);
+        constructors.forEach(constructor -> {
+            var copyValueMaybe = annotationUtils.getCopyValue(constructor);
+            if(copyValueMaybe.isPresent()){
+                var copyValue = copyValueMaybe.get();
+                if(copyValue.equals(Copy.REMOVE_EVERYTHING)){
+                    constructor.remove();
+                    assertFalse(compilationUnit.isAncestorOf(constructor));
+                }
+            }
+        });
     }
 
     @Test

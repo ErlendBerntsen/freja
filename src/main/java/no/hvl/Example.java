@@ -3,7 +3,6 @@ package no.hvl;
 import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;
-import org.checkerframework.checker.units.qual.C;
 
 @Implement
 public class Example {
@@ -11,8 +10,13 @@ public class Example {
     @Implement(copy = Copy.REMOVE_EVERYTHING)
     public int fieldVariable;
 
-    @Implement
+    @Implement(copy = Copy.REMOVE_EVERYTHING)
     public Example() {
+    }
+
+    @Implement(copy = Copy.REMOVE_EVERYTHING)
+    public void methodToRemove(){
+
     }
 
     @Implement(copy = Copy.REPLACE_SOLUTION, replacementId = "2")

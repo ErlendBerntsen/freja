@@ -1,6 +1,7 @@
 package no.hvl;
 
 import no.hvl.annotations.SolutionReplacement;
+import no.hvl.dat100example.TODO;
 
 public class ReplacementCode {
 

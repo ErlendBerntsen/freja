@@ -1,5 +1,7 @@
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -134,33 +137,45 @@ public class ParserTest {
     @Test
     public void fieldVariableShouldBeRemoved(){
         var compilationUnit = parser.getCompilationUnits().get(0);
-        var fields = compilationUnit.findAll(FieldDeclaration.class);
-        fields.forEach(field -> {
-            var copyValueMaybe = annotationUtils.getCopyValue(field);
-            if(copyValueMaybe.isPresent()){
-                var copyValue = copyValueMaybe.get();
-                if(copyValue.equals(Copy.REMOVE_EVERYTHING)){
-                    field.remove();
-                    assertFalse(compilationUnit.isAncestorOf(field));
-                }
-            }
-        });
+        var removedTypes = removeTypesFromClass(FieldDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
     }
 
     @Test
     public void constructorShouldBeRemoved(){
         var compilationUnit = parser.getCompilationUnits().get(0);
-        var constructors = compilationUnit.findAll(ConstructorDeclaration.class);
-        constructors.forEach(constructor -> {
-            var copyValueMaybe = annotationUtils.getCopyValue(constructor);
+        var removedTypes = removeTypesFromClass(ConstructorDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
+    }
+
+    @Test
+    public void methodShouldBeRemoved(){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var removedTypes = removeTypesFromClass(MethodDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
+    }
+
+    private <T extends BodyDeclaration<?>> List<BodyDeclaration<?>> removeTypesFromClass(Class<T> type){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var types = compilationUnit.findAll(type);
+        List<BodyDeclaration<?>> removedTypes = new ArrayList<>();
+        types.forEach(bodyDeclarationType -> {
+            var copyValueMaybe = annotationUtils.getCopyValue(bodyDeclarationType);
             if(copyValueMaybe.isPresent()){
                 var copyValue = copyValueMaybe.get();
                 if(copyValue.equals(Copy.REMOVE_EVERYTHING)){
-                    constructor.remove();
-                    assertFalse(compilationUnit.isAncestorOf(constructor));
+                    bodyDeclarationType.remove();
+                    removedTypes.add(bodyDeclarationType);
                 }
             }
         });
+        return removedTypes;
     }
 
     @Test

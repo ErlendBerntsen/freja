@@ -3,6 +3,7 @@ package no.hvl;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 public class Parser {
 
+    private AnnotationUtils annotationUtils = new AnnotationUtils();
     private List<CompilationUnit> compilationUnits;
     private Map<String, BlockStmt> solutionReplacements = new HashMap<>();
     private static final String START_COMMENT = "TODO - START";
@@ -40,7 +42,7 @@ public class Parser {
     private static final String IMPLEMENT_ANNOTATION_ID_NAME = "replacementId";
     private static final String IMPLEMENT_ANNOTATION_COPY_NAME = "copy";
 
-    public Parser() {
+    public Parser() throws IOException {
         this.compilationUnits = new ArrayList<>();
     }
 
@@ -240,6 +242,15 @@ public class Parser {
     public CompilationUnit modifyAllAnnotatedNodesInFile(CompilationUnit file, String annotationName){
         var annotatedNodes = getAnnotatedNodesInFile(file, annotationName);
         annotatedNodes.forEach(this::modifyAnnotatedNode);
+        List<ImportDeclaration> importDeclarations = List.copyOf(file.getImports());
+        importDeclarations.forEach(importDeclaration -> {
+            if(importDeclaration.getName().getQualifier().isPresent()
+                && importDeclaration.getName().getQualifier().get()
+                    .equals(annotationUtils.getAnnotationsPackageName())){
+                importDeclaration.remove();
+
+            }
+        });
         return file;
     }
 

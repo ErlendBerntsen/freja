@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.utils.SourceRoot;
 
@@ -18,14 +19,29 @@ import java.util.stream.Collectors;
 public class AnnotationUtils {
 
     List<AnnotationDeclaration> annotationDeclarations;
+    Name annotationsPackageName;
+
     public AnnotationUtils() throws IOException {
         var sourceRoot = new SourceRoot(Paths.get("C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations"));
         List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse("");
-        annotationDeclarations = parseResults.stream()
+        var annotationFiles = parseResults.stream()
                 .filter(ParseResult::isSuccessful)
-                .map(r -> r.getResult().get().findFirst(AnnotationDeclaration.class).get())
+                .map(parseResult -> parseResult.getResult().get())
                 .collect(Collectors.toList());
-        System.out.println(annotationDeclarations.toString());
+
+        annotationsPackageName = annotationFiles.get(0).getPackageDeclaration().get().getName();
+
+        annotationDeclarations = annotationFiles.stream()
+                .map(annotationFile -> annotationFile.findFirst(AnnotationDeclaration.class).get())
+                .collect(Collectors.toList());
+    }
+
+    public Name getAnnotationsPackageName() {
+        return annotationsPackageName;
+    }
+
+    public List<AnnotationDeclaration> getAnnotationDeclarations() {
+        return annotationDeclarations;
     }
 
     public Optional<Copy> getCopyValue (NodeWithAnnotations<?> node){

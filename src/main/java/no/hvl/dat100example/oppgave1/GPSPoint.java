@@ -1,10 +1,9 @@
 package no.hvl.dat100example.oppgave1;
 
-import no.hvl.Copy;
+import no.hvl.annotations.Copy;
 import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;
-import no.hvl.dat100example.TODO;
 
 public class GPSPoint {
 

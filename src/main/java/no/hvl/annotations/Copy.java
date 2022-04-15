@@ -1,4 +1,4 @@
-package no.hvl;
+package no.hvl.annotations;
 
 public enum Copy {
     REMOVE_EVERYTHING("REMOVE_EVERYTHING"),

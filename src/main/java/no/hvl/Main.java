@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     private static final String GPSPOINT_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example\\oppgave1\\GPSPoint.java";
-    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example\\ReplacementCode.java";
     private static final String GPSPOINT_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\GPSPoint.java";
     private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
 
@@ -26,11 +26,9 @@ public class Main {
         Parser parser = new Parser();
         parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
         parser.parseDirectory("C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example");
-        List<CompilationUnit> files = parser.getCompilationUnits().stream()
-                .map(cu -> parser.modifyAllAnnotatedNodesInFile(cu, "Implement"))
-                .collect(Collectors.toList());
+        List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
 
-        ProjectWriter projectWriter = new ProjectWriter(files);
+        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, parser.getFileNamesToRemove());
         projectWriter.createProject();
 
     }

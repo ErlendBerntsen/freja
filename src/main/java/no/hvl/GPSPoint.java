@@ -1,6 +1,7 @@
 package no.hvl;
 
 
+import no.hvl.annotations.Copy;
 import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;

@@ -1,8 +1,9 @@
-package no.hvl;
+package no.hvl.dat100example;
 
+import no.hvl.annotations.Remove;
 import no.hvl.annotations.SolutionReplacement;
-import no.hvl.dat100example.TODO;
 
+@Remove
 public class ReplacementCode {
 
     @SolutionReplacement(id = "1")

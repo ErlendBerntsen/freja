@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.AnnotationUtils;
-import no.hvl.Copy;
+import no.hvl.annotations.Copy;
 import no.hvl.NodeUtils;
 import no.hvl.Parser;
 import org.junit.jupiter.api.BeforeEach;

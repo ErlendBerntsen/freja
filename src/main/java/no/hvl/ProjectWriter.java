@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class ProjectWriter {
@@ -15,9 +16,11 @@ public class ProjectWriter {
     private String targetDirectoryPath = "C:\\Users\\Acer\\OneDrive\\Documents\\Master\\output\\";
     private String sourceDirectoryPath = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example";
     private HashMap<String, CompilationUnit> modifiedFiles;
+    private HashSet<String> fileNamesToRemove;
 
-    public ProjectWriter(List<CompilationUnit> modifiedFiles) {
+    public ProjectWriter(List<CompilationUnit> modifiedFiles, HashSet<String> fileNamesToRemove) {
         this.modifiedFiles = new HashMap<>();
+        this.fileNamesToRemove = fileNamesToRemove;
         modifiedFiles.forEach(file -> this.modifiedFiles.put(file.getStorage().get().getFileName(), file));
     }
 
@@ -34,7 +37,7 @@ public class ProjectWriter {
                newDir.mkdir();
                createFilesAndDirectories(newDir, file);
            }
-           if(file.isFile()){
+           if(file.isFile() && !fileNamesToRemove.contains(file.getName())){
                File newFile = new File(dir.getAbsolutePath() + File.separator + file.getName());
                try {
                    newFile.createNewFile();

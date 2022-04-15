@@ -15,16 +15,14 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
+import no.hvl.annotations.Copy;
 
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Parser {
@@ -32,6 +30,7 @@ public class Parser {
     private AnnotationUtils annotationUtils = new AnnotationUtils();
     private List<CompilationUnit> compilationUnits;
     private Map<String, BlockStmt> solutionReplacements = new HashMap<>();
+    private HashSet<String> fileNamesToRemove = new HashSet<>();
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
     private static final String IMPLEMENT_ANNOTATION_NAME = "Implement";
@@ -60,6 +59,10 @@ public class Parser {
 
     public String getEndComment() {
         return END_COMMENT;
+    }
+
+    public HashSet<String> getFileNamesToRemove() {
+        return fileNamesToRemove;
     }
 
     public void parseDirectory(String dir) throws IOException {
@@ -284,9 +287,20 @@ public class Parser {
         }
     }
 
-    public void print(){
-        compilationUnits.forEach(compilationUnit -> compilationUnit.getTypes()
-                .forEach(typeDeclaration -> System.out.println(typeDeclaration.toString())));
+    public List<CompilationUnit> createStartCodeProject(){
+        var nodesToRemove = getAllAnnotatedNodes(AnnotationNames.REMOVE_NAME);
+        nodesToRemove.forEach(node -> {
+            if(node.isTypeDeclaration()){
+                var compilationUnitMaybe = node.findCompilationUnit();
+                if(compilationUnitMaybe.isPresent()){
+                    fileNamesToRemove.add(compilationUnitMaybe.get().getStorage().get().getFileName());
+                    compilationUnits.remove(compilationUnitMaybe.get());
+                }
+            }
+        });
+        return getCompilationUnits().stream()
+                .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
+                .collect(Collectors.toList());
     }
 
 }

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.utils.SourceRoot;
+import no.hvl.annotations.Copy;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -32,6 +33,7 @@ public class AnnotationUtils {
         annotationsPackageName = annotationFiles.get(0).getPackageDeclaration().get().getName();
 
         annotationDeclarations = annotationFiles.stream()
+                .filter(file -> file.findFirst(AnnotationDeclaration.class).isPresent())
                 .map(annotationFile -> annotationFile.findFirst(AnnotationDeclaration.class).get())
                 .collect(Collectors.toList());
     }

@@ -21,13 +21,9 @@ public class AnnotationUtils {
 
     List<AnnotationDeclaration> annotationDeclarations;
     Name annotationsPackageName;
-    private String path = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations";
-    private String laptopPath = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations";
-
 
     public AnnotationUtils() throws IOException {
-        //TODO fix path problem
-        var sourceRoot = new SourceRoot(Paths.get(path));
+        var sourceRoot = new SourceRoot(Paths.get("C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations"));
         List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse("");
         var annotationFiles = parseResults.stream()
                 .filter(ParseResult::isSuccessful)

@@ -1,17 +1,22 @@
 package no.hvl;
 
+import no.hvl.annotations.Copy;
 import no.hvl.annotations.Implement;
-import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;
 
 @Implement
 public class Example {
 
-    @Implement
+    @Implement(copy = Copy.REMOVE_EVERYTHING)
     public int fieldVariable;
 
-    @Implement
+    @Implement(copy = Copy.REMOVE_EVERYTHING)
     public Example() {
+    }
+
+    @Implement(copy = Copy.REMOVE_EVERYTHING)
+    public void methodToRemove(){
+
     }
 
     @Implement(copy = Copy.REPLACE_SOLUTION, replacementId = "2")

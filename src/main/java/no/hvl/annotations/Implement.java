@@ -1,8 +1,6 @@
 package no.hvl.annotations;
 
 
-import no.hvl.Copy;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 

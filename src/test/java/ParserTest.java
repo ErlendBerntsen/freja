@@ -1,28 +1,45 @@
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
-import no.hvl.Copy;
+import no.hvl.AnnotationUtils;
+import no.hvl.annotations.Copy;
+import no.hvl.NodeUtils;
 import no.hvl.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
 
     Parser parser;
+    NodeUtils nodeUtils = new NodeUtils();
+    AnnotationUtils annotationUtils = new AnnotationUtils();
     private final String IMPLEMENT_ANNOTATION_NAME = "Implement";
+    private static final String EXAMPLE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
+    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+    private static final String EXAMPLE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
+    private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+
+    public ParserTest() throws IOException {
+    }
 
     @BeforeEach
     public void init() throws IOException {
         parser = new Parser();
-        parser.saveSolutionReplacements("C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java");
-        parser.parseFile("C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java");
+        //parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_DESKTOP);
+        //parser.parseFile(EXAMPLE_PATH_DESKTOP);
+        parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
+        parser.parseFile(EXAMPLE_PATH_LAPTOP);
     }
 
     @Test
@@ -82,17 +99,12 @@ public class ParserTest {
         assertTrue(classWasFound);
     }
 
-
     @Test
     public void implementedAnnotationShouldBeRemoved(){
         var annotatedNodes = parser.getAllAnnotatedNodes(IMPLEMENT_ANNOTATION_NAME);
-        var annotatedNodeMaybe = annotatedNodes.getFirst();
-        if(annotatedNodeMaybe.isPresent()){
-            var annotatedNode = annotatedNodeMaybe.get();
-            parser.removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
-            assertTrue(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).isEmpty());
-        }
-
+        var annotatedNode = annotatedNodes.get(0);
+        parser.removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
+        assertTrue(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).isEmpty());
     }
 
     @Test
@@ -122,7 +134,49 @@ public class ParserTest {
         }
     }
 
+    @Test
+    public void fieldVariableShouldBeRemoved(){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var removedTypes = removeTypesFromClass(FieldDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
+    }
 
+    @Test
+    public void constructorShouldBeRemoved(){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var removedTypes = removeTypesFromClass(ConstructorDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
+    }
+
+    @Test
+    public void methodShouldBeRemoved(){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var removedTypes = removeTypesFromClass(MethodDeclaration.class);
+        for (BodyDeclaration<?> removedType : removedTypes){
+            assertFalse(compilationUnit.isAncestorOf(removedType));
+        }
+    }
+
+    private <T extends BodyDeclaration<?>> List<BodyDeclaration<?>> removeTypesFromClass(Class<T> type){
+        var compilationUnit = parser.getCompilationUnits().get(0);
+        var types = compilationUnit.findAll(type);
+        List<BodyDeclaration<?>> removedTypes = new ArrayList<>();
+        types.forEach(bodyDeclarationType -> {
+            var copyValueMaybe = annotationUtils.getCopyValue(bodyDeclarationType);
+            if(copyValueMaybe.isPresent()){
+                var copyValue = copyValueMaybe.get();
+                if(copyValue.equals(Copy.REMOVE_EVERYTHING)){
+                    bodyDeclarationType.remove();
+                    removedTypes.add(bodyDeclarationType);
+                }
+            }
+        });
+        return removedTypes;
+    }
 
     @Test
     public void solutionStartAndEndShouldBeReplacedWithComments(){
@@ -159,14 +213,16 @@ public class ParserTest {
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("replacementId")){
                         String replacementId = pairs.getValue().asStringLiteralExpr().asString();
-                        parser.replaceSolution(annotatedNode.asMethodDeclaration(), replacementId);
-                        assertTrue(annotatedNode.asMethodDeclaration()
-                        .getBody().get()
-                                .getStatements().containsAll(parser.getSolutionReplacements().get(replacementId).getStatements()));
+                        parser.replaceSolutionInMethodBody(annotatedNode.asMethodDeclaration(), replacementId);
+                        var methodStatements =  nodeUtils.removeCommentsFromNodes(annotatedNode.asMethodDeclaration().getBody().get().getStatements());
+                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getSolutionReplacements().get(replacementId).getStatements());
+                        assertTrue(methodStatements.containsAll(solutionStatements));
                     }
                 }
             }
         }
+
+
     }
 
     @Test

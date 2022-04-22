@@ -1,34 +1,25 @@
 package no.hvl;
 
 
-import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.DefaultPrettyPrinter;
-import com.github.javaparser.utils.ProjectRoot;
-import com.github.javaparser.utils.SourceRoot;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
 
-    private static final String GPSPOINT_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example\\oppgave1\\GPSPoint.java";
-    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example\\ReplacementCode.java";
-    private static final String GPSPOINT_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\GPSPoint.java";
-    private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
-
+    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\dat100-prosjekt-complete-2020-master\\source\\no\\hvl\\dat100ptc\\ReplacementCode.java";
+    private static final String ASSIGNMENT_PROJECT_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\dat100-prosjekt-complete-2020-master\\source";
+    private static final String TARGET_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\dat100-prosjekt-complete-2020-master";
 
     public static void main (String[] args) throws IOException {
         Parser parser = new Parser();
         parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
-        parser.parseDirectory("C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\dat100example");
+        parser.parseDirectory(ASSIGNMENT_PROJECT_PATH_LAPTOP);
         List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
 
-        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, parser.getFileNamesToRemove());
+        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, parser.getFileNamesToRemove(),
+                "C:\\Users\\Acer\\IntelliJProjects\\dat100-prosjekt-complete-2020-master", TARGET_PATH_LAPTOP);
         projectWriter.createProject();
 
     }

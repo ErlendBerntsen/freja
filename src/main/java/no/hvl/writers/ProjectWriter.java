@@ -14,21 +14,19 @@ import java.util.List;
 
 public class ProjectWriter {
 
-    private String targetDirectoryPath = "C:\\Users\\Acer\\IntelliJProjects\\startcode\\";
-    private String sourceDirectoryPath = "C:\\Users\\Acer\\IntelliJProjects\\dat100-prosjekt-complete-2020-master";
-    private HashMap<String, CompilationUnit> modifiedFiles;
+    private String targetDirectoryPath;
+    private String sourceDirectoryPath;
+    private HashMap<String, CompilationUnit> startCodeProjectModifiedFiles;
+    private HashMap<String, CompilationUnit> solutionProjectModifiedFiles;
     private HashSet<String> fileNamesToRemove;
 
-    public ProjectWriter(List<CompilationUnit> modifiedFiles, HashSet<String> fileNamesToRemove) {
-        this.modifiedFiles = new HashMap<>();
+    public ProjectWriter(List<CompilationUnit> startCodeProject, List<CompilationUnit> solutionProject,
+                         HashSet<String> fileNamesToRemove, String sourceDirectoryPath, String targetDirectoryPath) {
         this.fileNamesToRemove = fileNamesToRemove;
-        modifiedFiles.forEach(file -> this.modifiedFiles.put(file.getStorage().get().getFileName(), file));
-    }
-
-    public ProjectWriter(List<CompilationUnit> modifiedFiles, HashSet<String> fileNamesToRemove, String sourceDirectoryPath, String targetDirectoryPath) {
-        this.modifiedFiles = new HashMap<>();
-        this.fileNamesToRemove = fileNamesToRemove;
-        modifiedFiles.forEach(file -> this.modifiedFiles.put(file.getStorage().get().getFileName(), file));
+        this.startCodeProjectModifiedFiles = new HashMap<>();
+        this.solutionProjectModifiedFiles = new HashMap<>();
+        startCodeProject.forEach(file -> this.startCodeProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
+        solutionProject.forEach(file -> this.solutionProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
         this.sourceDirectoryPath = sourceDirectoryPath;
         this.targetDirectoryPath = targetDirectoryPath;
     }
@@ -37,31 +35,40 @@ public class ProjectWriter {
         File sourceDirectory = new File(sourceDirectoryPath);
         File targetDirectory = new File(targetDirectoryPath);
         emptyTargetDirectory(targetDirectory);
-        createFilesAndDirectories(sourceDirectory, targetDirectory, false);
+
+        File solutionProject = new File(targetDirectory.getAbsolutePath() + File.separator + "solution");
+        solutionProject.mkdir();
+        createFilesAndDirectories(sourceDirectory, solutionProject, solutionProjectModifiedFiles, false);
+
+        File startCodeProject = new File(targetDirectory.getAbsolutePath() + File.separator + "startcode");
+        startCodeProject.mkdir();
+        createFilesAndDirectories(sourceDirectory, startCodeProject, startCodeProjectModifiedFiles, false);
     }
 
     private void emptyTargetDirectory(File targetDirectory){
         Arrays.stream(targetDirectory.listFiles()).forEach(file -> {
-            if(file.isDirectory()){
-                emptyTargetDirectory(file);
-            }
-            try {
-                Files.delete(file.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(!file.getName().equals(".git")){
+                if(file.isDirectory()){
+                    emptyTargetDirectory(file);
+                }
+                try {
+                    Files.delete(file.toPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
-    private void createFilesAndDirectories(File srcDir, File dir, boolean isSourceFolder){
+    private void createFilesAndDirectories(File srcDir, File dir, HashMap<String, CompilationUnit> modifiedFiles, boolean isSourceFolder){
         Arrays.stream(srcDir.listFiles()).forEach(file -> {
-           if(file.isDirectory()){
+           if(file.isDirectory() && !file.getName().equals(".git")){
                File newDir = new File(dir.getAbsolutePath() + File.separator + file.getName());
                newDir.mkdir();
                if("src".equals(file.getName())|| "source".equals(file.getName()) || isSourceFolder){
-                   createFilesAndDirectories(file, newDir, true);
+                   createFilesAndDirectories(file, newDir, modifiedFiles, true);
                }else{
-                   createFilesAndDirectories(file, newDir, false);
+                   createFilesAndDirectories(file, newDir, modifiedFiles,false);
                }
            }
            if(file.isFile() && !fileNamesToRemove.contains(file.getName())){

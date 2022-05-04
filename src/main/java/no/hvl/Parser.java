@@ -13,6 +13,7 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.Copy;
@@ -51,7 +52,9 @@ public class Parser {
     }
 
     public List<CompilationUnit> getCompilationUnits(){
-        return compilationUnits;
+        List<CompilationUnit> compilationUnitCopies = new ArrayList<>();
+        compilationUnits.forEach(compilationUnit -> compilationUnitCopies.add(compilationUnit.clone()));
+        return compilationUnitCopies;
     }
 
     public Map<String, BlockStmt> getSolutionReplacements() {
@@ -92,9 +95,9 @@ public class Parser {
         solutionReplacements = getAllSolutionReplacementsInFile(cu);
     }
 
-    public List<BodyDeclaration<?>> getAllAnnotatedNodes(String annotationName){
+    public List<BodyDeclaration<?>> getAllAnnotatedNodesInFiles(List<CompilationUnit> files, String annotationName){
         List<BodyDeclaration<?>> allAnnotatedNodes = new ArrayList<>();
-        for(CompilationUnit compilationUnit : compilationUnits){
+        for(CompilationUnit compilationUnit : files){
             allAnnotatedNodes.addAll(getAnnotatedNodesInFile(compilationUnit, annotationName));
         }
         return allAnnotatedNodes;
@@ -129,11 +132,10 @@ public class Parser {
     public NodeWithAnnotations<?> removeAnnotationFromNode(NodeWithAnnotations<?> node, String annotationName){
         NodeList<AnnotationExpr> annotations = new NodeList<>();
         for(var annotation : node.getAnnotations()){
-            AnnotationExpr annotationExpr = (AnnotationExpr) annotation;
-            if(annotationExpr.getName().asString().equals(annotationName)){
+            if(annotation.getName().asString().equals(annotationName)){
                 continue;
             }
-            annotations.add((AnnotationExpr) annotation);
+            annotations.add(annotation);
         }
         node.setAnnotations(annotations);
         return node;
@@ -301,23 +303,52 @@ public class Parser {
     }
 
     public List<CompilationUnit> createStartCodeProject(){
-        var nodesToRemove = getAllAnnotatedNodes(AnnotationNames.REMOVE_NAME);
+        var files = getCompilationUnits();
+        var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        removeNodes(files, nodesToRemove);
+        return files.stream()
+                .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
+                .collect(Collectors.toList());
+    }
+
+    public List<CompilationUnit> createSolutionProject(){
+        var files = getCompilationUnits();
+        var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        removeNodes(files, nodesToRemove);
+        var annotatedNodes = getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
+        for(var annotatedNode : annotatedNodes){
+            removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
+        }
+        for(CompilationUnit file : files){
+            removeAnnotationImportsFromFile(file);
+            removeSolutionStartAndEndStatementsFromFile(annotatedNodes);
+        }
+        return files;
+    }
+
+    private void removeSolutionStartAndEndStatementsFromFile(List<BodyDeclaration<?>> annotatedNodes) {
+        List<Statement> statements = new ArrayList<>();
+        annotatedNodes.forEach(node -> statements.addAll(node.findAll(Statement.class,
+                statement -> isStartStatement(statement) || isEndStatement(statement))));
+        statements.forEach(Node::remove);
+    }
+
+    private void removeNodes(List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
         nodesToRemove.forEach(node -> {
             if(node.isTypeDeclaration()){
                 var compilationUnitMaybe = node.findCompilationUnit();
                 if(compilationUnitMaybe.isPresent()){
                     fileNamesToRemove.add(compilationUnitMaybe.get().getStorage().get().getFileName());
-                    compilationUnits.remove(compilationUnitMaybe.get());
+                    files.remove(compilationUnitMaybe.get());
                 }
+            }else{
+                node.remove();
             }
         });
-        return getCompilationUnits().stream()
-                .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
-                .collect(Collectors.toList());
     }
 
     public List<Exercise> getExercises(){
-        List<BodyDeclaration<?>> tasks =getAllAnnotatedNodes(AnnotationNames.IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> tasks = getAllAnnotatedNodesInFiles(getCompilationUnits(), AnnotationNames.IMPLEMENT_NAME);
         tasks.sort((o1, o2) -> {
             var o1number = annotationUtils.getTaskNumber(o1).get();
             var o2number = annotationUtils.getTaskNumber(o2).get();
@@ -335,6 +366,7 @@ public class Parser {
             }
             return -1;
         });
+
         List<Exercise> exercises = new ArrayList<>();
         tasks.forEach(task -> {
             int[] number = annotationUtils.getTaskNumber(task).get();

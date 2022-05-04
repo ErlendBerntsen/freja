@@ -32,8 +32,9 @@ public class Main {
         descriptionWriter.createFiles();
 
         List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
+        List<CompilationUnit> solutionProject = parser.createSolutionProject();
 
-        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, parser.getFileNamesToRemove(),
+        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, solutionProject,  parser.getFileNamesToRemove(),
                 ASSIGNMENT_PROJECT_PATH_DESKTOP, TARGET_PATH_DESKTOP);
         projectWriter.createProject();
 

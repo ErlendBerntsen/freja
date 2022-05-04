@@ -16,6 +16,10 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.Copy;
+import no.hvl.concepts.Exercise;
+import no.hvl.concepts.Task;
+import no.hvl.utilities.AnnotationNames;
+import no.hvl.utilities.AnnotationUtils;
 
 
 import java.io.File;
@@ -310,6 +314,57 @@ public class Parser {
         return getCompilationUnits().stream()
                 .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
                 .collect(Collectors.toList());
+    }
+
+    public List<Exercise> getExercises(){
+        List<BodyDeclaration<?>> tasks =getAllAnnotatedNodes(AnnotationNames.IMPLEMENT_NAME);
+        tasks.sort((o1, o2) -> {
+            var o1number = annotationUtils.getTaskNumber(o1).get();
+            var o2number = annotationUtils.getTaskNumber(o2).get();
+            for(int i = 0; i < o1number.length; i++){
+                if(i >= o2number.length){
+                    return 1;
+                }
+                int comparison = Integer.compare(o1number[i], o2number[i]);
+                if(comparison != 0){
+                    return comparison;
+                }
+            }
+            if(o1number.length == o2number.length){
+                return 0;
+            }
+            return -1;
+        });
+        List<Exercise> exercises = new ArrayList<>();
+        tasks.forEach(task -> {
+            int[] number = annotationUtils.getTaskNumber(task).get();
+            var exercise = findExercise(number, 0, exercises);
+            exercise.setFullNumberAsString(exercise.convertNumberArrayToString(number));
+            var exerciseTask = new Task(task);
+            exerciseTask.setFullNumberAsString(exerciseTask.convertNumberArrayToString(number, exercise.getTasks().size() + 1));
+            exercise.addTask(exerciseTask);
+            //TODO handle exceptions
+            exercise.setFile(task.findCompilationUnit().get());
+        });
+        return exercises;
+    }
+
+    private Exercise findExercise(int[] number, int index, List<Exercise> exercises){
+        for(Exercise exercise : exercises){
+            if(exercise.getNumber() == number[index]){
+                if(index == number.length - 1){
+                    return exercise;
+                }
+                return findExercise(number, ++index, exercise.getSubExercises());
+            }
+        }
+        var exercise = new Exercise(number[index]);
+        exercises.add(exercise);
+        if(index == number.length - 1){
+            return exercise;
+        }
+        return findExercise(number, ++index, exercise.getSubExercises());
+
     }
 
 }

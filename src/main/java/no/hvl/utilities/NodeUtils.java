@@ -1,4 +1,4 @@
-package no.hvl;
+package no.hvl.utilities;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;

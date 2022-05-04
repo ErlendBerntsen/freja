@@ -5,12 +5,13 @@ import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;
 
+@Implement
 public class GPSPoint {
 
     // TODO - objektvariable
 
     @Implement(number = {1,1}, copy = Copy.REMOVE_EVERYTHING)
-    private int time;
+    int time;
     @Implement(number = {1,1}, copy = Copy.REMOVE_EVERYTHING)
     private double latitude;
     @Implement(number = {1,1}, copy = Copy.REMOVE_EVERYTHING)

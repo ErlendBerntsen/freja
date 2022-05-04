@@ -1,4 +1,4 @@
-package no.hvl;
+package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.DefaultPrettyPrinter;

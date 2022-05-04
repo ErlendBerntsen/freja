@@ -1,7 +1,8 @@
-package no.hvl;
+package no.hvl.utilities;
 
 public final class AnnotationNames {
     public static final String IMPLEMENT_NAME = "Implement";
+    public static final String IMPLEMENT_NUMBER_NAME = "number";
     public static final String SOLUTION_REPLACEMENT_NAME = "SolutionReplacement";
     public static final String SOLUTION_START_NAME = "SolutionStart";
     public static final String SOLUTION_END_NAME = "SolutionEnd";

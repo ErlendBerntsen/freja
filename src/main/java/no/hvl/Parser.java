@@ -25,6 +25,7 @@ import no.hvl.utilities.AnnotationUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -88,11 +89,35 @@ public class Parser {
         compilationUnits.add(cu);
     }
 
+    public File findSourceDirectory(String dir){
+        File projectDir = new File(dir);
+        for(File file : projectDir.listFiles()){
+            if("src".equalsIgnoreCase(file.getName())
+            || "source".equalsIgnoreCase(file.getName())){
+                return file;
+            }
+        }
+        return projectDir;
+    }
+
     public void saveSolutionReplacements(String filePath) throws FileNotFoundException{
         CompilationUnit cu = StaticJavaParser.parse(new File(filePath));
         removeAnnotationImportsFromFile(cu);
+
         solutionReplacementsImports.addAll(cu.getImports());
         solutionReplacements = getAllSolutionReplacementsInFile(cu);
+    }
+
+    public void saveSolutionReplacements(List<CompilationUnit> files){
+        for(CompilationUnit file : files){
+            var solutionReplacementsInFile = getAllSolutionReplacementsInFile(file);
+            if(!solutionReplacementsInFile.isEmpty()){
+                solutionReplacements.putAll(solutionReplacementsInFile);
+                removeAnnotationImportsFromFile(file);
+                //TODO make hashmap so imports dont get added unless needed?
+                solutionReplacementsImports.addAll(file.getImports());
+            }
+        }
     }
 
     public List<BodyDeclaration<?>> getAllAnnotatedNodesInFiles(List<CompilationUnit> files, String annotationName){
@@ -304,6 +329,7 @@ public class Parser {
 
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnits();
+        saveSolutionReplacements(files);
         var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
         return files.stream()

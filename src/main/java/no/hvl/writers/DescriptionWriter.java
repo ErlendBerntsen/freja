@@ -16,12 +16,13 @@ import java.util.stream.Collectors;
 
 public class DescriptionWriter {
 
-    private final String TARGET = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework";
+    private String targetPath;
     private StringBuilder content = new StringBuilder();
     private String fileName ="";
     private List<Exercise>  exercises;
 
-    public DescriptionWriter(List<Exercise> exercises) throws IOException {
+    public DescriptionWriter(String targetPath, List<Exercise> exercises) throws IOException {
+        this.targetPath = targetPath;
         this.exercises = exercises;
     }
 
@@ -30,7 +31,7 @@ public class DescriptionWriter {
             try {
                 createFileAttributes(exercise);
                 createTemplate(exercise);
-                File descriptionFile = new File(TARGET + File.separator + "Exercise" + exercise.getNumber() + ".adoc");
+                File descriptionFile = new File(targetPath + File.separator + "Exercise" + exercise.getNumber() + ".adoc");
                 FileWriter fileWriter = new FileWriter(descriptionFile);
                 fileWriter.write(content.toString());
                 fileWriter.close();
@@ -58,9 +59,13 @@ public class DescriptionWriter {
         CompilationUnit.Storage storage= file.getStorage().get();
         fileName = storage.getFileName();
         String name = "Exercise" + exercise.getFullNumberAsString();
-        createAttribute(name+ "Package", file.getPackageDeclaration().get().getNameAsString(), true);
+        String packageName = file.getPackageDeclaration().isPresent()? file.getPackageDeclaration().get().getNameAsString()
+                : "";
+        String typeName = file.getPrimaryType().isPresent()? file.getPrimaryType().get().getNameAsString()
+                : "";
+        createAttribute(name+ "Package", packageName, true);
         createAttribute(name+ "Filename", fileName, true);
-        createAttribute(name + "FileSimpleName", file.getPrimaryType().get().getNameAsString(),true);
+        createAttribute(name + "FileSimpleName", typeName,true);
     }
 
     private void writeTaskAttributes(Task task){

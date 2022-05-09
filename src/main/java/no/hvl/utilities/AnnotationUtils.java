@@ -8,10 +8,12 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.Copy;
 import no.hvl.utilities.AnnotationNames;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -20,34 +22,13 @@ import java.util.stream.Collectors;
 
 public class AnnotationUtils {
 
-    List<AnnotationDeclaration> annotationDeclarations;
-    Name annotationsPackageName;
-    private static final String ANNOTATIONS_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations";
-    private static final String ANNOTATIONS_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\annotations";
+    Name annotationsPackageName = new Name("no.hvl.annotations");
 
-
-    public AnnotationUtils() throws IOException {
-        var sourceRoot = new SourceRoot(Paths.get(ANNOTATIONS_PATH_DESKTOP));
-        List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse("");
-        var annotationFiles = parseResults.stream()
-                .filter(ParseResult::isSuccessful)
-                .map(parseResult -> parseResult.getResult().get())
-                .collect(Collectors.toList());
-
-        annotationsPackageName = annotationFiles.get(0).getPackageDeclaration().get().getName();
-
-        annotationDeclarations = annotationFiles.stream()
-                .filter(file -> file.findFirst(AnnotationDeclaration.class).isPresent())
-                .map(annotationFile -> annotationFile.findFirst(AnnotationDeclaration.class).get())
-                .collect(Collectors.toList());
+    public AnnotationUtils() {
     }
 
     public Name getAnnotationsPackageName() {
         return annotationsPackageName;
-    }
-
-    public List<AnnotationDeclaration> getAnnotationDeclarations() {
-        return annotationDeclarations;
     }
 
     public Optional<Copy> getCopyValue (NodeWithAnnotations<?> node){
@@ -69,20 +50,8 @@ public class AnnotationUtils {
     }
 
     public Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){
-        //TODO ERror handling
+        //TODO ERror handling for unspecified values
         var annotation = node.getAnnotationByName(annotationName).get();
-        if(annotation.isMarkerAnnotationExpr()){
-            for(AnnotationDeclaration annotationDeclaration : annotationDeclarations){
-                if(annotationName.equals(annotationDeclaration.getNameAsString())){
-                    return annotationDeclaration.getMembers().stream()
-                            .filter(BodyDeclaration::isAnnotationMemberDeclaration)
-                            .map(BodyDeclaration::asAnnotationMemberDeclaration)
-                            .filter(annotationMemberDeclaration -> memberName.equals(annotationMemberDeclaration.getNameAsString()))
-                            .findFirst().get().getDefaultValue().get();
-                }
-            }
-        }
-
         for(MemberValuePair pair : annotation.asNormalAnnotationExpr().getPairs()){
             if(pair.getName().asString().equals(memberName)){
                 return pair.getValue();

@@ -55,6 +55,13 @@
             <version>2.2.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>no.hvl</groupId>
+            <artifactId>paf-annotations</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
 
     </dependencies>
     <build>
@@ -63,6 +70,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.6.4</version>
+                <configuration>
+                    <goalPrefix>paf</goalPrefix>
+                </configuration>
                 <executions>
                     <!-- if you want to generate help goal -->
                     <execution>

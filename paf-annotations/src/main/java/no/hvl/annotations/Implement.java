@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 public @interface Implement {
 
     int[] number();
-    Copy copy();
+    CopyOption copyOption();
     String replacementId();
 
 }

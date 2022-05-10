@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.utilities.AnnotationUtils;
-import no.hvl.annotations.Copy;
+import no.hvl.annotations.CopyOption;
 import no.hvl.utilities.NodeUtils;
 import no.hvl.Parser;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,7 +122,7 @@ public class ParserTest {
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("copy") &&
-                            Copy.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
+                            CopyOption.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
                         parser.removeSolution(annotatedNode.asMethodDeclaration());
                         for(Statement statement : annotatedNode.asMethodDeclaration().getBody().get().getStatements()){
                             assertTrue(!parser.isStartStatement(statement) && !parser.isEndStatement(statement));
@@ -169,7 +169,7 @@ public class ParserTest {
             var copyValueMaybe = annotationUtils.getCopyValue(bodyDeclarationType);
             if(copyValueMaybe.isPresent()){
                 var copyValue = copyValueMaybe.get();
-                if(copyValue.equals(Copy.REMOVE_EVERYTHING)){
+                if(copyValue.equals(CopyOption.REMOVE_EVERYTHING)){
                     bodyDeclarationType.remove();
                     removedTypes.add(bodyDeclarationType);
                 }
@@ -186,7 +186,7 @@ public class ParserTest {
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("copy") &&
-                            Copy.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
+                            CopyOption.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
                         parser.removeSolution(annotatedNode.asMethodDeclaration());
 
                         assertTrue(

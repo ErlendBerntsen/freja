@@ -3,6 +3,7 @@ package no.hvl.maven;
 import com.github.javaparser.ast.CompilationUnit;
 import no.hvl.Parser;
 import no.hvl.writers.DescriptionWriter;
+import no.hvl.writers.MavenWriter;
 import no.hvl.writers.ProjectWriter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -10,7 +11,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +44,10 @@ public class PafMojo extends AbstractMojo {
             DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, parser.getExercises());
             descriptionWriter.createFiles();
 
-        } catch (IOException e) {
+            MavenWriter mavenWriter = new MavenWriter(targetPath);
+            mavenWriter.createPomFiles();
+
+        } catch (IOException | ParserConfigurationException | TransformerException | SAXException e) {
             e.printStackTrace();
 
         }

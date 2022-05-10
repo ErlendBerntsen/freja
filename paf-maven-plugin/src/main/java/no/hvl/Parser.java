@@ -13,10 +13,9 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
-import no.hvl.annotations.Copy;
+import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Task;
 import no.hvl.utilities.AnnotationNames;
@@ -25,7 +24,6 @@ import no.hvl.utilities.AnnotationUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -46,7 +44,7 @@ public class Parser {
     private static final String SOLUTION_END_ANNOTATION_NAME = "SolutionEnd";
     private static final String SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME = "id";
     private static final String IMPLEMENT_ANNOTATION_ID_NAME = "replacementId";
-    private static final String IMPLEMENT_ANNOTATION_COPY_NAME = "copy";
+    private static final String IMPLEMENT_ANNOTATION_COPYOPTION_NAME = "copyOption";
 
     public Parser() throws IOException {
         this.compilationUnits = new ArrayList<>();
@@ -284,8 +282,8 @@ public class Parser {
     }
 
     public void modifyAnnotatedNode(CompilationUnit file, BodyDeclaration<?> annotatedNode){
-        var copyValueExpression = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_COPY_NAME);
-        var copyValue = Copy.getCopy(copyValueExpression.asFieldAccessExpr().getNameAsString());
+        var copyValueExpression = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_COPYOPTION_NAME);
+        var copyValue = CopyOption.getCopy(copyValueExpression.asFieldAccessExpr().getNameAsString());
         switch (copyValue){
             case REPLACE_SOLUTION -> {
                 // TODO error handling
@@ -310,9 +308,14 @@ public class Parser {
     private void removeAnnotationImportsFromFile(CompilationUnit file){
         List<ImportDeclaration> importDeclarations = List.copyOf(file.getImports());
         importDeclarations.forEach(importDeclaration -> {
+            if(importDeclaration.isAsterisk() &&
+                importDeclaration.getNameAsString()
+                        .equals(annotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
+                importDeclaration.remove();
+            }
             if(importDeclaration.getName().getQualifier().isPresent()
-                    && importDeclaration.getName().getQualifier().get()
-                    .equals(annotationUtils.getAnnotationsPackageName())){
+                    && importDeclaration.getName().getQualifier().get().asString()
+                    .equals(annotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
                 importDeclaration.remove();
 
             }
@@ -335,6 +338,7 @@ public class Parser {
         return files.stream()
                 .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
                 .collect(Collectors.toList());
+
     }
 
     public List<CompilationUnit> createSolutionProject(){
@@ -349,6 +353,7 @@ public class Parser {
             removeAnnotationImportsFromFile(file);
             removeSolutionStartAndEndStatementsFromFile(annotatedNodes);
         }
+
         return files;
     }
 

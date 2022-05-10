@@ -2,6 +2,7 @@ package no.hvl;
 
 
 import com.github.javaparser.ast.CompilationUnit;
+import no.hvl.maven.PafMojo;
 import no.hvl.writers.DescriptionWriter;
 import no.hvl.writers.ProjectWriter;
 

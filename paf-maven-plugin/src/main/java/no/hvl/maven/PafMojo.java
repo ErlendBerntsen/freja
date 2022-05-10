@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,7 +35,9 @@ public class PafMojo extends AbstractMojo {
             ProjectWriter projectWriter = new ProjectWriter(startCodeProject, solutionProject,  parser.getFileNamesToRemove(),
                     projectPath, targetPath);
             projectWriter.createProject();
-            DescriptionWriter descriptionWriter = new DescriptionWriter(targetPath, parser.getExercises());
+
+            String startCodePath =  targetPath + File.separator + "startcode";
+            DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, parser.getExercises());
             descriptionWriter.createFiles();
 
         } catch (IOException e) {

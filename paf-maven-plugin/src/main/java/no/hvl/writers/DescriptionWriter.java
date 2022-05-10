@@ -22,8 +22,10 @@ public class DescriptionWriter {
     private List<Exercise>  exercises;
 
     public DescriptionWriter(String targetPath, List<Exercise> exercises) throws IOException {
-        this.targetPath = targetPath;
         this.exercises = exercises;
+        File descriptionsDir = new File(targetPath + File.separator + "descriptions");
+        this.targetPath = descriptionsDir.getAbsolutePath();
+        descriptionsDir.mkdir();
     }
 
     public void createFiles() {
@@ -38,6 +40,7 @@ public class DescriptionWriter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 

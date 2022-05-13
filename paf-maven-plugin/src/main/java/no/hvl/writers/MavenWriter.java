@@ -31,10 +31,10 @@ public class MavenWriter {
         doc.getDocumentElement().normalize();
         removeAnnotationDependency(doc);
         removePafPlugin(doc);
-
-        modifyArtifactId(doc, "solution");
+        String artifactId = getArtifactId(doc);
+        modifyArtifactId(doc, artifactId + "-solution");
         saveDomToFile(doc, targetPath + File.separator + "solution");
-        modifyArtifactId(doc, "startcode");
+        modifyArtifactId(doc, artifactId + "-startcode");
         saveDomToFile(doc, targetPath + File.separator + "startcode");
     }
 
@@ -47,13 +47,18 @@ public class MavenWriter {
         transformer.transform(dom, result);
     }
 
-    public static void modifyArtifactId(Document document, String postFix){
+    public void modifyArtifactId(Document document, String artifactId){
         NodeList nodeList = document.getElementsByTagName("artifactId");
         Node node = getProjectChild(nodeList);
-        node.setTextContent(node.getTextContent() + "-" + postFix);
+        node.setTextContent(artifactId);
     }
 
-    public static void removeAnnotationDependency(Document document){
+    public String getArtifactId(Document document){
+        NodeList nodeList = document.getElementsByTagName("artifactId");
+        Node node = getProjectChild(nodeList);
+        return node.getTextContent();
+    }
+    public void removeAnnotationDependency(Document document){
         NodeList nodeList = document.getElementsByTagName("dependencies");
         Node dependencies = getProjectChild(nodeList);
         dependencies.removeChild(getChildNode(dependencies, "no.hvl", "paf-annotations"));

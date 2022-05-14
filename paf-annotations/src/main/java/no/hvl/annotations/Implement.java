@@ -9,6 +9,6 @@ public @interface Implement {
 
     int[] number();
     CopyOption copyOption();
-    String replacementId();
+    String replacementId() default "";
 
 }

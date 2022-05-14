@@ -1,5 +1,5 @@
 package no.hvl.annotations;
 
-public @interface SolutionReplacement {
+public @interface ReplacementCode {
     String id();
 }

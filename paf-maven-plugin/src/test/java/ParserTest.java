@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -25,10 +26,10 @@ public class ParserTest {
     NodeUtils nodeUtils = new NodeUtils();
     AnnotationUtils annotationUtils = new AnnotationUtils();
     private final String IMPLEMENT_ANNOTATION_NAME = "Implement";
-    private static final String EXAMPLE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
-    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+    private static final String EXAMPLE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\paf-maven-plugin\\src\\test\\java\\examples\\Example.java";
+    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\paf-maven-plugin\\src\\test\\java\\examples\\ReplacementMethods.java";
     private static final String EXAMPLE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
-    private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementCode.java";
+    private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementMethods.java";
 
     public ParserTest() throws IOException {
     }
@@ -109,8 +110,9 @@ public class ParserTest {
 
     @Test
     public void allImplementAnnotationsShouldBeRemovedFromFile(){
-        parser.removeAnnotationsFromFile(parser.getCompilationUnits().get(0), IMPLEMENT_ANNOTATION_NAME);
-        var annotatedNodes = parser.getAnnotatedNodesInFile(parser.getCompilationUnits().get(0), IMPLEMENT_ANNOTATION_NAME);
+        CompilationUnit file = parser.getCompilationUnits().get(0);
+        parser.removeAnnotationsFromFile(file , IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = parser.getAnnotatedNodesInFile(file, IMPLEMENT_ANNOTATION_NAME);
         assertTrue(annotatedNodes.isEmpty());
     }
 

@@ -1,20 +1,20 @@
-package no.hvl;
+package examples;
 
 import no.hvl.annotations.CopyOption;
 import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionStart;
 
-@Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "1")
+@Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
 public class Example {
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "1")
+    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
     public int fieldVariable;
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "1")
+    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
     public Example() {
     }
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "1")
+    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
     public void methodToRemove(){
 
     }

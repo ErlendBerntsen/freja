@@ -39,7 +39,7 @@ public class Parser {
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
     private static final String IMPLEMENT_ANNOTATION_NAME = "Implement";
-    private static final String SOLUTION_REPLACEMENT_ANNOTATION_NAME = "SolutionReplacement";
+    private static final String SOLUTION_REPLACEMENT_ANNOTATION_NAME = "ReplacementCode";
     private static final String SOLUTION_START_ANNOTATION_NAME = "SolutionStart";
     private static final String SOLUTION_END_ANNOTATION_NAME = "SolutionEnd";
     private static final String SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME = "id";

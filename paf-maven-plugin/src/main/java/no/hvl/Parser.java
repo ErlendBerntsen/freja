@@ -18,6 +18,7 @@ import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Task;
+import no.hvl.exceptions.NoSourceDirectoryException;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 
@@ -25,6 +26,7 @@ import no.hvl.utilities.AnnotationUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,19 +40,12 @@ public class Parser {
     private HashSet<String> fileNamesToRemove = new HashSet<>();
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
-    private static final String IMPLEMENT_ANNOTATION_NAME = "Implement";
-    private static final String SOLUTION_REPLACEMENT_ANNOTATION_NAME = "ReplacementCode";
-    private static final String SOLUTION_START_ANNOTATION_NAME = "SolutionStart";
-    private static final String SOLUTION_END_ANNOTATION_NAME = "SolutionEnd";
-    private static final String SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME = "id";
-    private static final String IMPLEMENT_ANNOTATION_ID_NAME = "replacementId";
-    private static final String IMPLEMENT_ANNOTATION_COPYOPTION_NAME = "copyOption";
 
     public Parser() throws IOException {
         this.compilationUnits = new ArrayList<>();
     }
 
-    public List<CompilationUnit> getCompilationUnits(){
+    public List<CompilationUnit> getCompilationUnitCopies(){
         List<CompilationUnit> compilationUnitCopies = new ArrayList<>();
         compilationUnits.forEach(compilationUnit -> compilationUnitCopies.add(compilationUnit.clone()));
         return compilationUnitCopies;
@@ -82,20 +77,24 @@ public class Parser {
     }
 
     public void parseFile(String filePath) throws FileNotFoundException {
-        CompilationUnit cu = StaticJavaParser.parse(new File(filePath));
+        CompilationUnit file = StaticJavaParser.parse(new File(filePath));
         compilationUnits.clear();
-        compilationUnits.add(cu);
+        compilationUnits.add(file);
     }
 
-    public File findSourceDirectory(String dir){
+    public File findSourceDirectory(String dir) throws NoSuchFileException {
         File projectDir = new File(dir);
+        if(!projectDir.exists()){
+            throw new NoSuchFileException(projectDir.getAbsolutePath());
+        }
+
         for(File file : projectDir.listFiles()){
             if("src".equalsIgnoreCase(file.getName())
             || "source".equalsIgnoreCase(file.getName())){
                 return file;
             }
         }
-        return projectDir;
+        throw new NoSourceDirectoryException(dir);
     }
 
     public void saveSolutionReplacements(String filePath) throws FileNotFoundException{
@@ -137,11 +136,11 @@ public class Parser {
     public Map<String, BlockStmt> getAllSolutionReplacementsInFile(CompilationUnit file){
         //TODO ERror handling
         HashMap<String, BlockStmt> solutionReplacements = new HashMap<>();
-        getAnnotatedNodesInFile(file, SOLUTION_REPLACEMENT_ANNOTATION_NAME).stream()
+        getAnnotatedNodesInFile(file, AnnotationNames.SOLUTION_REPLACEMENT_NAME).stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .forEach(method ->
                         solutionReplacements.put(
-                                getAnnotationValue(method, SOLUTION_REPLACEMENT_ANNOTATION_NAME, SOLUTION_REPLACEMENT_ANNOTATION_ID_NAME)
+                                getAnnotationValue(method, AnnotationNames.SOLUTION_REPLACEMENT_NAME, AnnotationNames.SOLUTION_REPLACEMENT_ID_NAME)
                                         .asStringLiteralExpr().asString()
                                 , method.asMethodDeclaration().getBody().get()));
         return solutionReplacements;
@@ -257,7 +256,7 @@ public class Parser {
             Expression expression = statement.asExpressionStmt().getExpression();
             if(expression.isVariableDeclarationExpr()){
                 VariableDeclarationExpr variableDeclarationExpr = expression.asVariableDeclarationExpr();
-                return SOLUTION_START_ANNOTATION_NAME.equals(variableDeclarationExpr.getElementType().toString());
+                return AnnotationNames.SOLUTION_START_NAME.equals(variableDeclarationExpr.getElementType().toString());
             }
         }
         return false;
@@ -268,7 +267,7 @@ public class Parser {
             Expression expression = statement.asExpressionStmt().getExpression();
             if(expression.isVariableDeclarationExpr()){
                 VariableDeclarationExpr variableDeclarationExpr = expression.asVariableDeclarationExpr();
-                return SOLUTION_END_ANNOTATION_NAME.equals(variableDeclarationExpr.getElementType().toString());
+                return AnnotationNames.SOLUTION_END_NAME.equals(variableDeclarationExpr.getElementType().toString());
             }
         }
         return false;
@@ -282,7 +281,7 @@ public class Parser {
     }
 
     public void modifyAnnotatedNode(CompilationUnit file, BodyDeclaration<?> annotatedNode){
-        var copyValueExpression = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_COPYOPTION_NAME);
+        var copyValueExpression = getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
         var copyValue = CopyOption.getCopy(copyValueExpression.asFieldAccessExpr().getNameAsString());
         switch (copyValue){
             case REPLACE_SOLUTION -> {
@@ -290,19 +289,19 @@ public class Parser {
                 // TODO handle rest of cases
                 // TODO create test
                 solutionReplacementsImports.forEach(file::addImport);
-                var id = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_ID_NAME);
+                var id = getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME,  AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceSolutionInMethodBody(castToCallableDeclaration(annotatedNode), id.asStringLiteralExpr().asString());
             }
             case REPLACE_BODY -> {
                 solutionReplacementsImports.forEach(file::addImport);
-                var id = getAnnotationValue(annotatedNode, IMPLEMENT_ANNOTATION_NAME, IMPLEMENT_ANNOTATION_ID_NAME);
+                var id = getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceBody((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
             }
             case REMOVE_EVERYTHING -> {
                 annotatedNode.remove();
             }
         }
-        removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
+        removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
     }
 
     private void removeAnnotationImportsFromFile(CompilationUnit file){
@@ -331,7 +330,7 @@ public class Parser {
     }
 
     public List<CompilationUnit> createStartCodeProject(){
-        var files = getCompilationUnits();
+        var files = getCompilationUnitCopies();
         saveSolutionReplacements(files);
         var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
@@ -342,12 +341,12 @@ public class Parser {
     }
 
     public List<CompilationUnit> createSolutionProject(){
-        var files = getCompilationUnits();
+        var files = getCompilationUnitCopies();
         var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
         var annotatedNodes = getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
         for(var annotatedNode : annotatedNodes){
-            removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
+            removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
         }
         for(CompilationUnit file : files){
             removeAnnotationImportsFromFile(file);
@@ -379,7 +378,7 @@ public class Parser {
     }
 
     public List<Exercise> getExercises(){
-        List<BodyDeclaration<?>> tasks = getAllAnnotatedNodesInFiles(getCompilationUnits(), AnnotationNames.IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> tasks = getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
         tasks.sort((o1, o2) -> {
             var o1number = annotationUtils.getTaskNumber(o1).get();
             var o2number = annotationUtils.getTaskNumber(o2).get();

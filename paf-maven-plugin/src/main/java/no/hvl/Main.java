@@ -21,6 +21,10 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
+        generate();
+    }
+
+    public static void generate() throws IOException {
         Parser parser = new Parser();
         parser.parseDirectory(parser.findSourceDirectory(ASSIGNMENT_PROJECT_PATH_LAPTOP).getAbsolutePath());
 
@@ -34,6 +38,5 @@ public class Main {
         String startCodePath =  TARGET_PATH_LAPTOP + File.separator + "startcode";
         DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, parser.getExercises());
         descriptionWriter.createFiles();
-
     }
 }

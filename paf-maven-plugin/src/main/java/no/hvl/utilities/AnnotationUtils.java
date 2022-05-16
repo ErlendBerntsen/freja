@@ -12,9 +12,7 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.annotations.CopyOption;
 
-import java.nio.charset.IllegalCharsetNameException;
 import java.util.ArrayList;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,6 +108,23 @@ public class AnnotationUtils {
         }
         node.setAnnotations(annotationsToKeep);
         return node;
+    }
+
+    public static void removeAnnotationImportsFromFile(CompilationUnit file){
+        List<ImportDeclaration> importDeclarations = List.copyOf(file.getImports());
+        importDeclarations.forEach(importDeclaration -> {
+            if(importDeclaration.isAsterisk() &&
+                    importDeclaration.getNameAsString()
+                            .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
+                importDeclaration.remove();
+            }
+            if(importDeclaration.getName().getQualifier().isPresent()
+                    && importDeclaration.getName().getQualifier().get().asString()
+                    .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
+                importDeclaration.remove();
+
+            }
+        });
     }
 
 

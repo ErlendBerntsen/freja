@@ -117,9 +117,9 @@ public class ParserTest {
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("copy") &&
                             CopyOption.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
-                        parser.removeSolution(annotatedNode.asMethodDeclaration());
+                        parser.removeSolutionFromBlockStmt(annotatedNode.asMethodDeclaration());
                         for(Statement statement : annotatedNode.asMethodDeclaration().getBody().get().getStatements()){
-                            assertTrue(!parser.isStartStatement(statement) && !parser.isEndStatement(statement));
+                            assertTrue(!NodeUtils.isStartStatement(statement) && !NodeUtils.isEndStatement(statement));
                         }
                     }
                 }
@@ -181,7 +181,7 @@ public class ParserTest {
                 for(MemberValuePair pairs : annotationExpr.getPairs()){
                     if(pairs.getName().asString().equals("copy") &&
                             CopyOption.REMOVE_SOLUTION.toString().equals(pairs.getValue().asFieldAccessExpr().getNameAsString())){
-                        parser.removeSolution(annotatedNode.asMethodDeclaration());
+                        parser.removeSolutionFromBlockStmt(annotatedNode.asMethodDeclaration());
 
                         assertTrue(
                                 annotatedNode

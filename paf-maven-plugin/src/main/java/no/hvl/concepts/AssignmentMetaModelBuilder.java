@@ -2,14 +2,11 @@ package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AssignmentMetaModelBuilder {
 

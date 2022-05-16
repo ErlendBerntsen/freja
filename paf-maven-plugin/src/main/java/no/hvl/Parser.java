@@ -35,13 +35,13 @@ public class Parser {
 
     private AnnotationUtils annotationUtils = new AnnotationUtils();
     private List<CompilationUnit> compilationUnits;
-    private Map<String, BlockStmt> solutionReplacements = new HashMap<>();
-    private HashSet<ImportDeclaration> solutionReplacementsImports = new HashSet<>();
+    private Map<String, BlockStmt> codeReplacements = new HashMap<>();
+    private HashSet<ImportDeclaration> codeReplacementImports = new HashSet<>();
     private HashSet<String> fileNamesToRemove = new HashSet<>();
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
 
-    public Parser() throws IOException {
+    public Parser() {
         this.compilationUnits = new ArrayList<>();
     }
 
@@ -51,8 +51,8 @@ public class Parser {
         return compilationUnitCopies;
     }
 
-    public Map<String, BlockStmt> getSolutionReplacements() {
-        return solutionReplacements;
+    public Map<String, BlockStmt> getCodeReplacements() {
+        return codeReplacements;
     }
 
     public String getStartComment() {
@@ -97,22 +97,21 @@ public class Parser {
         throw new NoSourceDirectoryException(dir);
     }
 
-    public void saveSolutionReplacements(String filePath) throws FileNotFoundException{
-        CompilationUnit cu = StaticJavaParser.parse(new File(filePath));
-        removeAnnotationImportsFromFile(cu);
-
-        solutionReplacementsImports.addAll(cu.getImports());
-        solutionReplacements = getAllSolutionReplacementsInFile(cu);
+    public void saveCodeReplacements(String filePath) throws FileNotFoundException{
+        CompilationUnit file = StaticJavaParser.parse(new File(filePath));
+        removeAnnotationImportsFromFile(file);
+        codeReplacementImports.addAll(file.getImports());
+        codeReplacements = getAllSolutionReplacementsInFile(file);
     }
 
-    public void saveSolutionReplacements(List<CompilationUnit> files){
+    public void saveCodeReplacements(List<CompilationUnit> files){
         for(CompilationUnit file : files){
             var solutionReplacementsInFile = getAllSolutionReplacementsInFile(file);
             if(!solutionReplacementsInFile.isEmpty()){
-                solutionReplacements.putAll(solutionReplacementsInFile);
+                codeReplacements.putAll(solutionReplacementsInFile);
                 removeAnnotationImportsFromFile(file);
                 //TODO make hashmap so imports dont get added unless needed?
-                solutionReplacementsImports.addAll(file.getImports());
+                codeReplacementImports.addAll(file.getImports());
             }
         }
     }
@@ -136,11 +135,11 @@ public class Parser {
     public Map<String, BlockStmt> getAllSolutionReplacementsInFile(CompilationUnit file){
         //TODO ERror handling
         HashMap<String, BlockStmt> solutionReplacements = new HashMap<>();
-        getAnnotatedNodesInFile(file, AnnotationNames.SOLUTION_REPLACEMENT_NAME).stream()
+        getAnnotatedNodesInFile(file, AnnotationNames.REPLACEMENT_CODE_NAME).stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .forEach(method ->
                         solutionReplacements.put(
-                                getAnnotationValue(method, AnnotationNames.SOLUTION_REPLACEMENT_NAME, AnnotationNames.SOLUTION_REPLACEMENT_ID_NAME)
+                                getAnnotationValue(method, AnnotationNames.REPLACEMENT_CODE_NAME, AnnotationNames.REPLACEMENT_CODE_ID_NAME)
                                         .asStringLiteralExpr().asString()
                                 , method.asMethodDeclaration().getBody().get()));
         return solutionReplacements;
@@ -199,7 +198,7 @@ public class Parser {
     }
 
     private BlockStmt replaceSolution(BlockStmt methodBody, String replacementId){
-        var solutionReplacement = solutionReplacements.get(replacementId).clone();
+        var solutionReplacement = codeReplacements.get(replacementId).clone();
         solutionReplacement.getStatements().getFirst().get().setLineComment(START_COMMENT);
         var replacementBody = new BlockStmt();
         var isSolutionStatement = false;
@@ -233,10 +232,10 @@ public class Parser {
 
     public void replaceBody(CallableDeclaration<?> method, String replacementId){
         if(method.isMethodDeclaration()){
-            method.asMethodDeclaration().setBody(solutionReplacements.get(replacementId));
+            method.asMethodDeclaration().setBody(codeReplacements.get(replacementId));
         }
         else if (method.isConstructorDeclaration()){
-            method.asConstructorDeclaration().setBody(solutionReplacements.get(replacementId));
+            method.asConstructorDeclaration().setBody(codeReplacements.get(replacementId));
         }
     }
 
@@ -288,12 +287,12 @@ public class Parser {
                 // TODO error handling
                 // TODO handle rest of cases
                 // TODO create test
-                solutionReplacementsImports.forEach(file::addImport);
+                codeReplacementImports.forEach(file::addImport);
                 var id = getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME,  AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceSolutionInMethodBody(castToCallableDeclaration(annotatedNode), id.asStringLiteralExpr().asString());
             }
             case REPLACE_BODY -> {
-                solutionReplacementsImports.forEach(file::addImport);
+                codeReplacementImports.forEach(file::addImport);
                 var id = getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceBody((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
             }
@@ -331,7 +330,7 @@ public class Parser {
 
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnitCopies();
-        saveSolutionReplacements(files);
+        saveCodeReplacements(files);
         var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
         return files.stream()

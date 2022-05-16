@@ -1,25 +1,32 @@
 package no.hvl.utilities;
 
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.annotations.CopyOption;
 
+import java.nio.charset.IllegalCharsetNameException;
+import java.util.ArrayList;
+import java.util.IllegalFormatException;
+import java.util.List;
 import java.util.Optional;
 
 public class AnnotationUtils {
 
-    Name annotationsPackageName = new Name(new Name("no.hvl.annotations"), "empty");
+    private static Name annotationsPackageName = new Name(new Name("no.hvl.annotations"), "empty");
 
     public AnnotationUtils() {
     }
 
-    public Name getAnnotationsPackageName() {
+    public static  Name getAnnotationsPackageName() {
         return annotationsPackageName;
     }
 
-    public Optional<CopyOption> getCopyValue (NodeWithAnnotations<?> node){
+    public static Optional<CopyOption> getCopyValue (NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
             var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
             return Optional.of(CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString()));
@@ -27,7 +34,7 @@ public class AnnotationUtils {
         return Optional.empty();
     }
 
-    public Optional<int[]> getTaskNumber(NodeWithAnnotations<?> node){
+    public static Optional<int[]> getTaskNumber(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
             var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_NUMBER_NAME);
 
@@ -37,7 +44,7 @@ public class AnnotationUtils {
         return Optional.empty();
     }
 
-    public Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){
+    public static Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){
         //TODO ERror handling for unspecified values
         var annotation = node.getAnnotationByName(annotationName).get();
         for(MemberValuePair pair : annotation.asNormalAnnotationExpr().getPairs()){
@@ -46,6 +53,41 @@ public class AnnotationUtils {
             }
         }
         return null;
+    }
+
+    public static List<ImportDeclaration> filterOutAnnotationImports(List<ImportDeclaration> importDeclarations){
+        List<ImportDeclaration> nonAnnotationImportDeclarations = new ArrayList<>();
+        for(ImportDeclaration importDeclaration : importDeclarations){
+            if(isNonAnnotationImportDeclaration(importDeclaration)){
+                nonAnnotationImportDeclarations.add(importDeclaration);
+            }
+        }
+        return nonAnnotationImportDeclarations;
+    }
+
+    private static boolean isNonAnnotationImportDeclaration(ImportDeclaration importDeclaration){
+        var importQualifier = getImportQualifierAsString(importDeclaration);
+        var annotationPackageQualifier = annotationsPackageName.getQualifier().get().asString();
+        return !annotationPackageQualifier.equals(importQualifier);
+    }
+
+    private static String getImportQualifierAsString(ImportDeclaration importDeclaration){
+        if (importDeclaration.isAsterisk()){
+            return importDeclaration.getNameAsString();
+        }
+        var importName = importDeclaration.getName();
+        if(importName.getQualifier().isPresent()){
+            return importName.getQualifier().get().asString();
+        }
+        throw new IllegalStateException("Import declaration " + importDeclaration.getNameAsString() + " has an unrecognizable format.");
+    }
+
+    public static List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
+        List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
+        file.findAll(BodyDeclaration.class,
+                bodyDeclaration -> bodyDeclaration.getAnnotationByName(annotationName).isPresent())
+                .forEach(annotatedNodes::add);
+        return annotatedNodes;
     }
 
 }

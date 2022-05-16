@@ -2,6 +2,8 @@ package no.hvl;
 
 
 import com.github.javaparser.ast.CompilationUnit;
+import no.hvl.concepts.AssignmentMetaModel;
+import no.hvl.concepts.AssignmentMetaModelBuilder;
 import no.hvl.maven.PafMojo;
 import no.hvl.writers.DescriptionWriter;
 import no.hvl.writers.ProjectWriter;
@@ -21,7 +23,11 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
-        generate();
+        Parser parser = new Parser();
+        parser.parseDirectory(parser.findSourceDirectory(ASSIGNMENT_PROJECT_PATH_LAPTOP).getAbsolutePath());
+        List<CompilationUnit> files = parser.getCompilationUnitCopies();
+        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(files).build();
+        System.out.println(assignmentMetaModel);
     }
 
     public static void generate() throws IOException {

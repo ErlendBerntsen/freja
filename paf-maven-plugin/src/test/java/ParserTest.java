@@ -39,7 +39,7 @@ public class ParserTest {
         parser = new Parser();
         //parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_DESKTOP);
         //parser.parseFile(EXAMPLE_PATH_DESKTOP);
-        parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
+        parser.saveCodeReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
         parser.parseFile(EXAMPLE_PATH_LAPTOP);
     }
 
@@ -217,7 +217,7 @@ public class ParserTest {
                         String replacementId = pairs.getValue().asStringLiteralExpr().asString();
                         parser.replaceSolutionInMethodBody(annotatedNode.asMethodDeclaration(), replacementId);
                         var methodStatements =  nodeUtils.removeCommentsFromNodes(annotatedNode.asMethodDeclaration().getBody().get().getStatements());
-                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getSolutionReplacements().get(replacementId).getStatements());
+                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getCodeReplacements().get(replacementId).getStatements());
                         assertTrue(methodStatements.containsAll(solutionStatements));
                     }
                 }
@@ -239,7 +239,7 @@ public class ParserTest {
                         parser.replaceBody(annotatedNode.asMethodDeclaration(), replacementId);
                         assertTrue(annotatedNode.asMethodDeclaration()
                                 .getBody().get()
-                                .getStatements().containsAll(parser.getSolutionReplacements().get(replacementId).getStatements()));
+                                .getStatements().containsAll(parser.getCodeReplacements().get(replacementId).getStatements()));
                     }
 
 

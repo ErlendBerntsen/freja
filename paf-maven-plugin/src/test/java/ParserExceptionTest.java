@@ -22,7 +22,7 @@ public class ParserExceptionTest {
     public void emptyDirectoryShouldThrowNoSourceDirectoryException(){
         File emptyDir = new File(System.getProperty("user.dir") + File.separator + "emptyDir");
         if(emptyDir.mkdir()){
-            NoSourceDirectoryException exception = assertThrows(NoSourceDirectoryException.class, () -> parser.findSourceDirectory(emptyDir.getAbsolutePath()));
+            assertThrows(NoSourceDirectoryException.class, () -> parser.findSourceDirectory(emptyDir.getAbsolutePath()));
             emptyDir.delete();
         }
     }

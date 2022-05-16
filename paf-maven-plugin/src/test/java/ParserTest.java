@@ -7,6 +7,7 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 import no.hvl.annotations.CopyOption;
 import no.hvl.utilities.NodeUtils;
@@ -24,28 +25,19 @@ public class ParserTest {
 
     Parser parser;
     NodeUtils nodeUtils = new NodeUtils();
-    AnnotationUtils annotationUtils = new AnnotationUtils();
-    private final String IMPLEMENT_ANNOTATION_NAME = "Implement";
-    private static final String EXAMPLE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\paf-maven-plugin\\src\\test\\java\\examples\\Example.java";
-    private static final String REPLACEMENT_CODE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\paf-maven-plugin\\src\\test\\java\\examples\\ReplacementMethods.java";
+    private final String IMPLEMENT_ANNOTATION_NAME = AnnotationNames.IMPLEMENT_NAME;
+    private static final String EXAMPLE_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\programmingAssignmentFramework\\paf-maven-plugin\\src\\test\\java\\examples";
     private static final String EXAMPLE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\Example.java";
-    private static final String REPLACEMENT_CODE_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\programmingAssignmentFramework\\src\\main\\java\\no\\hvl\\ReplacementMethods.java";
-
-    public ParserTest() throws IOException {
-    }
 
     @BeforeEach
     public void init() throws IOException {
         parser = new Parser();
-        //parser.saveSolutionReplacements(REPLACEMENT_CODE_PATH_DESKTOP);
-        //parser.parseFile(EXAMPLE_PATH_DESKTOP);
-        parser.saveCodeReplacements(REPLACEMENT_CODE_PATH_LAPTOP);
-        parser.parseFile(EXAMPLE_PATH_LAPTOP);
+        parser.parseDirectory(EXAMPLE_PATH_LAPTOP);
     }
 
     @Test
     public void onlyNodesAnnotatedWithImplementIsFound(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         annotatedNodes
                 .forEach(node ->
                         assertEquals(IMPLEMENT_ANNOTATION_NAME, node.getAnnotation(0).asAnnotationExpr().getName().asString()));
@@ -55,7 +47,7 @@ public class ParserTest {
     @Test
     public void methodAnnotatedWithImplementIsFound(){
         boolean methodWasFound = false;
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.isMethodDeclaration()){
                 methodWasFound = true;
@@ -67,7 +59,7 @@ public class ParserTest {
     @Test
     public void constructorAnnotatedWithImplementIsFound(){
         boolean constructorWasFound = false;
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.isConstructorDeclaration()){
                 constructorWasFound= true;
@@ -79,7 +71,7 @@ public class ParserTest {
     @Test
     public void fieldAnnotatedWithImplementIsFound(){
         boolean fieldWasFound = false;
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.isFieldDeclaration()){
                 fieldWasFound= true;
@@ -91,7 +83,7 @@ public class ParserTest {
     @Test
     public void classAnnotatedWithImplementIsFound(){
         boolean classWasFound = false;
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.isClassOrInterfaceDeclaration()){
                 classWasFound = true;
@@ -102,23 +94,23 @@ public class ParserTest {
 
     @Test
     public void implementedAnnotationShouldBeRemoved(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         var annotatedNode = annotatedNodes.get(0);
-        parser.removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
+        AnnotationUtils.removeAnnotationFromNode(annotatedNode, IMPLEMENT_ANNOTATION_NAME);
         assertTrue(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).isEmpty());
     }
 
     @Test
     public void allImplementAnnotationsShouldBeRemovedFromFile(){
         CompilationUnit file = parser.getCompilationUnitCopies().get(0);
-        parser.removeAnnotationsFromFile(file , IMPLEMENT_ANNOTATION_NAME);
-        var annotatedNodes = parser.getAnnotatedNodesInFile(file, IMPLEMENT_ANNOTATION_NAME);
+        AnnotationUtils.removeAnnotationsFromFile(file , IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAnnotatedNodesInFile(file, IMPLEMENT_ANNOTATION_NAME);
         assertTrue(annotatedNodes.isEmpty());
     }
 
     @Test
     public void solutionShouldBeRemoved(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().isNormalAnnotationExpr()){
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
@@ -168,7 +160,7 @@ public class ParserTest {
         var types = compilationUnit.findAll(type);
         List<BodyDeclaration<?>> removedTypes = new ArrayList<>();
         types.forEach(bodyDeclarationType -> {
-            var copyValueMaybe = annotationUtils.getCopyValue(bodyDeclarationType);
+            var copyValueMaybe = AnnotationUtils.getCopyValue(bodyDeclarationType);
             if(copyValueMaybe.isPresent()){
                 var copyValue = copyValueMaybe.get();
                 if(copyValue.equals(CopyOption.REMOVE_EVERYTHING)){
@@ -182,7 +174,7 @@ public class ParserTest {
 
     @Test
     public void solutionStartAndEndShouldBeReplacedWithComments(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().isNormalAnnotationExpr()){
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
@@ -208,7 +200,7 @@ public class ParserTest {
 
     @Test
     public void solutionShouldBeReplacedWithSpecifiedCode(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().isNormalAnnotationExpr()){
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
@@ -217,7 +209,7 @@ public class ParserTest {
                         String replacementId = pairs.getValue().asStringLiteralExpr().asString();
                         parser.replaceSolutionInMethodBody(annotatedNode.asMethodDeclaration(), replacementId);
                         var methodStatements =  nodeUtils.removeCommentsFromNodes(annotatedNode.asMethodDeclaration().getBody().get().getStatements());
-                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getCodeReplacements().get(replacementId).getStatements());
+                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getCodeReplacements().get(replacementId).getReplacementCode().getStatements());
                         assertTrue(methodStatements.containsAll(solutionStatements));
                     }
                 }
@@ -229,7 +221,7 @@ public class ParserTest {
 
     @Test
     public void methodBodyShouldBeReplacedWithSpecifiedCode(){
-        var annotatedNodes = parser.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(parser.getCompilationUnitCopies(), IMPLEMENT_ANNOTATION_NAME);
         for(var annotatedNode : annotatedNodes){
             if(annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().isNormalAnnotationExpr()){
                 NormalAnnotationExpr annotationExpr = annotatedNode.getAnnotationByName(IMPLEMENT_ANNOTATION_NAME).get().asNormalAnnotationExpr();
@@ -239,7 +231,7 @@ public class ParserTest {
                         parser.replaceBody(annotatedNode.asMethodDeclaration(), replacementId);
                         assertTrue(annotatedNode.asMethodDeclaration()
                                 .getBody().get()
-                                .getStatements().containsAll(parser.getCodeReplacements().get(replacementId).getStatements()));
+                                .getStatements().containsAll(parser.getCodeReplacements().get(replacementId).getReplacementCode().getStatements()));
                     }
 
 

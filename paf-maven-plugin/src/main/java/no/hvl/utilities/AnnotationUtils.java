@@ -2,7 +2,10 @@ package no.hvl.utilities;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.Name;
@@ -17,13 +20,8 @@ import java.util.Optional;
 
 public class AnnotationUtils {
 
-    private static Name annotationsPackageName = new Name(new Name("no.hvl.annotations"), "empty");
-
-    public AnnotationUtils() {
-    }
-
     public static  Name getAnnotationsPackageName() {
-        return annotationsPackageName;
+        return new Name(new Name("no.hvl.annotations"), "empty");
     }
 
     public static Optional<CopyOption> getCopyValue (NodeWithAnnotations<?> node){
@@ -67,7 +65,7 @@ public class AnnotationUtils {
 
     private static boolean isNonAnnotationImportDeclaration(ImportDeclaration importDeclaration){
         var importQualifier = getImportQualifierAsString(importDeclaration);
-        var annotationPackageQualifier = annotationsPackageName.getQualifier().get().asString();
+        var annotationPackageQualifier = getAnnotationsPackageName().getQualifier().get().asString();
         return !annotationPackageQualifier.equals(importQualifier);
     }
 
@@ -82,6 +80,13 @@ public class AnnotationUtils {
         throw new IllegalStateException("Import declaration " + importDeclaration.getNameAsString() + " has an unrecognizable format.");
     }
 
+    public static List<BodyDeclaration<?>> getAllAnnotatedNodesInFiles(List<CompilationUnit> files, String annotationName){
+        List<BodyDeclaration<?>> allAnnotatedNodes = new ArrayList<>();
+        for(CompilationUnit file : files){
+            allAnnotatedNodes.addAll(getAnnotatedNodesInFile(file, annotationName));
+        }
+        return allAnnotatedNodes;
+    }
     public static List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
         List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
         file.findAll(BodyDeclaration.class,
@@ -89,5 +94,23 @@ public class AnnotationUtils {
                 .forEach(annotatedNodes::add);
         return annotatedNodes;
     }
+
+    public static void removeAnnotationsFromFile(CompilationUnit file, String annotationName){
+        var annotatedNodes = AnnotationUtils.getAnnotatedNodesInFile(file, annotationName);
+        annotatedNodes.forEach(node -> file.replace(node, (Node) removeAnnotationFromNode(node, annotationName)));
+    }
+
+    public static NodeWithAnnotations<?> removeAnnotationFromNode(NodeWithAnnotations<?> node, String annotationName){
+        NodeList<AnnotationExpr> annotationsToKeep = new NodeList<>();
+        for(var annotation : node.getAnnotations()){
+            if(annotation.getName().asString().equals(annotationName)){
+                continue;
+            }
+            annotationsToKeep.add(annotation);
+        }
+        node.setAnnotations(annotationsToKeep);
+        return node;
+    }
+
 
 }

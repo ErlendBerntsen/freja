@@ -23,26 +23,8 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
-        Parser parser = new Parser();
-        parser.parseDirectory(parser.findSourceDirectory(ASSIGNMENT_PROJECT_PATH_LAPTOP).getAbsolutePath());
-        List<CompilationUnit> files = parser.getCompilationUnitCopies();
-        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(files).build();
-        System.out.println(assignmentMetaModel);
+        Generator generator = new Generator(ASSIGNMENT_PROJECT_PATH_LAPTOP, TARGET_PATH_LAPTOP);
+        generator.generate();
     }
 
-    public static void generate() throws IOException {
-        Parser parser = new Parser();
-        parser.parseDirectory(parser.findSourceDirectory(ASSIGNMENT_PROJECT_PATH_LAPTOP).getAbsolutePath());
-
-        List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
-        List<CompilationUnit> solutionProject = parser.createSolutionProject();
-
-        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, solutionProject,  parser.getFileNamesToRemove(),
-                ASSIGNMENT_PROJECT_PATH_LAPTOP, TARGET_PATH_LAPTOP);
-        projectWriter.createProject();
-
-        String startCodePath =  TARGET_PATH_LAPTOP + File.separator + "startcode";
-        DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, parser.getExercises());
-        descriptionWriter.createFiles();
-    }
 }

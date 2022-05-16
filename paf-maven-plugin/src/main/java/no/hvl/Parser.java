@@ -16,8 +16,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.CopyOption;
-import no.hvl.concepts.Exercise;
-import no.hvl.concepts.Task;
+import no.hvl.concepts.*;
 import no.hvl.exceptions.NoSourceDirectoryException;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
@@ -33,10 +32,9 @@ import java.util.stream.Collectors;
 
 public class Parser {
 
-    private AnnotationUtils annotationUtils = new AnnotationUtils();
     private List<CompilationUnit> compilationUnits;
-    private Map<String, BlockStmt> codeReplacements = new HashMap<>();
-    private HashSet<ImportDeclaration> codeReplacementImports = new HashSet<>();
+    private HashMap<String, Replacement> codeReplacements;
+    private HashSet<ImportDeclaration> codeReplacementImports;
     private HashSet<String> fileNamesToRemove = new HashSet<>();
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
@@ -49,10 +47,6 @@ public class Parser {
         List<CompilationUnit> compilationUnitCopies = new ArrayList<>();
         compilationUnits.forEach(compilationUnit -> compilationUnitCopies.add(compilationUnit.clone()));
         return compilationUnitCopies;
-    }
-
-    public Map<String, BlockStmt> getCodeReplacements() {
-        return codeReplacements;
     }
 
     public String getStartComment() {
@@ -74,12 +68,13 @@ public class Parser {
                 .filter(ParseResult::isSuccessful)
                 .map(r -> r.getResult().get())
                 .collect(Collectors.toList());
+        createAssignmentMetaModel();
     }
 
-    public void parseFile(String filePath) throws FileNotFoundException {
-        CompilationUnit file = StaticJavaParser.parse(new File(filePath));
-        compilationUnits.clear();
-        compilationUnits.add(file);
+    private void createAssignmentMetaModel(){
+        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(getCompilationUnitCopies()).build();
+        codeReplacements = assignmentMetaModel.getReplacementsAsHashMap();
+        codeReplacementImports = assignmentMetaModel.getReplacementImportDeclarations();
     }
 
     public File findSourceDirectory(String dir) throws NoSuchFileException {
@@ -97,70 +92,6 @@ public class Parser {
         throw new NoSourceDirectoryException(dir);
     }
 
-    public void saveCodeReplacements(String filePath) throws FileNotFoundException{
-        CompilationUnit file = StaticJavaParser.parse(new File(filePath));
-        removeAnnotationImportsFromFile(file);
-        codeReplacementImports.addAll(file.getImports());
-        codeReplacements = getAllSolutionReplacementsInFile(file);
-    }
-
-    public void saveCodeReplacements(List<CompilationUnit> files){
-        for(CompilationUnit file : files){
-            var solutionReplacementsInFile = getAllSolutionReplacementsInFile(file);
-            if(!solutionReplacementsInFile.isEmpty()){
-                codeReplacements.putAll(solutionReplacementsInFile);
-                removeAnnotationImportsFromFile(file);
-                //TODO make hashmap so imports dont get added unless needed?
-                codeReplacementImports.addAll(file.getImports());
-            }
-        }
-    }
-
-    public List<BodyDeclaration<?>> getAllAnnotatedNodesInFiles(List<CompilationUnit> files, String annotationName){
-        List<BodyDeclaration<?>> allAnnotatedNodes = new ArrayList<>();
-        for(CompilationUnit compilationUnit : files){
-            allAnnotatedNodes.addAll(getAnnotatedNodesInFile(compilationUnit, annotationName));
-        }
-        return allAnnotatedNodes;
-    }
-
-    public List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
-        List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
-        file.findAll(BodyDeclaration.class,
-                bodyDeclaration -> bodyDeclaration.getAnnotationByName(annotationName).isPresent())
-                .forEach(annotatedNodes::add);
-        return annotatedNodes;
-    }
-
-    public Map<String, BlockStmt> getAllSolutionReplacementsInFile(CompilationUnit file){
-        //TODO ERror handling
-        HashMap<String, BlockStmt> solutionReplacements = new HashMap<>();
-        getAnnotatedNodesInFile(file, AnnotationNames.REPLACEMENT_CODE_NAME).stream()
-                .filter(BodyDeclaration::isMethodDeclaration)
-                .forEach(method ->
-                        solutionReplacements.put(
-                                getAnnotationValue(method, AnnotationNames.REPLACEMENT_CODE_NAME, AnnotationNames.REPLACEMENT_CODE_ID_NAME)
-                                        .asStringLiteralExpr().asString()
-                                , method.asMethodDeclaration().getBody().get()));
-        return solutionReplacements;
-    }
-
-    public void removeAnnotationsFromFile(CompilationUnit file, String annotationName){
-        var annotatedNodes = getAnnotatedNodesInFile(file, annotationName);
-        annotatedNodes.forEach(node -> file.replace(node, (Node) removeAnnotationFromNode(node, annotationName)));
-    }
-
-    public NodeWithAnnotations<?> removeAnnotationFromNode(NodeWithAnnotations<?> node, String annotationName){
-        NodeList<AnnotationExpr> annotations = new NodeList<>();
-        for(var annotation : node.getAnnotations()){
-            if(annotation.getName().asString().equals(annotationName)){
-                continue;
-            }
-            annotations.add(annotation);
-        }
-        node.setAnnotations(annotations);
-        return node;
-    }
 
     public void removeSolution(MethodDeclaration method){
         //TODO Errorhandling, cleaner solution,
@@ -198,7 +129,7 @@ public class Parser {
     }
 
     private BlockStmt replaceSolution(BlockStmt methodBody, String replacementId){
-        var solutionReplacement = codeReplacements.get(replacementId).clone();
+        var solutionReplacement = codeReplacements.get(replacementId).getReplacementCode().clone();
         solutionReplacement.getStatements().getFirst().get().setLineComment(START_COMMENT);
         var replacementBody = new BlockStmt();
         var isSolutionStatement = false;
@@ -232,10 +163,10 @@ public class Parser {
 
     public void replaceBody(CallableDeclaration<?> method, String replacementId){
         if(method.isMethodDeclaration()){
-            method.asMethodDeclaration().setBody(codeReplacements.get(replacementId));
+            method.asMethodDeclaration().setBody(codeReplacements.get(replacementId).getReplacementCode());
         }
         else if (method.isConstructorDeclaration()){
-            method.asConstructorDeclaration().setBody(codeReplacements.get(replacementId));
+            method.asConstructorDeclaration().setBody(codeReplacements.get(replacementId).getReplacementCode());
         }
     }
 
@@ -273,7 +204,7 @@ public class Parser {
     }
 
     public CompilationUnit modifyAllAnnotatedNodesInFile(CompilationUnit file, String annotationName){
-        var annotatedNodes = getAnnotatedNodesInFile(file, annotationName);
+        var annotatedNodes = AnnotationUtils.getAnnotatedNodesInFile(file, annotationName);
         annotatedNodes.forEach(annotatedNode -> modifyAnnotatedNode(file, annotatedNode));
         removeAnnotationImportsFromFile(file);
         return file;
@@ -300,7 +231,7 @@ public class Parser {
                 annotatedNode.remove();
             }
         }
-        removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
+        AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
     }
 
     private void removeAnnotationImportsFromFile(CompilationUnit file){
@@ -308,12 +239,12 @@ public class Parser {
         importDeclarations.forEach(importDeclaration -> {
             if(importDeclaration.isAsterisk() &&
                 importDeclaration.getNameAsString()
-                        .equals(annotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
+                        .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
                 importDeclaration.remove();
             }
             if(importDeclaration.getName().getQualifier().isPresent()
                     && importDeclaration.getName().getQualifier().get().asString()
-                    .equals(annotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
+                    .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
                 importDeclaration.remove();
 
             }
@@ -330,8 +261,7 @@ public class Parser {
 
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnitCopies();
-        saveCodeReplacements(files);
-        var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
         return files.stream()
                 .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
@@ -341,11 +271,11 @@ public class Parser {
 
     public List<CompilationUnit> createSolutionProject(){
         var files = getCompilationUnitCopies();
-        var nodesToRemove = getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         removeNodes(files, nodesToRemove);
-        var annotatedNodes = getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
+        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
         for(var annotatedNode : annotatedNodes){
-            removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
+            AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
         }
         for(CompilationUnit file : files){
             removeAnnotationImportsFromFile(file);
@@ -377,10 +307,10 @@ public class Parser {
     }
 
     public List<Exercise> getExercises(){
-        List<BodyDeclaration<?>> tasks = getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> tasks = AnnotationUtils.getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
         tasks.sort((o1, o2) -> {
-            var o1number = annotationUtils.getTaskNumber(o1).get();
-            var o2number = annotationUtils.getTaskNumber(o2).get();
+            var o1number = AnnotationUtils.getTaskNumber(o1).get();
+            var o2number = AnnotationUtils.getTaskNumber(o2).get();
             for(int i = 0; i < o1number.length; i++){
                 if(i >= o2number.length){
                     return 1;
@@ -398,7 +328,7 @@ public class Parser {
 
         List<Exercise> exercises = new ArrayList<>();
         tasks.forEach(task -> {
-            int[] number = annotationUtils.getTaskNumber(task).get();
+            int[] number = AnnotationUtils.getTaskNumber(task).get();
             var exercise = findExercise(number, 0, exercises);
             exercise.setFullNumberAsString(exercise.convertNumberArrayToString(number));
             var exerciseTask = new Task(task);
@@ -428,4 +358,7 @@ public class Parser {
 
     }
 
+    public HashMap<String, Replacement> getCodeReplacements() {
+        return codeReplacements;
+    }
 }

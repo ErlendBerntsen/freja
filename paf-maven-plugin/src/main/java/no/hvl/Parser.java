@@ -200,10 +200,6 @@ public class Parser {
         AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
     }
 
-
-
-
-
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnitCopies();
         var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
@@ -231,10 +227,40 @@ public class Parser {
     }
 
     public List<Exercise> getExercises(){
-        List<BodyDeclaration<?>> tasks = AnnotationUtils.getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> nodesAnnotatedWithImplement = AnnotationUtils
+                .getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
+        sortTasks(nodesAnnotatedWithImplement);
+        return createExercises(nodesAnnotatedWithImplement);
+    }
+
+    private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
+        List<Exercise> exercises = new ArrayList<>();
+        nodesAnnotatedWithImplement.forEach(nodeAnnotatedWithImplement -> {
+            int[] number = AnnotationUtils.getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
+            Exercise exercise = findExerciseOrCreateNewOne(number, 0, exercises);
+            exercise.setFullNumberAsString(exercise.convertNumberArrayToString(number));
+            var exerciseTask = new Task(nodeAnnotatedWithImplement);
+            exerciseTask.setFullNumberAsString(exerciseTask.convertNumberArrayToString(number, exercise.getTasks().size() + 1));
+            Optional<Solution> solution = Optional.empty();
+            if(NodeUtils.isNodeWithBlockStmt(nodeAnnotatedWithImplement)){
+                var blockStmt = NodeUtils.getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
+                if(NodeUtils.blockStmtHasSolution(blockStmt)){
+                    solution = Optional.of(new SolutionBuilder(blockStmt).build());
+                }
+            }
+            exerciseTask.setSolution(solution);
+            exercise.addTask(exerciseTask);
+            //TODO handle exceptions
+            exercise.setFile(nodeAnnotatedWithImplement.findCompilationUnit().get());
+        });
+        return exercises;
+    }
+
+
+    private void sortTasks(List<BodyDeclaration<?>> tasks) {
         tasks.sort((o1, o2) -> {
-            var o1number = AnnotationUtils.getTaskNumber(o1).get();
-            var o2number = AnnotationUtils.getTaskNumber(o2).get();
+            var o1number = AnnotationUtils.getNumberValueInImplementAnnotation(o1);
+            var o2number = AnnotationUtils.getNumberValueInImplementAnnotation(o2);
             for(int i = 0; i < o1number.length; i++){
                 if(i >= o2number.length){
                     return 1;
@@ -249,36 +275,15 @@ public class Parser {
             }
             return -1;
         });
-
-        List<Exercise> exercises = new ArrayList<>();
-        tasks.forEach(task -> {
-            int[] number = AnnotationUtils.getTaskNumber(task).get();
-            var exercise = findExercise(number, 0, exercises);
-            exercise.setFullNumberAsString(exercise.convertNumberArrayToString(number));
-            var exerciseTask = new Task(task);
-            exerciseTask.setFullNumberAsString(exerciseTask.convertNumberArrayToString(number, exercise.getTasks().size() + 1));
-            Optional<Solution> solution = Optional.empty();
-            if(NodeUtils.isNodeWithBlockStmt(task)){
-                var blockStmt = NodeUtils.getBlockStmtFromBodyDeclaration(task);
-                if(NodeUtils.blockStmtHasSolution(blockStmt)){
-                    solution = Optional.of(new SolutionBuilder(blockStmt).build());
-                }
-            }
-            exerciseTask.setSolution(solution);
-            exercise.addTask(exerciseTask);
-            //TODO handle exceptions
-            exercise.setFile(task.findCompilationUnit().get());
-        });
-        return exercises;
     }
 
-    private Exercise findExercise(int[] number, int index, List<Exercise> exercises){
+    private Exercise findExerciseOrCreateNewOne(int[] number, int index, List<Exercise> exercises){
         for(Exercise exercise : exercises){
             if(exercise.getNumber() == number[index]){
                 if(index == number.length - 1){
                     return exercise;
                 }
-                return findExercise(number, ++index, exercise.getSubExercises());
+                return findExerciseOrCreateNewOne(number, ++index, exercise.getSubExercises());
             }
         }
         var exercise = new Exercise(number[index]);
@@ -286,7 +291,7 @@ public class Parser {
         if(index == number.length - 1){
             return exercise;
         }
-        return findExercise(number, ++index, exercise.getSubExercises());
+        return findExerciseOrCreateNewOne(number, ++index, exercise.getSubExercises());
 
     }
 

@@ -22,22 +22,40 @@ public class AnnotationUtils {
         return new Name(new Name("no.hvl.annotations"), "empty");
     }
 
-    public static Optional<CopyOption> getCopyValue (NodeWithAnnotations<?> node){
+    public static CopyOption getCopyOptionValueInImplementAnnotation(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
             var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
-            return Optional.of(CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString()));
+            return CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString());
         }
-        return Optional.empty();
+        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get copyOption value");
     }
 
-    public static Optional<int[]> getTaskNumber(NodeWithAnnotations<?> node){
+    public static int[] getNumberValueInImplementAnnotation(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
             var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_NUMBER_NAME);
 
-            return Optional.of(expression.asArrayInitializerExpr().getValues().stream()
-                    .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray());
+            return expression.asArrayInitializerExpr().getValues().stream()
+                    .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray();
         }
-        return Optional.empty();
+        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get number value");
+
+    }
+
+    public static Optional<String> getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
+            var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
+            return tryToCastToString(expression);
+        }
+        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get number value");
+
+    }
+
+    private static Optional<String> tryToCastToString(Expression expression) {
+        try {
+            return Optional.of(expression.asStringLiteralExpr().asString());
+        }catch (IllegalStateException e){
+            return Optional.empty();
+        }
     }
 
     public static Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){

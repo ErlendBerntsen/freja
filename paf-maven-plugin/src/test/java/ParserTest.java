@@ -160,13 +160,10 @@ public class ParserTest {
         var types = compilationUnit.findAll(type);
         List<BodyDeclaration<?>> removedTypes = new ArrayList<>();
         types.forEach(bodyDeclarationType -> {
-            var copyValueMaybe = AnnotationUtils.getCopyValue(bodyDeclarationType);
-            if(copyValueMaybe.isPresent()){
-                var copyValue = copyValueMaybe.get();
-                if(copyValue.equals(CopyOption.REMOVE_EVERYTHING)){
-                    bodyDeclarationType.remove();
-                    removedTypes.add(bodyDeclarationType);
-                }
+            CopyOption copyValue = AnnotationUtils.getCopyOptionValueInImplementAnnotation(bodyDeclarationType);
+            if(copyValue.equals(CopyOption.REMOVE_EVERYTHING)){
+                bodyDeclarationType.remove();
+                removedTypes.add(bodyDeclarationType);
             }
         });
         return removedTypes;

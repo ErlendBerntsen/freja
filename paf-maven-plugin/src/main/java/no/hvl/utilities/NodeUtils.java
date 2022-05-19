@@ -117,4 +117,21 @@ public class NodeUtils {
             return bodyDeclaration.asConstructorDeclaration();
         }
     }
+
+    public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
+                                         List<Statement>  replacementStatements){
+        NodeList<Statement> codeBlockStatements = codeBlock.getStatements();
+        Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, statementsToBeReplaced.get(0));
+        startIndex.ifPresent(integer -> codeBlockStatements.addAll(integer, replacementStatements));
+        codeBlockStatements.removeAll(statementsToBeReplaced);
+    }
+
+    public static Optional<Integer> findIndexOfStatement(NodeList<Statement> statements, Statement statement) {
+        for(int i = 0; i < statements.size(); i++){
+            if(statements.get(i).equals(statement)){
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
+    }
 }

@@ -75,4 +75,9 @@ public class Exercise {
     public boolean hasTasks(){
         return !tasks.isEmpty();
     }
+
+
+    public int getAmountOfTasks(){
+        return tasks.size();
+    }
 }

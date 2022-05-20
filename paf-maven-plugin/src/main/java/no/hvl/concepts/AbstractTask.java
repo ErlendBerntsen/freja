@@ -4,7 +4,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.annotations.CopyOption;
 
 
-public abstract class AbstractTask {
+public abstract class AbstractTask implements TaskOperations {
     private BodyDeclaration<?> node;
     private String fullNumberAsString;
     private CopyOption copyOption;

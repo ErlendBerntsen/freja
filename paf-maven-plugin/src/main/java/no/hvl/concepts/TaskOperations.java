@@ -1,7 +1,9 @@
 package no.hvl.concepts;
 
+import com.github.javaparser.ast.body.BodyDeclaration;
+
 public interface TaskOperations {
 
-    void createSolutionCode();
-    void createStartCode();
+    BodyDeclaration<?> createSolutionCode();
+    BodyDeclaration<?> createStartCode();
 }

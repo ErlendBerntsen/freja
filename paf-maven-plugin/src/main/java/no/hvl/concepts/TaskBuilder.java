@@ -34,7 +34,7 @@ public class TaskBuilder {
                 return buildSolutionReplacementTask();
             }
             default -> throw new IllegalArgumentException(
-                    String.format("Could not recognize copyOption \"%s\"", copyOption.toString()));
+                    String.format("Could not recognize copyOption: \"%s\"", copyOption.toString()));
         }
     }
 

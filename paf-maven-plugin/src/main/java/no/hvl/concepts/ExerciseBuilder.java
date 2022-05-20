@@ -7,14 +7,13 @@ import no.hvl.utilities.AnnotationUtils;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class ExerciseBuilder {
 
-    private BodyDeclaration<?> annotatedNode;
-    private List<Exercise> createdExercises;
-    private HashMap<String, Replacement> replacementMap;
+    private final BodyDeclaration<?> annotatedNode;
+    private final List<Exercise> createdExercises;
+    private final HashMap<String, Replacement> replacementMap;
     private int[] fullNumberAsIntArray;
 
     public ExerciseBuilder(BodyDeclaration<?> annotatedNode, List<Exercise> createdExercises,
@@ -32,8 +31,6 @@ public class ExerciseBuilder {
         addTaskToParentExercise(parentExerciseForTask);
         return parentExerciseForTask;
     }
-
-
 
     private Exercise findParentExerciseOfTaskOrCreateNewParent(List<Exercise> exercises, int indexInNumberArray){
         Optional<Exercise> parentExercise = findParentExercise(exercises, indexInNumberArray);
@@ -90,7 +87,7 @@ public class ExerciseBuilder {
             return file.get();
         }
         throw new IllegalStateException(String.format("Could not find file of type annotated with @%s," +
-                " are you sure this type was parsed from a file?", AnnotationNames.IMPLEMENT_NAME));
+                ". Are you sure this type was parsed from a file?", AnnotationNames.IMPLEMENT_NAME));
     }
 
     private void addTaskToParentExercise(Exercise parentExerciseForTask) {

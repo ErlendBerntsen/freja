@@ -5,7 +5,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.utilities.NodeUtils;
 
-public class ReplaceSolutionTask extends AbstractTask implements TaskOperations {
+public class ReplaceSolutionTask extends AbstractTask{
     public static final CopyOption copyOption = CopyOption.REPLACE_SOLUTION;
     private Solution solution;
     private Replacement replacement;
@@ -18,16 +18,17 @@ public class ReplaceSolutionTask extends AbstractTask implements TaskOperations 
     }
 
     @Override
-    public void createSolutionCode() {
-
+    public BodyDeclaration<?> createSolutionCode() {
+        return null;
     }
 
     @Override
-    public void createStartCode() {
+    public BodyDeclaration<?> createStartCode() {
         BodyDeclaration<?> nodeClone = getNode().clone();
         BlockStmt codeBlockWithSolution = NodeUtils.getBlockStmtFromBodyDeclaration(nodeClone);
         BlockStmt replacementCode = replacement.getReplacementCode();
         NodeUtils.replaceStatements(codeBlockWithSolution, solution.getStatements(), replacementCode.getStatements());
+        return nodeClone;
     }
 
 }

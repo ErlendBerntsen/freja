@@ -1,15 +1,18 @@
 package no.hvl.concepts;
 
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 public class AssignmentMetaModel {
-    List<Replacement> replacements;
-    List<Exercise> exercises;
+    private List<CompilationUnit> files;
+    private List<Replacement> replacements;
+    private List<Exercise> exercises;
 
     public AssignmentMetaModel(){
     }
@@ -44,5 +47,26 @@ public class AssignmentMetaModel {
 
     public void setExercises(List<Exercise> exercises) {
         this.exercises = exercises;
+    }
+
+    public List<AbstractTask> getTasks(){
+        return getTasksFromExercises(exercises);
+    }
+
+    private List<AbstractTask> getTasksFromExercises(List<Exercise> exercises) {
+        List<AbstractTask> abstractTasks = new ArrayList<>();
+        for(Exercise exercise : exercises){
+            abstractTasks.addAll(exercise.getAbstractTasks());
+            abstractTasks.addAll(getTasksFromExercises(exercise.getSubExercises()));
+        }
+        return abstractTasks;
+    }
+
+    public List<CompilationUnit> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<CompilationUnit> files) {
+        this.files = files;
     }
 }

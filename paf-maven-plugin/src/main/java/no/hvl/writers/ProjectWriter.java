@@ -46,6 +46,7 @@ public class ProjectWriter {
     }
 
     private void emptyTargetDirectory(File targetDirectory){
+        if(targetDirectory.listFiles() == null)return;
         Arrays.stream(targetDirectory.listFiles()).forEach(file -> {
             if(!file.getName().equals(".git")){
                 if(file.isDirectory()){

@@ -3,6 +3,7 @@ package no.hvl.concepts;
 import com.github.javaparser.ast.CompilationUnit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Exercise {
@@ -17,6 +18,7 @@ public class Exercise {
     public Exercise() {
         subExercises = new ArrayList<>();
         tasks = new ArrayList<>();
+        abstractTasks = new ArrayList<>();
     }
 
     public int getNumberAmongSiblingExercises() {
@@ -83,5 +85,9 @@ public class Exercise {
 
     public int getAmountOfTasks(){
         return tasks.size();
+    }
+
+    public List<AbstractTask> getAbstractTasks() {
+        return abstractTasks;
     }
 }

@@ -1,16 +1,7 @@
 package no.hvl;
 
 
-import com.github.javaparser.ast.CompilationUnit;
-import no.hvl.concepts.AssignmentMetaModel;
-import no.hvl.concepts.AssignmentMetaModelBuilder;
-import no.hvl.maven.PafMojo;
-import no.hvl.writers.DescriptionWriter;
-import no.hvl.writers.ProjectWriter;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class Main {
 
@@ -23,7 +14,8 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
-        Generator generator = new Generator(ASSIGNMENT_PROJECT_PATH_LAPTOP, TARGET_PATH_LAPTOP);
+        Generator generator = new Generator("C:\\Users\\Erlend\\IdeaProjects\\dependencytest",
+                "C:\\Users\\Erlend\\IdeaProjects\\outputTest");
         generator.generate();
     }
 

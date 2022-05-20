@@ -22,6 +22,7 @@ public class AssignmentMetaModelBuilder {
 
     public AssignmentMetaModel build(){
         assignmentMetaModel = new AssignmentMetaModel();
+        assignmentMetaModel.setFiles(files);
         assignmentMetaModel.setReplacements(findReplacements());
         assignmentMetaModel.setExercises(findExercises());
         //Create exercises
@@ -41,6 +42,14 @@ public class AssignmentMetaModelBuilder {
         return replacements;
     }
 
+    private List<Replacement> createReplacements(List<BodyDeclaration<?>> nodesAnnotatedWithReplacementCode){
+        List<Replacement> replacements = new ArrayList<>();
+        for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithReplacementCode){
+            replacements.add(new ReplacementBuilder(annotatedNode).build());
+        }
+        return replacements;
+    }
+
     private void createReplacementMap(List<Replacement> replacements) {
         replacementMap = new HashMap<>();
         for(Replacement replacement : replacements){
@@ -53,21 +62,12 @@ public class AssignmentMetaModelBuilder {
         }
     }
 
-    private List<Replacement> createReplacements(List<BodyDeclaration<?>> nodesAnnotatedWithReplacementCode){
-        List<Replacement> replacements = new ArrayList<>();
-        for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithReplacementCode){
-            replacements.add(new ReplacementBuilder(annotatedNode).build());
-        }
-        return replacements;
-    }
-
     private List<Exercise> findExercises() {
         List<BodyDeclaration<?>> nodesAnnotatedWithImplement = new ArrayList<>();
         for(CompilationUnit file : files){
             nodesAnnotatedWithImplement.addAll(
                     AnnotationUtils.getAnnotatedNodesInFile(file, AnnotationNames.IMPLEMENT_NAME));
         }
-        
         GeneralUtils.sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
         return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));
     }
@@ -76,7 +76,7 @@ public class AssignmentMetaModelBuilder {
     private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
         List<Exercise> exercises = new ArrayList<>();
         for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithImplement){
-            exercises.add(new ExerciseBuilder(annotatedNode, exercises, replacementMap).build());
+            new ExerciseBuilder(annotatedNode, exercises, replacementMap).build();
         }
         return exercises;
     }

@@ -101,10 +101,14 @@ public class NodeUtils {
         return false;
     }
 
-    public static void removeSolutionStartAndEndStatementsFromFile(List<BodyDeclaration<?>> annotatedNodes) {
+    public static void removeSolutionStartAndEndStatementsFromNodes(List<BodyDeclaration<?>> annotatedNodes) {
+        annotatedNodes.forEach(NodeUtils::removeSolutionStartAndEndStatementsFromNode);
+    }
+
+    public static void removeSolutionStartAndEndStatementsFromNode(BodyDeclaration<?> annotatedNode) {
         List<Statement> statements = new ArrayList<>();
-        annotatedNodes.forEach(node -> statements.addAll(node.findAll(Statement.class,
-                statement -> isStartStatement(statement) || isEndStatement(statement))));
+        statements.addAll(annotatedNode.findAll(Statement.class,
+                statement -> isStartStatement(statement) || isEndStatement(statement)));
         statements.forEach(Node::remove);
     }
 

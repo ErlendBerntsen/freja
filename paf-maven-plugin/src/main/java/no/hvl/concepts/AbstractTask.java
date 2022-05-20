@@ -2,6 +2,7 @@ package no.hvl.concepts;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.annotations.CopyOption;
+import no.hvl.utilities.NodeUtils;
 
 
 public abstract class AbstractTask implements TaskOperations {
@@ -38,5 +39,12 @@ public abstract class AbstractTask implements TaskOperations {
 
     public void setCopyOption(CopyOption copyOption) {
         this.copyOption = copyOption;
+    }
+
+    @Override
+    public BodyDeclaration<?> createSolutionCode() {
+        BodyDeclaration<?> nodeClone = node.clone();
+        NodeUtils.removeSolutionStartAndEndStatementsFromNode(nodeClone);
+        return nodeClone;
     }
 }

@@ -232,80 +232,11 @@ public class Parser {
         }
         for(CompilationUnit file : files){
             AnnotationUtils.removeAnnotationImportsFromFile(file);
-            NodeUtils.removeSolutionStartAndEndStatementsFromFile(annotatedNodes);
+            NodeUtils.removeSolutionStartAndEndStatementsFromNodes(annotatedNodes);
         }
 
         return files;
     }
 
-    public List<Exercise> getExercises(){
-        List<BodyDeclaration<?>> nodesAnnotatedWithImplement = AnnotationUtils
-                .getAllAnnotatedNodesInFiles(getCompilationUnitCopies(), AnnotationNames.IMPLEMENT_NAME);
-        sortTasks(nodesAnnotatedWithImplement);
-        return createExercises(nodesAnnotatedWithImplement);
-    }
-
-    private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
-        List<Exercise> exercises = new ArrayList<>();
-        nodesAnnotatedWithImplement.forEach(nodeAnnotatedWithImplement -> {
-            int[] number = AnnotationUtils.getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
-            Exercise exercise = findExerciseOrCreateNewOne(number, 0, exercises);
-            exercise.setFullNumberAsString(exercise.convertNumberArrayToString(number));
-            var exerciseTask = new Task(nodeAnnotatedWithImplement);
-            exerciseTask.setFullNumberAsString(exerciseTask.convertNumberArrayToString(number, exercise.getTasks().size() + 1));
-            Optional<Solution> solution = Optional.empty();
-            if(NodeUtils.isNodeWithBlockStmt(nodeAnnotatedWithImplement)){
-                var blockStmt = NodeUtils.getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
-                if(NodeUtils.blockStmtHasSolution(blockStmt)){
-                    solution = Optional.of(new SolutionBuilder(blockStmt).build());
-                }
-            }
-            exerciseTask.setSolution(solution);
-            exercise.addTask(exerciseTask);
-            //TODO handle exceptions
-            exercise.setFile(nodeAnnotatedWithImplement.findCompilationUnit().get());
-        });
-        return exercises;
-    }
-
-
-    private void sortTasks(List<BodyDeclaration<?>> tasks) {
-        tasks.sort((o1, o2) -> {
-            var o1number = AnnotationUtils.getNumberValueInImplementAnnotation(o1);
-            var o2number = AnnotationUtils.getNumberValueInImplementAnnotation(o2);
-            for(int i = 0; i < o1number.length; i++){
-                if(i >= o2number.length){
-                    return 1;
-                }
-                int comparison = Integer.compare(o1number[i], o2number[i]);
-                if(comparison != 0){
-                    return comparison;
-                }
-            }
-            if(o1number.length == o2number.length){
-                return 0;
-            }
-            return -1;
-        });
-    }
-
-    private Exercise findExerciseOrCreateNewOne(int[] number, int index, List<Exercise> exercises){
-        for(Exercise exercise : exercises){
-            if(exercise.getNumberAmongSiblingExercises() == number[index]){
-                if(index == number.length - 1){
-                    return exercise;
-                }
-                return findExerciseOrCreateNewOne(number, ++index, exercise.getSubExercises());
-            }
-        }
-        var exercise = new Exercise();
-        exercise.setNumberAmongSiblingExercises(number[index]);
-        exercises.add(exercise);
-        if(index == number.length - 1){
-            return exercise;
-        }
-        return findExerciseOrCreateNewOne(number, ++index, exercise.getSubExercises());
-
-    }
 
 }

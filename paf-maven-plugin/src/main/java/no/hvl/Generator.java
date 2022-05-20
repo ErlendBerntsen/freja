@@ -31,6 +31,7 @@ public class Generator {
         AssignmentMetaModel assignmentMetaModel =
                 new AssignmentMetaModelBuilder(parser).build();
         createStartCodeJavaFiles(assignmentMetaModel);
+        createSolutionCodeJavaFiles(assignmentMetaModel);
 
 //        List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
 //        List<CompilationUnit> solutionProject = parser.createSolutionProject();
@@ -40,25 +41,21 @@ public class Generator {
 //        projectWriter.createProject();
 //
 //        String startCodePath =  targetPath + File.separator + "startcode";
-//        DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, parser.getExercises());
+//        DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, assignmentMetaModel.getExercises());
 //        descriptionWriter.createFiles();
     }
 
-    public void createStartCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
-        List<CompilationUnit> startCodeFiles = assignmentMetaModel.getStartCodeFiles();
-        removePafInformation(startCodeFiles);
-        //TODO
-        //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
-        List<AbstractTask> tasks = assignmentMetaModel.getTasks();
-        for(AbstractTask task : tasks){
-            Node nodeCopy = NodeUtils.findNodeInFiles(startCodeFiles, task.getNode());
-            updateTaskNode(task, nodeCopy);
-        }
-        System.out.println("PARSED FILES:");
-        assignmentMetaModel.getParsedFiles().forEach(System.out::println);
+    private void createSolutionCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
+        modifyJavaFiles(assignmentMetaModel.getSolutionCodeFiles(), assignmentMetaModel.getTasks(), true);
+    }
 
-        System.out.println("START CODE FILES:");
-        assignmentMetaModel.getStartCodeFiles().forEach(System.out::println);
+    private void modifyJavaFiles(List<CompilationUnit> files, List<AbstractTask> tasks, boolean isSolutionCode){
+        removePafInformation(files);
+        for(AbstractTask task : tasks){
+            Node oldTaskNode = NodeUtils.findNodeInFiles(files, task.getNode());
+            BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task);
+            updateTaskNode(oldTaskNode, newTaskNode);
+        }
     }
 
     private void removePafInformation(List<CompilationUnit> files){
@@ -67,6 +64,7 @@ public class Generator {
     }
 
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
+        //TODO Remember that ProjectWriter need to know what file names to remove
         List<BodyDeclaration<?>> nodesAnnotatedWithRemove = AnnotationUtils
                 .getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
         NodeUtils.removeNodesFromFiles(files, nodesAnnotatedWithRemove);
@@ -78,15 +76,31 @@ public class Generator {
         }
     }
 
-    private void updateTaskNode(AbstractTask task, Node nodeCopy){
-        BodyDeclaration<?> updatedNode = task.createStartCode();
-        AnnotationUtils.removeAnnotationFromNode(updatedNode, AnnotationNames.IMPLEMENT_NAME);
-        Optional<Node> parentNode = nodeCopy.getParentNode();
+    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, AbstractTask task) {
+        BodyDeclaration<?> newTaskNode;
+        if(isSolutionCode){
+            newTaskNode = task.createSolutionCode();
+        }else{
+            newTaskNode = task.createStartCode();
+        }
+        AnnotationUtils.removeAnnotationFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
+        return newTaskNode;
+    }
+
+    private void updateTaskNode(Node oldTaskNode, Node newTaskNode){
+        Optional<Node> parentNode = oldTaskNode.getParentNode();
         if(parentNode.isPresent()){
-            parentNode.get().replace(nodeCopy, updatedNode);
+            parentNode.get().replace(oldTaskNode, newTaskNode);
         }else{
             throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s"
                     , AnnotationNames.IMPLEMENT_NAME));
         }
     }
+
+    private void createStartCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
+        //TODO
+        //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
+        modifyJavaFiles(assignmentMetaModel.getStartCodeFiles(), assignmentMetaModel.getTasks(), false);
+    }
+
 }

@@ -18,11 +18,6 @@ public class ReplaceSolutionTask extends AbstractTask{
     }
 
     @Override
-    public BodyDeclaration<?> createSolutionCode() {
-        return null;
-    }
-
-    @Override
     public BodyDeclaration<?> createStartCode() {
         BodyDeclaration<?> nodeClone = getNode().clone();
         BlockStmt codeBlockWithSolution = NodeUtils.getBlockStmtFromBodyDeclaration(nodeClone);

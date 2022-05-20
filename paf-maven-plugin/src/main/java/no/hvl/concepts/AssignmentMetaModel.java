@@ -9,6 +9,7 @@ import java.util.List;
 
 public class AssignmentMetaModel {
     List<Replacement> replacements;
+    List<Exercise> exercises;
 
     public AssignmentMetaModel(){
     }
@@ -35,5 +36,13 @@ public class AssignmentMetaModel {
 
     public void setReplacements(List<Replacement> replacements) {
         this.replacements = replacements;
+    }
+
+    public List<Exercise> getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(List<Exercise> exercises) {
+        this.exercises = exercises;
     }
 }

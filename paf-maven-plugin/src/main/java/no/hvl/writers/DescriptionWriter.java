@@ -33,7 +33,7 @@ public class DescriptionWriter {
             try {
                 createFileAttributes(exercise);
                 createTemplate(exercise);
-                File descriptionFile = new File(targetPath + File.separator + "Exercise" + exercise.getNumber() + ".adoc");
+                File descriptionFile = new File(targetPath + File.separator + "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc");
                 FileWriter fileWriter = new FileWriter(descriptionFile);
                 fileWriter.write(content.toString());
                 fileWriter.close();
@@ -132,7 +132,7 @@ public class DescriptionWriter {
     }
 
     private void createTemplate(Exercise exercise){
-        content.append("\n= *Exercise ").append(exercise.getNumber()).append("*\n");
+        content.append("\n= *Exercise ").append(exercise.getNumberAmongSiblingExercises()).append("*\n");
         createExerciseTemplate(exercise,1);
     }
 

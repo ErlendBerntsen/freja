@@ -279,14 +279,15 @@ public class Parser {
 
     private Exercise findExerciseOrCreateNewOne(int[] number, int index, List<Exercise> exercises){
         for(Exercise exercise : exercises){
-            if(exercise.getNumber() == number[index]){
+            if(exercise.getNumberAmongSiblingExercises() == number[index]){
                 if(index == number.length - 1){
                     return exercise;
                 }
                 return findExerciseOrCreateNewOne(number, ++index, exercise.getSubExercises());
             }
         }
-        var exercise = new Exercise(number[index]);
+        var exercise = new Exercise();
+        exercise.setNumberAmongSiblingExercises(number[index]);
         exercises.add(exercise);
         if(index == number.length - 1){
             return exercise;

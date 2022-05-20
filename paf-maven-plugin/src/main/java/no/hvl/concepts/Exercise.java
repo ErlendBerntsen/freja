@@ -7,24 +7,24 @@ import java.util.List;
 
 public class Exercise {
 
-    private int number;
+    private int numberAmongSiblingExercises;
     private List<Exercise> subExercises;
     private List<Task> tasks;
+    private List<AbstractTask> abstractTasks;
     private CompilationUnit file;
     private String fullNumberAsString;
 
-    public Exercise(int number) {
-        this.number = number;
+    public Exercise() {
         subExercises = new ArrayList<>();
         tasks = new ArrayList<>();
     }
 
-    public int getNumber() {
-        return number;
+    public int getNumberAmongSiblingExercises() {
+        return numberAmongSiblingExercises;
     }
 
-    public void setNumber(int number) {
-        this.number = number;
+    public void setNumberAmongSiblingExercises(int numberAmongSiblingExercises) {
+        this.numberAmongSiblingExercises = numberAmongSiblingExercises;
     }
 
     public List<Exercise> getSubExercises() {
@@ -37,6 +37,10 @@ public class Exercise {
 
     public void addTask(Task task){
         this.tasks.add(task);
+    }
+
+    public void addAbstractTask(AbstractTask task){
+        this.abstractTasks.add(task);
     }
 
     public List<Task> getTasks() {

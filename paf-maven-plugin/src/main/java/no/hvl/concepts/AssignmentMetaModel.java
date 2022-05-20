@@ -10,7 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 
 public class AssignmentMetaModel {
-    private List<CompilationUnit> files;
+    private List<CompilationUnit> parsedFiles;
+    private List<CompilationUnit> startCodeFiles;
+    private List<CompilationUnit> solutionCodeFiles;
     private List<Replacement> replacements;
     private List<Exercise> exercises;
 
@@ -62,11 +64,27 @@ public class AssignmentMetaModel {
         return abstractTasks;
     }
 
-    public List<CompilationUnit> getFiles() {
-        return files;
+    public List<CompilationUnit> getParsedFiles() {
+        return parsedFiles;
     }
 
-    public void setFiles(List<CompilationUnit> files) {
-        this.files = files;
+    public void setParsedFiles(List<CompilationUnit> parsedFiles) {
+        this.parsedFiles = parsedFiles;
+    }
+
+    public List<CompilationUnit> getStartCodeFiles() {
+        return startCodeFiles;
+    }
+
+    public void setStartCodeFiles(List<CompilationUnit> startCodeFiles) {
+        this.startCodeFiles = startCodeFiles;
+    }
+
+    public List<CompilationUnit> getSolutionCodeFiles() {
+        return solutionCodeFiles;
+    }
+
+    public void setSolutionCodeFiles(List<CompilationUnit> solutionCodeFiles) {
+        this.solutionCodeFiles = solutionCodeFiles;
     }
 }

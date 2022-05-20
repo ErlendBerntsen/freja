@@ -32,11 +32,17 @@ public class Parser {
     private HashMap<String, Replacement> codeReplacements;
     private HashSet<ImportDeclaration> codeReplacementImports;
     private HashSet<String> fileNamesToRemove = new HashSet<>();
+    private String directory;
     private static final String START_COMMENT = "TODO - START";
     private static final String END_COMMENT = "TODO - END";
 
     public Parser() {
         this.compilationUnits = new ArrayList<>();
+    }
+
+    public Parser(String directory) {
+        this.compilationUnits = new ArrayList<>();
+        this.directory = directory;
     }
 
     public List<CompilationUnit> getCompilationUnitCopies(){
@@ -62,7 +68,7 @@ public class Parser {
     }
 
     public void parseDirectory(String dir) throws IOException {
-        var sourceRoot = new SourceRoot(Paths.get(dir));
+        var sourceRoot = new SourceRoot(Paths.get(directory));
         List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse("");
         compilationUnits = parseResults.stream()
                 .filter(ParseResult::isSuccessful)
@@ -71,8 +77,14 @@ public class Parser {
         createAssignmentMetaModel();
     }
 
-    private void createAssignmentMetaModel(){
-        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(getCompilationUnitCopies()).build();
+    public void parse() throws IOException {
+        File sourceDir = findSourceDirectory(directory);
+        parseDirectory(sourceDir.getAbsolutePath());
+    }
+
+
+    private void createAssignmentMetaModel() throws IOException {
+        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(this).build();
         codeReplacements = assignmentMetaModel.getReplacementsAsHashMap();
         codeReplacementImports = assignmentMetaModel.getReplacementImportDeclarations();
     }
@@ -203,7 +215,7 @@ public class Parser {
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnitCopies();
         var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
-        NodeUtils.removeNodes(files, nodesToRemove, fileNamesToRemove);
+        fileNamesToRemove = NodeUtils.removeNodesFromFiles(files, nodesToRemove);
         return files.stream()
                 .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
                 .collect(Collectors.toList());
@@ -213,7 +225,7 @@ public class Parser {
     public List<CompilationUnit> createSolutionProject(){
         var files = getCompilationUnitCopies();
         var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
-        NodeUtils.removeNodes(files, nodesToRemove, fileNamesToRemove);
+        fileNamesToRemove = NodeUtils.removeNodesFromFiles(files, nodesToRemove);
         var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
         for(var annotatedNode : annotatedNodes){
             AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);

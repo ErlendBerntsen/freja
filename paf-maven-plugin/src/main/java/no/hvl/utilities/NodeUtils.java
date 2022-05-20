@@ -21,6 +21,18 @@ public class NodeUtils {
     public NodeUtils() {
     }
 
+    public static Node findNodeInFiles(List<CompilationUnit> files, BodyDeclaration<?> node) {
+        for(CompilationUnit file : files){
+            List<Node> fileNodes = file.findAll(Node.class);
+            for(Node nodeCopy : fileNodes){
+                if(nodeCopy.equals(node)){
+                    return nodeCopy;
+                }
+            }
+        }
+        throw new IllegalStateException("Could not find copy of node");
+    }
+
     public NodeList<Node> removeCommentsFromNodes(NodeList<?> nodes){
         NodeList<Node> nodesWithoutComments = new NodeList<>();
         nodes.forEach(node -> nodesWithoutComments.add(node.clone().removeComment()));
@@ -96,18 +108,21 @@ public class NodeUtils {
         statements.forEach(Node::remove);
     }
 
-    public static void removeNodes(List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove, HashSet<String> fileNamesToRemove){
+    public static HashSet<String> removeNodesFromFiles(List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
+        HashSet<String> fileNamesToRemove = new HashSet<>();
         nodesToRemove.forEach(node -> {
             if(node.isTypeDeclaration()){
                 var compilationUnitMaybe = node.findCompilationUnit();
                 if(compilationUnitMaybe.isPresent()){
                     fileNamesToRemove.add(compilationUnitMaybe.get().getStorage().get().getFileName());
+                    //TODO maybe create copy instead?
                     files.remove(compilationUnitMaybe.get());
                 }
             }else{
                 node.remove();
             }
         });
+        return fileNamesToRemove;
     }
 
     public static CallableDeclaration<?> castToCallableDeclaration(BodyDeclaration<?> bodyDeclaration){

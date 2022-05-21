@@ -18,6 +18,10 @@ import java.util.Optional;
 
 public class AnnotationUtils {
 
+    private AnnotationUtils(){
+        throw new IllegalStateException("This is a utility class. It is not meant to be instantiated");
+    }
+
     public static  Name getAnnotationsPackageName() {
         return new Name(new Name("no.hvl.annotations"), "empty");
     }
@@ -43,7 +47,7 @@ public class AnnotationUtils {
 
     public static Optional<String> getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
-            var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
+            Expression expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
             return tryToCastToString(expression);
         }
         throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get number value");

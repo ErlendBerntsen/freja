@@ -68,20 +68,18 @@ public class Parser {
     }
 
     public void parseDirectory(String dir) throws IOException {
-        var sourceRoot = new SourceRoot(Paths.get(directory));
+        var sourceRoot = new SourceRoot(Paths.get(dir));
         List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse("");
         compilationUnits = parseResults.stream()
                 .filter(ParseResult::isSuccessful)
                 .map(r -> r.getResult().get())
                 .collect(Collectors.toList());
-        createAssignmentMetaModel();
     }
 
     public void parse() throws IOException {
         File sourceDir = findSourceDirectory(directory);
         parseDirectory(sourceDir.getAbsolutePath());
     }
-
 
     private void createAssignmentMetaModel() throws IOException {
         AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(this).build();

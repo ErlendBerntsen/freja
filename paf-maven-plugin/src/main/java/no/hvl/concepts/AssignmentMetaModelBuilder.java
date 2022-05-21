@@ -3,28 +3,27 @@ package no.hvl.concepts;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
-import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.AnnotationUtils;
-import no.hvl.utilities.GeneralUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static no.hvl.utilities.AnnotationNames.*;
+import static no.hvl.utilities.AnnotationUtils.*;
+import static no.hvl.utilities.GeneralUtils.*;
+
 public class AssignmentMetaModelBuilder {
 
-    private Parser parser;
+    private final Parser parser;
     List<CompilationUnit> parsedFiles;
-    private AssignmentMetaModel assignmentMetaModel;
     private HashMap<String, Replacement> replacementMap;
 
     public AssignmentMetaModelBuilder(Parser parser) {
         this.parser = parser;
     }
 
-    public AssignmentMetaModel build() throws IOException {
-        assignmentMetaModel = new AssignmentMetaModel();
+    public AssignmentMetaModel build() {
+        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModel();
         parsedFiles = parser.getCompilationUnitCopies();
         assignmentMetaModel.setParsedFiles(parsedFiles);
         assignmentMetaModel.setStartCodeFiles(parser.getCompilationUnitCopies());
@@ -42,7 +41,7 @@ public class AssignmentMetaModelBuilder {
         List<Replacement> replacements = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
             var nodesAnnotatedWithReplacementCode =
-                    AnnotationUtils.getAnnotatedNodesInFile(file, AnnotationNames.REPLACEMENT_CODE_NAME);
+                    getAnnotatedNodesInFile(file, REPLACEMENT_CODE_NAME);
             replacements.addAll(createReplacements(nodesAnnotatedWithReplacementCode));
         }
         createReplacementMap(replacements);
@@ -63,7 +62,7 @@ public class AssignmentMetaModelBuilder {
             String replacementId = replacement.getId();
             if(replacementMap.containsKey(replacementId)){
                 throw new IllegalStateException(String.format("Type annotated with %s uses an %s that is already defined"
-                        ,AnnotationNames.REPLACEMENT_CODE_NAME, AnnotationNames.REPLACEMENT_CODE_ID_NAME ));
+                        , REPLACEMENT_CODE_NAME, REPLACEMENT_CODE_ID_NAME ));
             }
             replacementMap.put(replacementId, replacement);
         }
@@ -73,9 +72,9 @@ public class AssignmentMetaModelBuilder {
         List<BodyDeclaration<?>> nodesAnnotatedWithImplement = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
             nodesAnnotatedWithImplement.addAll(
-                    AnnotationUtils.getAnnotatedNodesInFile(file, AnnotationNames.IMPLEMENT_NAME));
+                    getAnnotatedNodesInFile(file, IMPLEMENT_NAME));
         }
-        GeneralUtils.sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
+        sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
         return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));
     }
 

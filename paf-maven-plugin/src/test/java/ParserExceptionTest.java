@@ -9,7 +9,7 @@ import java.nio.file.NoSuchFileException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParserExceptionTest {
+class ParserExceptionTest {
 
     Parser parser;
 
@@ -19,7 +19,7 @@ public class ParserExceptionTest {
     }
 
     @Test
-    public void emptyDirectoryShouldThrowNoSourceDirectoryException(){
+    void emptyDirectoryShouldThrowNoSourceDirectoryException(){
         File emptyDir = new File(System.getProperty("user.dir") + File.separator + "emptyDir");
         if(emptyDir.mkdir()){
             assertThrows(NoSourceDirectoryException.class, () -> parser.findSourceDirectory(emptyDir.getAbsolutePath()));
@@ -28,7 +28,7 @@ public class ParserExceptionTest {
     }
 
     @Test
-    public void nonExistingDirectoryShouldThrowNoSuchFileException(){
+    void nonExistingDirectoryShouldThrowNoSuchFileException(){
         assertThrows(NoSuchFileException.class, () -> parser.findSourceDirectory(""));
     }
 }

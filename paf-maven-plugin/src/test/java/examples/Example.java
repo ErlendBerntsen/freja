@@ -3,23 +3,25 @@ package examples;
 import no.hvl.annotations.CopyOption;
 import no.hvl.annotations.Implement;
 import no.hvl.annotations.SolutionStart;
+import testUtils.TestId;
 
-@Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
+@Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
 public class Example {
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
+    @TestId(1)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public int fieldVariable;
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public Example() {
     }
 
-    @Implement(number = 1, copyOption = CopyOption.REMOVE_EVERYTHING)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public void methodToRemove(){
 
     }
 
-    @Implement(number = 1, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
     public String helloWorld() {
         String str;
         SolutionStart s;

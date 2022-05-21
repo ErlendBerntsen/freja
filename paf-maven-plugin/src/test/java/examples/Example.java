@@ -9,8 +9,11 @@ import testUtils.TestId;
 public class Example {
 
     @TestId(1)
-    @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
+    @Implement(number = {1,2}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public int fieldVariable;
+
+    @TestId(2)
+    public int noImplementAnnotation;
 
     @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public Example() {
@@ -21,6 +24,7 @@ public class Example {
 
     }
 
+    @TestId(3)
     @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
     public String helloWorld() {
         String str;

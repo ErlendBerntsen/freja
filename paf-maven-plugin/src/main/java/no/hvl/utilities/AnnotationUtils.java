@@ -5,16 +5,16 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MemberValuePair;
-import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.annotations.CopyOption;
+import no.hvl.exceptions.MissingAnnotationException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static no.hvl.utilities.AnnotationNames.*;
 
 public class AnnotationUtils {
 
@@ -27,52 +27,57 @@ public class AnnotationUtils {
     }
 
     public static CopyOption getCopyOptionValueInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
-            var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
+        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
+            var expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_COPY_NAME);
             return CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString());
         }
-        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get copyOption value");
+        throw new MissingAnnotationException(IMPLEMENT_COPY_NAME);
+    }
+
+    public static Expression getAnnotationMemberValue(NodeWithAnnotations<?> node,
+                                                      String annotationName, String memberName){
+        Optional<AnnotationExpr> annotation = node.getAnnotationByName(annotationName);
+        if(annotation.isPresent()){
+            return getAnnotationMemberValueFromAnnotationExpr(annotation.get(), memberName);
+        }else{
+            throw new IllegalArgumentException(
+                    String.format("Could not find annotation \"%s\" on the node:%n%s", annotationName, node));
+        }
+    }
+
+    private static Expression getAnnotationMemberValueFromAnnotationExpr(
+            AnnotationExpr annotationExpr, String memberName) {
+        if(annotationExpr.isNormalAnnotationExpr()){
+            NormalAnnotationExpr normalAnnotationExpr = annotationExpr.asNormalAnnotationExpr();
+            for(MemberValuePair pair : normalAnnotationExpr.getPairs()){
+                if(pair.getName().asString().equals(memberName)){
+                    return pair.getValue();
+                }
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("Could not find annotation member \"%s\" in the annotation:%n%s",
+                        memberName, annotationExpr));
     }
 
     public static int[] getNumberValueInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
-            var expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_NUMBER_NAME);
-
+        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
+            var expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_NUMBER_NAME);
             return expression.asArrayInitializerExpr().getValues().stream()
                     .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray();
         }
-        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get number value");
-
+        throw new MissingAnnotationException(IMPLEMENT_NUMBER_NAME);
     }
 
-    public static Optional<String> getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(AnnotationNames.IMPLEMENT_NAME)) {
-            Expression expression = getAnnotationValue(node, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
-            return tryToCastToString(expression);
+    public static String getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
+            Expression expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_ID_NAME);
+            return expression.asStringLiteralExpr().asString();
         }
-        throw new IllegalArgumentException("Node is not annotated with @Implement and thus can't get number value");
-
+        throw new MissingAnnotationException(IMPLEMENT_ID_NAME);
     }
 
-    private static Optional<String> tryToCastToString(Expression expression) {
-        try {
-            return Optional.of(expression.asStringLiteralExpr().asString());
-        }catch (IllegalStateException e){
-            return Optional.empty();
-        }
-    }
-
-    public static Expression getAnnotationValue(NodeWithAnnotations<?> node, String annotationName, String memberName){
-        //TODO ERror handling for unspecified values
-        var annotation = node.getAnnotationByName(annotationName).get();
-        for(MemberValuePair pair : annotation.asNormalAnnotationExpr().getPairs()){
-            if(pair.getName().asString().equals(memberName)){
-                return pair.getValue();
-            }
-        }
-        return null;
-    }
-
+    //TODO Make test for methods below
     public static List<ImportDeclaration> filterOutAnnotationImports(List<ImportDeclaration> importDeclarations){
         List<ImportDeclaration> nonAnnotationImportDeclarations = new ArrayList<>();
         for(ImportDeclaration importDeclaration : importDeclarations){
@@ -107,6 +112,7 @@ public class AnnotationUtils {
         }
         return allAnnotatedNodes;
     }
+
     public static List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
         List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
         file.findAll(BodyDeclaration.class,

@@ -187,7 +187,7 @@ public class Parser {
     }
 
     public void modifyAnnotatedNode(CompilationUnit file, BodyDeclaration<?> annotatedNode){
-        var copyValueExpression = AnnotationUtils.getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
+        var copyValueExpression = AnnotationUtils.getAnnotationMemberValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_COPY_NAME);
         var copyValue = CopyOption.getCopy(copyValueExpression.asFieldAccessExpr().getNameAsString());
         switch (copyValue){
             case REPLACE_SOLUTION -> {
@@ -195,12 +195,12 @@ public class Parser {
                 // TODO handle rest of cases
                 // TODO create test
                 codeReplacementImports.forEach(file::addImport);
-                var id = AnnotationUtils.getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME,  AnnotationNames.IMPLEMENT_ID_NAME);
+                var id = AnnotationUtils.getAnnotationMemberValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME,  AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceSolutionInMethodBody(NodeUtils.castToCallableDeclaration(annotatedNode), id.asStringLiteralExpr().asString());
             }
             case REPLACE_BODY -> {
                 codeReplacementImports.forEach(file::addImport);
-                var id = AnnotationUtils.getAnnotationValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
+                var id = AnnotationUtils.getAnnotationMemberValue(annotatedNode, AnnotationNames.IMPLEMENT_NAME, AnnotationNames.IMPLEMENT_ID_NAME);
                 replaceBody((MethodDeclaration) annotatedNode, id.asStringLiteralExpr().asString());
             }
             case REMOVE_EVERYTHING -> {

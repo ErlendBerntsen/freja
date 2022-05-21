@@ -30,7 +30,7 @@ public class ReplacementBuilder {
     }
 
     private String findId(){
-        var idExpression = AnnotationUtils.getAnnotationValue(annotatedNode,
+        var idExpression = AnnotationUtils.getAnnotationMemberValue(annotatedNode,
                 AnnotationNames.REPLACEMENT_CODE_NAME,
                 AnnotationNames.REPLACEMENT_CODE_ID_NAME);
         return idExpression.asStringLiteralExpr().asString();

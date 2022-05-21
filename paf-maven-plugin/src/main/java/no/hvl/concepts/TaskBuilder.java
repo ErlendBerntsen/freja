@@ -10,6 +10,8 @@ import no.hvl.utilities.NodeUtils;
 import java.util.Map;
 import java.util.Optional;
 
+import static no.hvl.utilities.AnnotationUtils.*;
+
 
 public class TaskBuilder {
     private BodyDeclaration<?> nodeAnnotatedWithImplement;
@@ -26,8 +28,8 @@ public class TaskBuilder {
     }
 
     public AbstractTask build(){
-        copyOption = AnnotationUtils.getCopyOptionValueInImplementAnnotation(nodeAnnotatedWithImplement);
-        int[] exerciseNumber = AnnotationUtils.getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
+        copyOption = getCopyOptionValueInImplementAnnotation(nodeAnnotatedWithImplement);
+        int[] exerciseNumber = getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
         fullNumberAsString = getFullNumberAsString(exerciseNumber);
         switch (copyOption){
             case REPLACE_SOLUTION -> {
@@ -47,14 +49,14 @@ public class TaskBuilder {
     }
 
     private String getReplacementId(){
-        Optional<String> replacementId = AnnotationUtils.getReplacementIdInImplementAnnotation(nodeAnnotatedWithImplement);
-        if(replacementId.isEmpty()){
+        try{
+          return getReplacementIdInImplementAnnotation(nodeAnnotatedWithImplement);
+        }catch (IllegalArgumentException e){
             throw new IllegalStateException(
                     String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-                    AnnotationNames.IMPLEMENT_ID_NAME, AnnotationNames.IMPLEMENT_NAME,
-                    AnnotationNames.IMPLEMENT_COPY_NAME, copyOption.toString()));
+                            AnnotationNames.IMPLEMENT_ID_NAME, AnnotationNames.IMPLEMENT_NAME,
+                            AnnotationNames.IMPLEMENT_COPY_NAME, copyOption.toString()));
         }
-        return replacementId.get();
     }
 
     private String getFullNumberAsString(int[] exerciseNumber){

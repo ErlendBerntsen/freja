@@ -34,11 +34,24 @@ public class TestUtils {
 
     private static Node findAnnotationWithTestId
             (List<SingleMemberAnnotationExpr> singleMemberAnnotationExprs, int targetId) {
+        boolean found = false;
+        SingleMemberAnnotationExpr singleMemberAnnotationExprWithTargetId = null;
         for(SingleMemberAnnotationExpr singleMemberAnnotationExpr : singleMemberAnnotationExprs){
             if(isTestIdWithEqualId(singleMemberAnnotationExpr, targetId)){
-                return getParentNode(singleMemberAnnotationExpr, targetId);
+                if(found){
+                    throw new IllegalStateException(
+                            String.format("Found two different \"%s\" annotations with the id \"%d\":%n%s%n%n%s",
+                            TEST_ID_ANNOTATION_NAME, targetId,
+                                    getParentNode(singleMemberAnnotationExprWithTargetId, targetId),
+                                    getParentNode(singleMemberAnnotationExpr, targetId)));
+                }
+                found = true;
+                singleMemberAnnotationExprWithTargetId = singleMemberAnnotationExpr;
             }
 
+        }
+        if(found){
+            return getParentNode(singleMemberAnnotationExprWithTargetId, targetId);
         }
         throw new IllegalStateException(String.format("Cant find any %s annotation with the value: %s",
                 TEST_ID_ANNOTATION_NAME, targetId));

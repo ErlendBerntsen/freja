@@ -51,7 +51,7 @@ public class ReplacementBuilder {
 
     private List<ImportDeclaration> findRequiredImports(){
         List<ImportDeclaration> importDeclarations = replacement.getFile().getImports();
-        return AnnotationUtils.filterOutAnnotationImports(importDeclarations);
+        return AnnotationUtils.getNewListWithoutAnnotationImports(importDeclarations);
     }
 
 }

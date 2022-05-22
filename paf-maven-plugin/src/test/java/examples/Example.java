@@ -1,8 +1,6 @@
 package examples;
 
-import no.hvl.annotations.CopyOption;
-import no.hvl.annotations.Implement;
-import no.hvl.annotations.SolutionStart;
+import no.hvl.annotations.*;
 import testUtils.TestId;
 
 @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)

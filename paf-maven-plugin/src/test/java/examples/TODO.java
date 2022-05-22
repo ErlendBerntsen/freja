@@ -1,10 +1,12 @@
 package examples;
 
+import static java.lang.Thread.currentThread;
+
 public class TODO {
 
     public static String method() {
 
-        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+        String methodName = currentThread().getStackTrace()[2].getMethodName();
 
         return "Metoden " + methodName + " er ikke implementert";
     }

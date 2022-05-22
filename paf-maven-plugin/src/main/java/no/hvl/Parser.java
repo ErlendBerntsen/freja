@@ -180,7 +180,7 @@ public class Parser {
     }
 
     public CompilationUnit modifyAllAnnotatedNodesInFile(CompilationUnit file, String annotationName){
-        var annotatedNodes = AnnotationUtils.getAnnotatedNodesInFile(file, annotationName);
+        var annotatedNodes = AnnotationUtils.getNodesInFileAnnotatedWith(file, annotationName);
         annotatedNodes.forEach(annotatedNode -> modifyAnnotatedNode(file, annotatedNode));
         AnnotationUtils.removeAnnotationImportsFromFile(file);
         return file;
@@ -207,12 +207,12 @@ public class Parser {
                 annotatedNode.remove();
             }
         }
-        AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
+        AnnotationUtils.removeAnnotationTypeFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
     }
 
     public List<CompilationUnit> createStartCodeProject(){
         var files = getCompilationUnitCopies();
-        var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        var nodesToRemove = AnnotationUtils.getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
         fileNamesToRemove = NodeUtils.removeNodesFromFiles(files, nodesToRemove);
         return files.stream()
                 .map(cu -> modifyAllAnnotatedNodesInFile(cu, AnnotationNames.IMPLEMENT_NAME))
@@ -222,11 +222,11 @@ public class Parser {
 
     public List<CompilationUnit> createSolutionProject(){
         var files = getCompilationUnitCopies();
-        var nodesToRemove = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+        var nodesToRemove = AnnotationUtils.getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
         fileNamesToRemove = NodeUtils.removeNodesFromFiles(files, nodesToRemove);
-        var annotatedNodes = AnnotationUtils.getAllAnnotatedNodesInFiles(files, AnnotationNames.IMPLEMENT_NAME);
+        var annotatedNodes = AnnotationUtils.getAllNodesInFilesAnnotatedWith(files, AnnotationNames.IMPLEMENT_NAME);
         for(var annotatedNode : annotatedNodes){
-            AnnotationUtils.removeAnnotationFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
+            AnnotationUtils.removeAnnotationTypeFromNode(annotatedNode, AnnotationNames.IMPLEMENT_NAME);
         }
         for(CompilationUnit file : files){
             AnnotationUtils.removeAnnotationImportsFromFile(file);

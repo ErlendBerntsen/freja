@@ -11,7 +11,6 @@ import no.hvl.utilities.AnnotationUtils;
 import no.hvl.utilities.NodeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +65,7 @@ public class Generator {
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
         //TODO Remember that ProjectWriter need to know what file names to remove
         List<BodyDeclaration<?>> nodesAnnotatedWithRemove = AnnotationUtils
-                .getAllAnnotatedNodesInFiles(files, AnnotationNames.REMOVE_NAME);
+                .getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
         NodeUtils.removeNodesFromFiles(files, nodesAnnotatedWithRemove);
     }
 
@@ -83,7 +82,7 @@ public class Generator {
         }else{
             newTaskNode = task.createStartCode();
         }
-        AnnotationUtils.removeAnnotationFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
+        AnnotationUtils.removeAnnotationTypeFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
         return newTaskNode;
     }
 

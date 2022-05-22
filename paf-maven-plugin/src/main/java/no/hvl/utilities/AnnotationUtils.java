@@ -17,13 +17,11 @@ import java.util.Optional;
 import static no.hvl.utilities.AnnotationNames.*;
 
 public class AnnotationUtils {
+    public static final String ANNOTATIONS_PACKAGE_NAME = "no.hvl.annotations";
+
 
     private AnnotationUtils(){
-        throw new IllegalStateException("This is a utility class. It is not meant to be instantiated");
-    }
-
-    public static  Name getAnnotationsPackageName() {
-        return new Name(new Name("no.hvl.annotations"), "empty");
+        throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
     }
 
     public static CopyOption getCopyOptionValueInImplementAnnotation(NodeWithAnnotations<?> node){
@@ -77,8 +75,14 @@ public class AnnotationUtils {
         throw new MissingAnnotationException(IMPLEMENT_ID_NAME);
     }
 
-    //TODO Make test for methods below
-    public static List<ImportDeclaration> filterOutAnnotationImports(List<ImportDeclaration> importDeclarations){
+    public static void removeAnnotationImportsFromFile(CompilationUnit file){
+        NodeList<ImportDeclaration> nonAnnotationImports = new NodeList<>();
+        nonAnnotationImports.addAll(getNewListWithoutAnnotationImports(file.getImports()));
+        file.setImports(nonAnnotationImports);
+    }
+
+    public static List<ImportDeclaration> getNewListWithoutAnnotationImports
+            (List<ImportDeclaration> importDeclarations){
         List<ImportDeclaration> nonAnnotationImportDeclarations = new ArrayList<>();
         for(ImportDeclaration importDeclaration : importDeclarations){
             if(isNonAnnotationImportDeclaration(importDeclaration)){
@@ -88,32 +92,34 @@ public class AnnotationUtils {
         return nonAnnotationImportDeclarations;
     }
 
-    private static boolean isNonAnnotationImportDeclaration(ImportDeclaration importDeclaration){
-        var importQualifier = getImportQualifierAsString(importDeclaration);
-        var annotationPackageQualifier = getAnnotationsPackageName().getQualifier().get().asString();
-        return !annotationPackageQualifier.equals(importQualifier);
+    public static boolean isNonAnnotationImportDeclaration(ImportDeclaration importDeclaration){
+        String importQualifier = getImportQualifierAsString(importDeclaration);
+        return !ANNOTATIONS_PACKAGE_NAME.equals(importQualifier);
     }
 
     private static String getImportQualifierAsString(ImportDeclaration importDeclaration){
         if (importDeclaration.isAsterisk()){
             return importDeclaration.getNameAsString();
         }
-        var importName = importDeclaration.getName();
-        if(importName.getQualifier().isPresent()){
-            return importName.getQualifier().get().asString();
+        Name importName = importDeclaration.getName();
+        Optional<Name> importQualifier = importName.getQualifier();
+        if(importQualifier.isPresent()){
+            return importQualifier.get().asString();
         }
-        throw new IllegalStateException("Import declaration " + importDeclaration.getNameAsString() + " has an unrecognizable format.");
+        throw new IllegalStateException(String.format
+                ("Import declaration %s has an unrecognizable format", importDeclaration.getNameAsString()));
     }
 
-    public static List<BodyDeclaration<?>> getAllAnnotatedNodesInFiles(List<CompilationUnit> files, String annotationName){
+    public static List<BodyDeclaration<?>> getAllNodesInFilesAnnotatedWith
+            (List<CompilationUnit> files, String annotationName){
         List<BodyDeclaration<?>> allAnnotatedNodes = new ArrayList<>();
         for(CompilationUnit file : files){
-            allAnnotatedNodes.addAll(getAnnotatedNodesInFile(file, annotationName));
+            allAnnotatedNodes.addAll(getNodesInFileAnnotatedWith(file, annotationName));
         }
         return allAnnotatedNodes;
     }
 
-    public static List<BodyDeclaration<?>> getAnnotatedNodesInFile(CompilationUnit file, String annotationName){
+    public static List<BodyDeclaration<?>> getNodesInFileAnnotatedWith(CompilationUnit file, String annotationName){
         List<BodyDeclaration<?>> annotatedNodes = new ArrayList<>();
         file.findAll(BodyDeclaration.class,
                 bodyDeclaration -> bodyDeclaration.getAnnotationByName(annotationName).isPresent())
@@ -121,12 +127,13 @@ public class AnnotationUtils {
         return annotatedNodes;
     }
 
-    public static void removeAnnotationsFromFile(CompilationUnit file, String annotationName){
-        var annotatedNodes = AnnotationUtils.getAnnotatedNodesInFile(file, annotationName);
-        annotatedNodes.forEach(node -> file.replace(node, (Node) removeAnnotationFromNode(node, annotationName)));
+    public static void removeAnnotationTypeFromFile(CompilationUnit file, String annotationName){
+        var annotatedNodes = getNodesInFileAnnotatedWith(file, annotationName);
+        annotatedNodes.forEach(node -> file.replace(node, (Node) removeAnnotationTypeFromNode(node, annotationName)));
     }
 
-    public static NodeWithAnnotations<?> removeAnnotationFromNode(NodeWithAnnotations<?> node, String annotationName){
+    public static NodeWithAnnotations<?> removeAnnotationTypeFromNode
+            (NodeWithAnnotations<?> node, String annotationName){
         NodeList<AnnotationExpr> annotationsToKeep = new NodeList<>();
         for(var annotation : node.getAnnotations()){
             if(annotation.getName().asString().equals(annotationName)){
@@ -137,23 +144,5 @@ public class AnnotationUtils {
         node.setAnnotations(annotationsToKeep);
         return node;
     }
-
-    public static void removeAnnotationImportsFromFile(CompilationUnit file){
-        List<ImportDeclaration> importDeclarations = List.copyOf(file.getImports());
-        importDeclarations.forEach(importDeclaration -> {
-            if(importDeclaration.isAsterisk() &&
-                    importDeclaration.getNameAsString()
-                            .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
-                importDeclaration.remove();
-            }
-            if(importDeclaration.getName().getQualifier().isPresent()
-                    && importDeclaration.getName().getQualifier().get().asString()
-                    .equals(AnnotationUtils.getAnnotationsPackageName().getQualifier().get().asString())){
-                importDeclaration.remove();
-
-            }
-        });
-    }
-
 
 }

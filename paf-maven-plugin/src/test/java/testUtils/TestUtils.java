@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class TestUtils {
 
-    public static final String TestIdAnnotationName = "TestId";
+    public static final String TEST_ID_ANNOTATION_NAME = "TestId";
 
     private TestUtils(){
         throw new IllegalStateException("This is a utility class. It is not meant to be instantiated");
@@ -32,7 +32,8 @@ public class TestUtils {
         return singleMemberAnnotationExprs;
     }
 
-    private static Node findAnnotationWithTestId(List<SingleMemberAnnotationExpr> singleMemberAnnotationExprs, int targetId) {
+    private static Node findAnnotationWithTestId
+            (List<SingleMemberAnnotationExpr> singleMemberAnnotationExprs, int targetId) {
         for(SingleMemberAnnotationExpr singleMemberAnnotationExpr : singleMemberAnnotationExprs){
             if(isTestIdWithEqualId(singleMemberAnnotationExpr, targetId)){
                 return getParentNode(singleMemberAnnotationExpr, targetId);
@@ -40,11 +41,11 @@ public class TestUtils {
 
         }
         throw new IllegalStateException(String.format("Cant find any %s annotation with the value: %s",
-                TestIdAnnotationName, targetId));
+                TEST_ID_ANNOTATION_NAME, targetId));
     }
 
     private static boolean isTestIdWithEqualId (SingleMemberAnnotationExpr singleMemberAnnotationExpr, int targetId){
-        if(TestIdAnnotationName.equals(singleMemberAnnotationExpr.getName().asString())){
+        if(TEST_ID_ANNOTATION_NAME.equals(singleMemberAnnotationExpr.getName().asString())){
             int id = singleMemberAnnotationExpr.getMemberValue().asIntegerLiteralExpr().asNumber().intValue();
             return id == targetId;
         }
@@ -57,7 +58,7 @@ public class TestUtils {
             return parentNode.get();
         }else{
             throw new IllegalStateException(String.format("Cant find the parent node of " +
-                    "%s annotation with the value: %d", TestIdAnnotationName, targetId));
+                    "%s annotation with the value: %d", TEST_ID_ANNOTATION_NAME, targetId));
         }
 
     }

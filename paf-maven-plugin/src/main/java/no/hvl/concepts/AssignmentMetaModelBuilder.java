@@ -41,7 +41,7 @@ public class AssignmentMetaModelBuilder {
         List<Replacement> replacements = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
             var nodesAnnotatedWithReplacementCode =
-                    getAnnotatedNodesInFile(file, REPLACEMENT_CODE_NAME);
+                    getNodesInFileAnnotatedWith(file, REPLACEMENT_CODE_NAME);
             replacements.addAll(createReplacements(nodesAnnotatedWithReplacementCode));
         }
         createReplacementMap(replacements);
@@ -72,7 +72,7 @@ public class AssignmentMetaModelBuilder {
         List<BodyDeclaration<?>> nodesAnnotatedWithImplement = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
             nodesAnnotatedWithImplement.addAll(
-                    getAnnotatedNodesInFile(file, IMPLEMENT_NAME));
+                    getNodesInFileAnnotatedWith(file, IMPLEMENT_NAME));
         }
         sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
         return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));

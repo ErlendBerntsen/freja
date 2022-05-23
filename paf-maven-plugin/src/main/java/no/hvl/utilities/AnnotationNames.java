@@ -1,6 +1,11 @@
 package no.hvl.utilities;
 
 public final class AnnotationNames {
+
+    private AnnotationNames(){
+        throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
+    }
+
     public static final String IMPLEMENT_NAME = "Implement";
     public static final String IMPLEMENT_NUMBER_NAME = "number";
     public static final String IMPLEMENT_ID_NAME = "replacementId";

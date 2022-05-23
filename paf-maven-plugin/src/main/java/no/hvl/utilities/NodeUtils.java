@@ -21,16 +21,17 @@ public class NodeUtils {
     public NodeUtils() {
     }
 
-    public static Node findNodeInFiles(List<CompilationUnit> files, BodyDeclaration<?> node) {
+    public static BodyDeclaration<?> findBodyDeclarationCopyInFiles
+            (List<CompilationUnit> files, BodyDeclaration<?> targetNode) {
         for(CompilationUnit file : files){
-            List<Node> fileNodes = file.findAll(Node.class);
-            for(Node nodeCopy : fileNodes){
-                if(nodeCopy.equals(node)){
+            List<BodyDeclaration> bodyDeclarations = file.findAll(BodyDeclaration.class);
+            for(BodyDeclaration<?> nodeCopy : bodyDeclarations){
+                if(nodeCopy.equals(targetNode)){
                     return nodeCopy;
                 }
             }
         }
-        throw new IllegalStateException("Could not find copy of node");
+        throw new IllegalStateException(String.format("Could not find copy of node: %n%s", targetNode));
     }
 
     public NodeList<Node> removeCommentsFromNodes(NodeList<?> nodes){

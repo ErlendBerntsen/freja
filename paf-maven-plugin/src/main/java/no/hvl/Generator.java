@@ -51,7 +51,7 @@ public class Generator {
     private void modifyJavaFiles(List<CompilationUnit> files, List<AbstractTask> tasks, boolean isSolutionCode){
         removePafInformation(files);
         for(AbstractTask task : tasks){
-            Node oldTaskNode = NodeUtils.findNodeInFiles(files, task.getNode());
+            Node oldTaskNode = NodeUtils.findBodyDeclarationCopyInFiles(files, task.getNode());
             BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task);
             updateTaskNode(oldTaskNode, newTaskNode);
         }

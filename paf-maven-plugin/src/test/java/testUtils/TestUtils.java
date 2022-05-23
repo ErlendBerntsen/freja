@@ -2,6 +2,7 @@ package testUtils;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 
@@ -18,9 +19,9 @@ public class TestUtils {
         throw new IllegalStateException("This is a utility class. It is not meant to be instantiated");
     }
 
-    public static NodeWithAnnotations<?> getNodeWithId(List<CompilationUnit> files, int targetId) {
+    public static BodyDeclaration<?> getNodeWithId(List<CompilationUnit> files, int targetId) {
         List<SingleMemberAnnotationExpr> singleMemberAnnotationExprs = getAllSingleMemberAnnotationExprFromFiles(files);
-        return (NodeWithAnnotations<?>) findAnnotationWithTestId(singleMemberAnnotationExprs, targetId);
+        return (BodyDeclaration<?>) findAnnotationWithTestId(singleMemberAnnotationExprs, targetId);
     }
 
     private static List<SingleMemberAnnotationExpr> getAllSingleMemberAnnotationExprFromFiles(

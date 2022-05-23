@@ -30,24 +30,4 @@ public class Example {
         str = "Hello World";
         return str;
     }
-
-
-//    @Implement(copy = Copy.REMOVE_SOLUTION)
-//    public String helloWorld2(){
-//        String str;
-//        solution: {
-//            str = "Hello World";
-//        }
-//        return str;
-//    }
-
-//    @Implement(copy = Copy.REMOVE_SOLUTION)
-//    public String helloWorld3(){
-//        String str;
-//        //SOLUTION_START
-//        str = "Hello World";
-//        //SOLUTION_END
-//        return str;
-//    }
-//
 }

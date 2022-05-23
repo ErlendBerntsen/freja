@@ -1,7 +1,10 @@
-package no.hvl.concepts;
+package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.Exercise;
+import no.hvl.concepts.Replacement;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 

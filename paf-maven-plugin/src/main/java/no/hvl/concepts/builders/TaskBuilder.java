@@ -1,24 +1,25 @@
-package no.hvl.concepts;
+package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
+import no.hvl.concepts.*;
+import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.ReplaceSolutionTask;
 import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.AnnotationUtils;
 import no.hvl.utilities.NodeUtils;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static no.hvl.utilities.AnnotationUtils.*;
 
 
 public class TaskBuilder {
-    private BodyDeclaration<?> nodeAnnotatedWithImplement;
-    private Exercise parentExercise;
+    private final BodyDeclaration<?> nodeAnnotatedWithImplement;
+    private final Exercise parentExercise;
     private String fullNumberAsString;
     private CopyOption copyOption;
-    private Map<String, Replacement> replacementMap;
+    private final Map<String, Replacement> replacementMap;
 
     public TaskBuilder(BodyDeclaration<?> nodeAnnotatedWithImplement, Exercise parentExercise,
                        Map<String, Replacement> replacementMap) {

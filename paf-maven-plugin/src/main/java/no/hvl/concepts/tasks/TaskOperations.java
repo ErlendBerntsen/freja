@@ -1,4 +1,4 @@
-package no.hvl.concepts;
+package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 

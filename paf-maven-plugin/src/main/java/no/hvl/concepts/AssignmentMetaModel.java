@@ -3,6 +3,7 @@ package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import no.hvl.concepts.tasks.AbstractTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;

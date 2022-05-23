@@ -1,8 +1,9 @@
-package no.hvl.concepts;
+package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
+import no.hvl.concepts.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
+import no.hvl.concepts.tasks.AbstractTask;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Exercise {

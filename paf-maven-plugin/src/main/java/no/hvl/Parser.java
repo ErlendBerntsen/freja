@@ -13,6 +13,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
+import no.hvl.concepts.builders.AssignmentMetaModelBuilder;
 import no.hvl.exceptions.NoSourceDirectoryException;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;

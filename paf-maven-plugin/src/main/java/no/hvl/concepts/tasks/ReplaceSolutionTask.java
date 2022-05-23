@@ -1,11 +1,14 @@
-package no.hvl.concepts;
+package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
+import no.hvl.concepts.Replacement;
+import no.hvl.concepts.Solution;
+import no.hvl.concepts.tasks.AbstractTask;
 import no.hvl.utilities.NodeUtils;
 
-public class ReplaceSolutionTask extends AbstractTask{
+public class ReplaceSolutionTask extends AbstractTask {
     public static final CopyOption copyOption = CopyOption.REPLACE_SOLUTION;
     private Solution solution;
     private Replacement replacement;

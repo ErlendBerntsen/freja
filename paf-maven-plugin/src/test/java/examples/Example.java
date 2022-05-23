@@ -53,4 +53,31 @@ public class Example {
         x = "blabla";
         return x;
     }
+
+    @TestId(7)
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    public String wrongOrder() {
+        String x;
+        SolutionEnd e;
+        x = "blablabla";
+        SolutionStart s;
+        return x;
+    }
+
+    @TestId(8)
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    public String noStartStatement() {
+        String x;
+        SolutionEnd e;
+        x = "blabla";
+        return x;
+    }
+
+    @TestId(9)
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    public void startStatementIsLastStatement() {
+        String x;
+        SolutionStart s;
+    }
+
 }

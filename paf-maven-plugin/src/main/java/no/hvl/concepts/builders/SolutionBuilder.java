@@ -1,23 +1,25 @@
-package no.hvl.concepts;
+package no.hvl.concepts.builders;
 
 
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.concepts.Solution;
 import no.hvl.utilities.NodeUtils;
 
 import java.util.List;
 
+import static no.hvl.utilities.NodeUtils.*;
+
 public class SolutionBuilder {
 
-    private BlockStmt body;
-    private Solution solution;
+    private final BlockStmt body;
 
     public SolutionBuilder(BlockStmt body){
         this.body = body;
     }
 
     public Solution build(){
-        solution = new Solution();
+        Solution solution = new Solution();
         solution.setStatements(findSolutionStatements());
         return solution;
     }
@@ -34,8 +36,8 @@ public class SolutionBuilder {
     private Integer findStartStatementIndex(){
         var statements = body.getStatements();
         for(int i = 0; i < statements.size(); i++){
-            if(NodeUtils.isStartStatement(statements.get(i))){
-                return i;
+            if(isStartStatement(statements.get(i))){
+                return i + 1;
             }
         }
         throw new IllegalStateException("Cant build solution without a SolutionStart statement");
@@ -44,7 +46,7 @@ public class SolutionBuilder {
     private Integer findEndStatementIndex(){
         var statements = body.getStatements();
         for(int i = 0; i < statements.size(); i++){
-            if(NodeUtils.isEndStatement(statements.get(i))){
+            if(isEndStatement(statements.get(i))){
                 return i;
             }
         }

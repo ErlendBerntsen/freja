@@ -1,10 +1,11 @@
-package no.hvl.concepts;
+package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import no.hvl.concepts.Replacement;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 import no.hvl.utilities.NodeUtils;

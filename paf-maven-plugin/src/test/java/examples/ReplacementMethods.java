@@ -1,9 +1,11 @@
 package examples;
 
 import no.hvl.annotations.ReplacementCode;
+import testUtils.TestId;
 
 public class ReplacementMethods {
 
+    @TestId(10)
     @ReplacementCode(id = "1")
     public void throwExceptionForUnImplementedConstructor(){
         throw new UnsupportedOperationException(TODO.construtor("GPSPoint"));

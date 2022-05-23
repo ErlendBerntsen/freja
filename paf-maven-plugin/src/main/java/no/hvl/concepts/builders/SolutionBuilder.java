@@ -4,10 +4,10 @@ package no.hvl.concepts.builders;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Solution;
-import no.hvl.utilities.NodeUtils;
 
 import java.util.List;
 
+import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.NodeUtils.*;
 
 public class SolutionBuilder {
@@ -28,7 +28,8 @@ public class SolutionBuilder {
         Integer startStatementIndex = findStartStatementIndex();
         Integer endStatementIndex = findEndStatementIndex();
         if(endStatementIndex <= startStatementIndex){
-            throw new IllegalStateException("SolutionEnd statement must be after SolutionStart statement.");
+            throw new IllegalStateException(String.format("%s statement must be after %s statement.",
+                    SOLUTION_END_NAME, SOLUTION_START_NAME));
         }
         return body.getStatements().subList(startStatementIndex, endStatementIndex);
     }
@@ -40,7 +41,8 @@ public class SolutionBuilder {
                 return i + 1;
             }
         }
-        throw new IllegalStateException("Cant build solution without a SolutionStart statement");
+        throw new IllegalStateException(String.format("Cant build solution without a %s statement",
+                SOLUTION_START_NAME));
     }
 
     private Integer findEndStatementIndex(){

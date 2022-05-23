@@ -3,18 +3,19 @@ package no.hvl.concepts.builders;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.concepts.Replacement;
-import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.AnnotationUtils;
-import no.hvl.utilities.NodeUtils;
 
 import java.util.List;
 
+import static no.hvl.utilities.AnnotationNames.*;
+import static no.hvl.utilities.AnnotationUtils.*;
+import static no.hvl.utilities.NodeUtils.*;
+
 public class ReplacementBuilder {
 
-    private BodyDeclaration<?> annotatedNode;
+    private final BodyDeclaration<?> annotatedNode;
     private Replacement replacement;
 
     public ReplacementBuilder (BodyDeclaration<?> annotatedNode){
@@ -31,28 +32,29 @@ public class ReplacementBuilder {
     }
 
     private String findId(){
-        var idExpression = AnnotationUtils.getAnnotationMemberValue(annotatedNode,
-                AnnotationNames.REPLACEMENT_CODE_NAME,
-                AnnotationNames.REPLACEMENT_CODE_ID_NAME);
+        Expression idExpression = getAnnotationMemberValue(annotatedNode,
+                REPLACEMENT_CODE_NAME,
+                REPLACEMENT_CODE_ID_NAME);
         return idExpression.asStringLiteralExpr().asString();
     }
 
     private BlockStmt findReplacementCode(){
-        if(NodeUtils.nodeHasBlockStmt(annotatedNode)){
-            var nodeWithBlockStmt = (NodeWithOptionalBlockStmt<?>) annotatedNode;
-            return nodeWithBlockStmt.getBody().get();
+        if(nodeHasBlockStmt(annotatedNode)){
+            return getBlockStmtFromBodyDeclaration(annotatedNode);
         }
-        throw new IllegalStateException("Types annotated with @ReplacementCode must have a body.");
+        throw new IllegalArgumentException(
+                String.format("Types annotated with @%s must have a body.", REPLACEMENT_CODE_NAME));
     }
 
     private CompilationUnit findFile(){
         return annotatedNode.findCompilationUnit()
-                .orElseThrow(() -> new IllegalStateException("ReplacementCode must be inside a file."));
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("Types annotated with @%s must be inside a file.", REPLACEMENT_CODE_NAME)));
     }
 
     private List<ImportDeclaration> findRequiredImports(){
         List<ImportDeclaration> importDeclarations = replacement.getFile().getImports();
-        return AnnotationUtils.getNewListWithoutAnnotationImports(importDeclarations);
+        return getNewListWithoutAnnotationImports(importDeclarations);
     }
 
 }

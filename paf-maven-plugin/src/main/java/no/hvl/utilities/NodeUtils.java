@@ -34,13 +34,13 @@ public class NodeUtils {
         throw new IllegalStateException(String.format("Could not find copy of node: %n%s", targetNode));
     }
 
-    public NodeList<Node> removeCommentsFromNodes(NodeList<?> nodes){
+    public static NodeList<Node> getNodesWithoutComments(NodeList<?> nodes){
         NodeList<Node> nodesWithoutComments = new NodeList<>();
         nodes.forEach(node -> nodesWithoutComments.add(node.clone().removeComment()));
         return nodesWithoutComments;
     }
 
-    public static boolean isNodeWithBlockStmt(Node node){
+    public static boolean nodeHasBlockStmt(Node node){
         if(node instanceof NodeWithBlockStmt){
             return true;
         }
@@ -53,15 +53,19 @@ public class NodeUtils {
     }
 
     public static BlockStmt getBlockStmtFromBodyDeclaration(BodyDeclaration<?> bodyDeclaration){
-        if(isNodeWithBlockStmt(bodyDeclaration)){
+        if(nodeHasBlockStmt(bodyDeclaration)){
             if(bodyDeclaration instanceof  NodeWithBlockStmt){
                 return ((NodeWithBlockStmt<?>) bodyDeclaration).getBody();
             }
             if(bodyDeclaration instanceof  NodeWithOptionalBlockStmt){
-                return ((NodeWithOptionalBlockStmt<?>)bodyDeclaration).getBody().get();
+                var body = ((NodeWithOptionalBlockStmt<?>) bodyDeclaration).getBody();
+                if(body.isPresent()){
+                    return body.get();
+                }
             }
         }
-        throw new IllegalArgumentException("The body declaration does not have a block statement.");
+        throw new IllegalArgumentException(
+                String.format("The body declaration does not have a block statement:%n%s", bodyDeclaration));
     }
 
     public static boolean isStartStatement(Statement statement){
@@ -72,8 +76,9 @@ public class NodeUtils {
         return statementHasVariableDeclarationTypeName(statement, AnnotationNames.SOLUTION_END_NAME);
     }
 
-    public static boolean statementHasVariableDeclarationTypeName(Statement statement, String variableDeclarationTypeName){
-        var variableDeclarationExpr =  getStatementAsVariableDeclarationExpr(statement);
+    private static boolean statementHasVariableDeclarationTypeName
+            (Statement statement, String variableDeclarationTypeName){
+        Optional<VariableDeclarationExpr> variableDeclarationExpr =  getStatementAsVariableDeclarationExpr(statement);
         if(variableDeclarationExpr.isPresent()){
             String actualVariableDeclarationTypeName = variableDeclarationExpr.get().getElementType().asString();
             return actualVariableDeclarationTypeName.equals(variableDeclarationTypeName);
@@ -81,7 +86,7 @@ public class NodeUtils {
         return false;
     }
 
-    public static Optional<VariableDeclarationExpr> getStatementAsVariableDeclarationExpr(Statement statement){
+    private static Optional<VariableDeclarationExpr> getStatementAsVariableDeclarationExpr(Statement statement){
         if(!statement.isExpressionStmt()){
             return Optional.empty();
         }
@@ -91,15 +96,6 @@ public class NodeUtils {
             return Optional.empty();
         }
         return Optional.of(expressionStmt.getExpression().asVariableDeclarationExpr());
-    }
-
-    public static boolean blockStmtHasSolution(BlockStmt blockStmt){
-        for(Statement statement : blockStmt.getStatements()){
-            if(isStartStatement(statement)){
-                return true;
-            }
-        }
-        return false;
     }
 
     public static void removeSolutionStartAndEndStatementsFromNodes(List<BodyDeclaration<?>> annotatedNodes) {
@@ -113,7 +109,51 @@ public class NodeUtils {
         statements.forEach(Node::remove);
     }
 
-    public static HashSet<String> removeNodesFromFiles(List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
+
+    public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
+                                         List<Statement>  replacementStatements){
+        if(statementsToBeReplaced.isEmpty()){
+            throw new IllegalArgumentException("The list of statements to be replaced can not be empty.");
+        }
+        List<Statement> codeBlockStatements = codeBlock.getStatements();
+        Statement firstStatementToBePlaced = statementsToBeReplaced.get(0);
+        Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, firstStatementToBePlaced);
+        if(startIndex.isPresent()){
+            NodeList<Statement> newCodeBlock = createNewCodeBlock(startIndex.get(), codeBlockStatements,
+                    statementsToBeReplaced, replacementStatements);
+            codeBlock.setStatements(newCodeBlock);
+        }else{
+            throw new IllegalArgumentException(
+                    String.format("Can not find the statement:%n%s%n%n in the code block:%n%s",
+                            firstStatementToBePlaced, codeBlock));
+        }
+    }
+
+    private static NodeList<Statement> createNewCodeBlock(Integer startIndexOfStatementsToBeReplaced,
+                                                          List<Statement> codeBlockStatements,
+                                                          List<Statement> statementsToBeReplaced,
+                                                          List<Statement> replacementStatements) {
+        List<Statement> newCodeBlock = new ArrayList<>();
+        newCodeBlock.addAll(codeBlockStatements.subList(0, startIndexOfStatementsToBeReplaced));
+        newCodeBlock.addAll(replacementStatements);
+        int endIndexOfStatementsToBeReplaced = startIndexOfStatementsToBeReplaced + statementsToBeReplaced.size();
+        newCodeBlock.addAll(codeBlockStatements.subList(endIndexOfStatementsToBeReplaced,
+                codeBlockStatements.size()));
+        return new NodeList<>(newCodeBlock);
+    }
+
+    private static Optional<Integer> findIndexOfStatement(List<Statement> statements, Statement statement) {
+        for(int i = 0; i < statements.size(); i++){
+            if(statements.get(i).equals(statement)){
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
+    }
+
+    //TODO remove methods below?
+    public static HashSet<String> removeNodesFromFiles
+            (List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
         HashSet<String> fileNamesToRemove = new HashSet<>();
         nodesToRemove.forEach(node -> {
             if(node.isTypeDeclaration()){
@@ -123,9 +163,9 @@ public class NodeUtils {
                     //TODO maybe create copy instead?
                     files.remove(compilationUnitMaybe.get());
                 }
-            }else{
-                node.remove();
             }
+            node.remove();
+
         });
         return fileNamesToRemove;
     }
@@ -138,20 +178,4 @@ public class NodeUtils {
         }
     }
 
-    public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
-                                         List<Statement>  replacementStatements){
-        NodeList<Statement> codeBlockStatements = codeBlock.getStatements();
-        Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, statementsToBeReplaced.get(0));
-        startIndex.ifPresent(integer -> codeBlockStatements.addAll(integer, replacementStatements));
-        codeBlockStatements.removeAll(statementsToBeReplaced);
-    }
-
-    public static Optional<Integer> findIndexOfStatement(NodeList<Statement> statements, Statement statement) {
-        for(int i = 0; i < statements.size(); i++){
-            if(statements.get(i).equals(statement)){
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
-    }
 }

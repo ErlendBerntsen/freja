@@ -205,8 +205,8 @@ public class ParserTest {
                     if(pairs.getName().asString().equals("replacementId")){
                         String replacementId = pairs.getValue().asStringLiteralExpr().asString();
                         parser.replaceSolutionInMethodBody(annotatedNode.asMethodDeclaration(), replacementId);
-                        var methodStatements =  nodeUtils.removeCommentsFromNodes(annotatedNode.asMethodDeclaration().getBody().get().getStatements());
-                        var solutionStatements = nodeUtils.removeCommentsFromNodes(parser.getCodeReplacements().get(replacementId).getReplacementCode().getStatements());
+                        var methodStatements =  nodeUtils.getNodesWithoutComments(annotatedNode.asMethodDeclaration().getBody().get().getStatements());
+                        var solutionStatements = nodeUtils.getNodesWithoutComments(parser.getCodeReplacements().get(replacementId).getReplacementCode().getStatements());
                         assertTrue(methodStatements.containsAll(solutionStatements));
                     }
                 }

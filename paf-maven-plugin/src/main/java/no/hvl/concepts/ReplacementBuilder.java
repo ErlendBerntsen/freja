@@ -37,7 +37,7 @@ public class ReplacementBuilder {
     }
 
     private BlockStmt findReplacementCode(){
-        if(NodeUtils.isNodeWithBlockStmt(annotatedNode)){
+        if(NodeUtils.nodeHasBlockStmt(annotatedNode)){
             var nodeWithBlockStmt = (NodeWithOptionalBlockStmt<?>) annotatedNode;
             return nodeWithBlockStmt.getBody().get();
         }

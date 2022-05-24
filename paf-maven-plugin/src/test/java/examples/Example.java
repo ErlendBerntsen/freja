@@ -44,7 +44,7 @@ public class Example {
     }
 
     @TestId(6)
-    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    @Implement(number = {1,2,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "1")
     public String removeStartEndStatements() {
         String x;
         SolutionStart s;
@@ -55,7 +55,7 @@ public class Example {
     }
 
     @TestId(7)
-    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION)
     public String wrongOrder() {
         String x;
         SolutionEnd e;
@@ -78,6 +78,17 @@ public class Example {
     public void startStatementIsLastStatement() {
         String x;
         SolutionStart s;
+    }
+
+    @TestId(11)
+    @Implement(number = {1,2,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "3")
+    public String nonExistingReplacementId() {
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+        x = "blabla";
+        return x;
     }
 
 }

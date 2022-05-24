@@ -5,13 +5,13 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
-import no.hvl.concepts.tasks.AbstractTask;
-import no.hvl.utilities.NodeUtils;
+
+import static no.hvl.utilities.NodeUtils.*;
 
 public class ReplaceSolutionTask extends AbstractTask {
     public static final CopyOption copyOption = CopyOption.REPLACE_SOLUTION;
-    private Solution solution;
-    private Replacement replacement;
+    private final Solution solution;
+    private final Replacement replacement;
 
     public ReplaceSolutionTask(BodyDeclaration<?> node, String fullNumberAsString,
                                Solution solution, Replacement replacement) {
@@ -23,11 +23,18 @@ public class ReplaceSolutionTask extends AbstractTask {
     @Override
     public BodyDeclaration<?> createStartCode() {
         BodyDeclaration<?> nodeClone = getNode().clone();
-        BlockStmt codeBlockWithSolution = NodeUtils.getBlockStmtFromBodyDeclaration(nodeClone);
+        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeClone);
         BlockStmt replacementCode = replacement.getReplacementCode();
         //TODO start end comments fix
-        NodeUtils.replaceStatements(codeBlockWithSolution, solution.getStatements(), replacementCode.getStatements());
+        replaceStatements(codeBlockWithSolution, solution.getStatements(), replacementCode.getStatements());
         return nodeClone;
     }
 
+    public Solution getSolution() {
+        return solution;
+    }
+
+    public Replacement getReplacement() {
+        return replacement;
+    }
 }

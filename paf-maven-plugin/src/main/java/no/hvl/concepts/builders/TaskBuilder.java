@@ -6,12 +6,12 @@ import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.AbstractTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
-import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.NodeUtils;
 
 import java.util.Map;
 
+import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
+import static no.hvl.utilities.NodeUtils.*;
 
 
 public class TaskBuilder {
@@ -33,19 +33,23 @@ public class TaskBuilder {
         int[] exerciseNumber = getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
         fullNumberAsString = getFullNumberAsString(exerciseNumber);
         switch (copyOption){
-            case REPLACE_SOLUTION -> {
+            case REPLACE_SOLUTION :
                 return buildSolutionReplacementTask();
-            }
-            default -> throw new IllegalArgumentException(
+            default : throw new IllegalArgumentException(
                     String.format("Could not recognize copyOption: \"%s\"", copyOption.toString()));
         }
     }
 
     private ReplaceSolutionTask buildSolutionReplacementTask() {
         String replacementId = getReplacementId();
-        BlockStmt codeBlockWithSolution = NodeUtils.getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
-        Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
+        if(!replacementMap.containsKey(replacementId)){
+            throw new IllegalArgumentException(
+                    String.format("The %s \"%s\" does not match any %s of the %s annotations",
+                            IMPLEMENT_ID_NAME, replacementId, REPLACEMENT_CODE_ID_NAME, REPLACEMENT_CODE_NAME));
+        }
         Replacement replacement = replacementMap.get(replacementId);
+        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
+        Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
         return new ReplaceSolutionTask(nodeAnnotatedWithImplement, fullNumberAsString, solution, replacement);
     }
 
@@ -55,8 +59,8 @@ public class TaskBuilder {
         }catch (IllegalArgumentException e){
             throw new IllegalStateException(
                     String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-                            AnnotationNames.IMPLEMENT_ID_NAME, AnnotationNames.IMPLEMENT_NAME,
-                            AnnotationNames.IMPLEMENT_COPY_NAME, copyOption.toString()));
+                            IMPLEMENT_ID_NAME, IMPLEMENT_NAME,
+                            IMPLEMENT_COPY_NAME, copyOption.toString()));
         }
     }
 
@@ -65,7 +69,7 @@ public class TaskBuilder {
         return convertNumberArrayToString(exerciseNumber, taskNumberInParentExercise);
     }
 
-    public String convertNumberArrayToString(int[] number, int taskNumber){
+    private String convertNumberArrayToString(int[] number, int taskNumber){
         var taskNumberString = new StringBuilder();
         for(int digit : number){
             taskNumberString.append(digit);

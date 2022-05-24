@@ -30,7 +30,7 @@ public class AssignmentMetaModelBuilder {
         assignmentMetaModel.setStartCodeFiles(parser.getCompilationUnitCopies());
         assignmentMetaModel.setSolutionCodeFiles(parser.getCompilationUnitCopies());
         assignmentMetaModel.setReplacements(findReplacements());
-        assignmentMetaModel.setExercises(findExercises());
+        //assignmentMetaModel.setExercises(findExercises());
         //TODO
         //Create exercises
             //Create tasks (need replacement map)

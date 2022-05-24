@@ -34,7 +34,6 @@ class ReplacementBuilderTest {
         assertEquals("1", replacement.getId());
         Statement actualReplacementCode = StaticJavaParser
                 .parseStatement("throw new UnsupportedOperationException(TODO.construtor(\"GPSPoint\"));");
-        actualReplacementCode.setLineComment(Replacement.START_COMMENT);
         BlockStmt actualReplacementCodeAsBlockStmt = new BlockStmt(new NodeList<>(actualReplacementCode));
         assertEquals(actualReplacementCodeAsBlockStmt, replacement.getReplacementCode());
         Optional<CompilationUnit> file = node.findCompilationUnit();

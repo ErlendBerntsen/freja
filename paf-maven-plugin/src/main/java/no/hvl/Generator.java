@@ -9,10 +9,16 @@ import no.hvl.concepts.builders.AssignmentMetaModelBuilder;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
 import no.hvl.utilities.NodeUtils;
+import no.hvl.writers.DescriptionWriter;
+import no.hvl.writers.ProjectWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import static no.hvl.utilities.AnnotationUtils.*;
+import static no.hvl.utilities.NodeUtils.*;
 
 public class Generator {
     private String sourcePath;
@@ -26,18 +32,19 @@ public class Generator {
     public void generate() throws IOException {
         Parser parser = new Parser(sourcePath);
         parser.parse();
+        parser.createAssignmentMetaModel();
 
-        AssignmentMetaModel assignmentMetaModel =
-                new AssignmentMetaModelBuilder(parser).build();
-        createStartCodeJavaFiles(assignmentMetaModel);
-        createSolutionCodeJavaFiles(assignmentMetaModel);
+//        AssignmentMetaModel assignmentMetaModel =
+//                new AssignmentMetaModelBuilder(parser).build();
+//        createStartCodeJavaFiles(assignmentMetaModel);
+//        createSolutionCodeJavaFiles(assignmentMetaModel);
 
-//        List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
-//        List<CompilationUnit> solutionProject = parser.createSolutionProject();
-//
-//        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, solutionProject,  parser.getFileNamesToRemove(),
-//                sourcePath, targetPath);
-//        projectWriter.createProject();
+        List<CompilationUnit> startCodeProject = parser.createStartCodeProject();
+        List<CompilationUnit> solutionProject = parser.createSolutionProject();
+
+        ProjectWriter projectWriter = new ProjectWriter(startCodeProject, solutionProject, parser.getFileNamesToRemove()
+                , sourcePath, targetPath);
+        projectWriter.createProject();
 //
 //        String startCodePath =  targetPath + File.separator + "startcode";
 //        DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, assignmentMetaModel.getExercises());
@@ -51,7 +58,7 @@ public class Generator {
     private void modifyJavaFiles(List<CompilationUnit> files, List<AbstractTask> tasks, boolean isSolutionCode){
         removePafInformation(files);
         for(AbstractTask task : tasks){
-            Node oldTaskNode = NodeUtils.findBodyDeclarationCopyInFiles(files, task.getNode());
+            Node oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
             BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task);
             updateTaskNode(oldTaskNode, newTaskNode);
         }
@@ -64,14 +71,14 @@ public class Generator {
 
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
         //TODO Remember that ProjectWriter need to know what file names to remove
-        List<BodyDeclaration<?>> nodesAnnotatedWithRemove = AnnotationUtils
-                .getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
-        NodeUtils.removeNodesFromFiles(files, nodesAnnotatedWithRemove);
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
+                getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
+        removeNodesFromFiles(files, nodesAnnotatedWithRemove);
     }
 
     private void removePafImports(List<CompilationUnit> files) {
         for(CompilationUnit file : files){
-            AnnotationUtils.removeAnnotationImportsFromFile(file);
+            removeAnnotationImportsFromFile(file);
         }
     }
 
@@ -82,7 +89,7 @@ public class Generator {
         }else{
             newTaskNode = task.createStartCode();
         }
-        AnnotationUtils.removeAnnotationTypeFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
+        removeAnnotationTypeFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
         return newTaskNode;
     }
 

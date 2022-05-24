@@ -164,10 +164,9 @@ class NodeUtilsTest {
         BlockStmt methodBody = getBlockStmtFromBodyDeclaration(node);
         List<List<Statement>> beforeReplacedAfter = getBeforeReplacedToBeReplacedAndAfterReplacedStatements(methodBody);
         BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 3);
-        List<Statement> replacementStatements = getBlockStmtFromBodyDeclaration(node2).getStatements();
-        replaceStatements(methodBody, beforeReplacedAfter.get(1), replacementStatements);
-        System.out.println(methodBody);
-        assertStatementsAreCorrectlyReplaced(methodBody, beforeReplacedAfter, replacementStatements);
+        BlockStmt replacementCode = getBlockStmtFromBodyDeclaration(node2);
+        replaceStatements(methodBody, beforeReplacedAfter.get(1), replacementCode);
+        assertStatementsAreCorrectlyReplaced(methodBody, beforeReplacedAfter, replacementCode.getStatements());
     }
 
     private List<List<Statement>> getBeforeReplacedToBeReplacedAndAfterReplacedStatements(BlockStmt blockStmt){
@@ -192,9 +191,8 @@ class NodeUtilsTest {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         BlockStmt methodBody = getBlockStmtFromBodyDeclaration(node);
         List<Statement> targetStatements = new ArrayList<>();
-        List<Statement> replacementStatements = methodBody.getStatements();
         assertThrows(IllegalArgumentException.class,
-                () -> replaceStatements(methodBody, targetStatements, replacementStatements));
+                () -> replaceStatements(methodBody, targetStatements, methodBody));
     }
 
     @Test
@@ -204,8 +202,7 @@ class NodeUtilsTest {
         BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 3);
         BlockStmt otherMethodBody = getBlockStmtFromBodyDeclaration(node2);
         List<Statement> targetStatements = otherMethodBody.getStatements();
-        List<Statement> replacementStatements = methodBody.getStatements();
         assertThrows(IllegalArgumentException.class,
-                () -> replaceStatements(methodBody, targetStatements, replacementStatements));
+                () -> replaceStatements(methodBody, targetStatements, methodBody));
     }
 }

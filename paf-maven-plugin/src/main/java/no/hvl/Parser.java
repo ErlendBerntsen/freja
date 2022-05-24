@@ -52,6 +52,12 @@ public class Parser {
         return compilationUnitCopies;
     }
 
+    public void createAssignmentMetaModel(){
+        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(this).build();
+        codeReplacements = assignmentMetaModel.getReplacementsAsHashMap();
+        codeReplacementImports = assignmentMetaModel.getReplacementImportDeclarations();
+    }
+
     public String getStartComment() {
         return START_COMMENT;
     }
@@ -80,12 +86,6 @@ public class Parser {
     public void parse() throws IOException {
         File sourceDir = findSourceDirectory(directory);
         parseDirectory(sourceDir.getAbsolutePath());
-    }
-
-    private void createAssignmentMetaModel() throws IOException {
-        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(this).build();
-        codeReplacements = assignmentMetaModel.getReplacementsAsHashMap();
-        codeReplacementImports = assignmentMetaModel.getReplacementImportDeclarations();
     }
 
     public File findSourceDirectory(String dir) throws NoSuchFileException {

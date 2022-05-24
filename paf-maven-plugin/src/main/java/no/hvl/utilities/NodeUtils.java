@@ -1,15 +1,18 @@
 package no.hvl.utilities;
 
+import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.concepts.Replacement;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -111,7 +114,7 @@ public class NodeUtils {
 
 
     public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
-                                         List<Statement>  replacementStatements){
+                                         BlockStmt replacementCode){
         if(statementsToBeReplaced.isEmpty()){
             throw new IllegalArgumentException("The list of statements to be replaced can not be empty.");
         }
@@ -120,13 +123,24 @@ public class NodeUtils {
         Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, firstStatementToBeReplaced);
         if(startIndex.isPresent()){
             NodeList<Statement> newCodeBlock = createNewCodeBlock(startIndex.get(), codeBlockStatements,
-                    statementsToBeReplaced, replacementStatements);
+                    statementsToBeReplaced, replacementCode.getStatements());
             codeBlock.setStatements(newCodeBlock);
+            insertStartTodoComment(replacementCode);
+            insertEndTodoComment(codeBlock, statementsToBeReplaced);
         }else{
             throw new IllegalArgumentException(
                     String.format("Can not find the statement:%n%s%n%n in the code block:%n%s",
                             firstStatementToBeReplaced, codeBlock));
         }
+    }
+
+    private static Optional<Integer> findIndexOfStatement(List<Statement> statements, Statement statement) {
+        for(int i = 0; i < statements.size(); i++){
+            if(statements.get(i).equals(statement)){
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
     }
 
     private static NodeList<Statement> createNewCodeBlock(Integer startIndexOfStatementsToBeReplaced,
@@ -142,14 +156,24 @@ public class NodeUtils {
         return new NodeList<>(newCodeBlock);
     }
 
-    private static Optional<Integer> findIndexOfStatement(List<Statement> statements, Statement statement) {
-        for(int i = 0; i < statements.size(); i++){
-            if(statements.get(i).equals(statement)){
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
+    private static void insertStartTodoComment(BlockStmt replacementCode) {
+        Optional<Statement> firstStatement = replacementCode.getStatements().getFirst();
+        firstStatement.ifPresent(statement -> statement.setLineComment(Replacement.START_COMMENT));
     }
+
+    private static void insertEndTodoComment(BlockStmt codeBlock, List<Statement> statementsToBeReplaced) {
+        Statement lastStatementToBeReplaced = statementsToBeReplaced.get(statementsToBeReplaced.size()-1);
+        codeBlock.addOrphanComment(createEndComment(lastStatementToBeReplaced));
+    }
+
+    private static LineComment createEndComment(Statement statement){
+        Optional<TokenRange> statementTokenRange = statement.getTokenRange();
+        if(statementTokenRange.isPresent()){
+            return new LineComment(statementTokenRange.get(), Replacement.END_COMMENT);
+        }
+        throw new IllegalArgumentException(String.format("The statement %s does not have a token range", statement));
+    }
+
 
     //TODO remove methods below?
     public static HashSet<String> removeNodesFromFiles

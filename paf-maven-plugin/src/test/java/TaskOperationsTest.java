@@ -7,6 +7,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
+import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
@@ -71,12 +72,18 @@ class TaskOperationsTest {
         BlockStmt originalCodeBlock = getBlockStmtFromBodyDeclaration(node);
         BlockStmt solutionCodeBlock = getBlockStmtFromBodyDeclaration(solutionCode);
         NodeList<Statement> solutionStatements = solutionCodeBlock.getStatements();
-        for(Statement statement : originalCodeBlock.getStatements()){
-            if(isEndStatement(statement) || isStartStatement(statement)
-                    || statementsThatShouldNotBePreserved.contains(statement)){
+        for(Statement originalStatement : originalCodeBlock.getStatements()){
+            if(isEndStatement(originalStatement) || isStartStatement(originalStatement)
+                    || statementsThatShouldNotBePreserved.contains(originalStatement)){
                 continue;
             }
-            assertTrue(solutionStatements.contains(statement));
+            if(!solutionStatements.contains(originalStatement)){
+                System.out.println(originalStatement);
+
+                System.out.println("SOLUTION");
+                System.out.println(solutionStatements);
+            }
+            assertTrue(solutionStatements.contains(originalStatement));
         }
     }
 
@@ -145,4 +152,46 @@ class TaskOperationsTest {
         BlockStmt replacementCode = replacement.getReplacementCode();
         return replacementCode.getStatements().get(0);
     }
+
+    @Test
+    void testCreatingStartCodeForReplaceSolutionTaskHasWithEndStatementHasEndTodoComment(){
+        testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(6);
+    }
+
+    @Test
+    void testCreatingStartCodeForReplaceSolutionTaskWithoutEndSolutionStatementHasEndTodoComment(){
+        testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(3);
+    }
+
+    @Test
+    void testCreatingStartCodeForReplaceSolutionTaskWithEndSolutionAsLastStatementHasEndTodoComment(){
+        testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(13);
+    }
+
+    private void testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(int testId){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), testId);
+        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode();
+        assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode);
+    }
+
+    private void assertReplacementCodeHasEndTodoComment(Solution solution, BodyDeclaration<?> startCode){
+        List<Statement> solutionStatements = solution.getStatementsIncludingSolutionMarkers();
+        int lastStatementIndex = solutionStatements.size() - 1;
+        Statement lastStatement = solutionStatements.get(lastStatementIndex);
+        BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
+        assertTrue(endCommentIsRightAfterReplacementCode(startCodeBlock.getOrphanComments(), lastStatement));
+    }
+
+    private boolean endCommentIsRightAfterReplacementCode(List<Comment> orphanCommentsInBody, Statement lastStatement){
+        for(Comment orphanComment : orphanCommentsInBody){
+            if(Replacement.END_COMMENT.equals(orphanComment.getContent()) &&
+                orphanComment.getTokenRange().equals(lastStatement.getTokenRange())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

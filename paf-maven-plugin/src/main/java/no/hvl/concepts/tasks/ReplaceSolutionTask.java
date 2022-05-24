@@ -25,8 +25,7 @@ public class ReplaceSolutionTask extends AbstractTask {
         BodyDeclaration<?> nodeClone = getNode().clone();
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeClone);
         BlockStmt replacementCode = replacement.getReplacementCode();
-        //TODO start end comments fix
-        replaceStatements(codeBlockWithSolution, solution.getStatementsIncludingSolutionMarkers(), replacementCode.getStatements());
+        replaceStatements(codeBlockWithSolution, solution.getStatementsIncludingSolutionMarkers(), replacementCode);
         return nodeClone;
     }
 

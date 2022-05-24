@@ -1,8 +1,10 @@
 package no.hvl.concepts.builders;
 
+import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -47,17 +49,13 @@ public class ReplacementBuilder {
                 throw new IllegalArgumentException(
                         String.format("Types annotated with @%s can not have an empty body.", REPLACEMENT_CODE_NAME));
             }
-            insertStartComment(replacementCodeBlock);
             return replacementCodeBlock;
         }
         throw new IllegalArgumentException(
                 String.format("Types annotated with @%s must have a body.", REPLACEMENT_CODE_NAME));
     }
 
-    private void insertStartComment(BlockStmt replacementCodeBlock) {
-        Optional<Statement> firstStatement = replacementCodeBlock.getStatements().getFirst();
-        firstStatement.ifPresent(statement -> statement.setLineComment(Replacement.START_COMMENT));
-    }
+
 
     private CompilationUnit findFile(){
         return annotatedNode.findCompilationUnit()

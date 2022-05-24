@@ -91,4 +91,13 @@ public class Example {
         return x;
     }
 
+    @TestId(13)
+    @Implement(number = {1,2,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "1")
+    public void solutionEndIsLastStatement() {
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+    }
+
 }

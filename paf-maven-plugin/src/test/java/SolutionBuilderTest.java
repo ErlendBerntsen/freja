@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static no.hvl.utilities.NodeUtils.*;
@@ -31,8 +32,17 @@ class SolutionBuilderTest {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(node);
         Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
-        Statement actualSolution = StaticJavaParser.parseStatement("x = \"blablabla\";");
-        assertEquals(List.of(actualSolution), solution.getStatements());
+        List<String> stringStatements = List.of("SolutionStart s;", "x = \"blablabla\";", "SolutionEnd e;");
+        List<Statement> actualSolution = buildActualSolution(stringStatements);
+        assertEquals(actualSolution, solution.getStatementsIncludingSolutionMarkers());
+    }
+
+    private List<Statement> buildActualSolution(List<String> statementsAsString){
+        List<Statement> actualStatements = new ArrayList<>();
+        for(String stringStatement : statementsAsString){
+            actualStatements.add(StaticJavaParser.parseStatement(stringStatement));
+        }
+        return actualStatements;
     }
 
     @Test
@@ -40,10 +50,9 @@ class SolutionBuilderTest {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 3);
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(node);
         Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
-        Statement actualSolutionStatement1 = StaticJavaParser.parseStatement("str = \"Hello World\";");
-        Statement actualSolutionStatement2 = StaticJavaParser.parseStatement("return str;");
-        List<Statement> actualSolution = List.of(actualSolutionStatement1, actualSolutionStatement2);
-        assertEquals(actualSolution, solution.getStatements());
+        List<String> stringStatements = List.of("SolutionStart s;", "str = \"Hello World\";", "return str;");
+        List<Statement> actualSolution = buildActualSolution(stringStatements);
+        assertEquals(actualSolution, solution.getStatementsIncludingSolutionMarkers());
     }
 
 

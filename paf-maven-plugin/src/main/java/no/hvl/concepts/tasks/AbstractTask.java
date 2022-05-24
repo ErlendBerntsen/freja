@@ -4,6 +4,8 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.annotations.CopyOption;
 import no.hvl.utilities.NodeUtils;
 
+import static no.hvl.utilities.NodeUtils.*;
+
 
 public abstract class AbstractTask implements TaskOperations {
     private BodyDeclaration<?> node;
@@ -44,7 +46,7 @@ public abstract class AbstractTask implements TaskOperations {
     @Override
     public BodyDeclaration<?> createSolutionCode() {
         BodyDeclaration<?> nodeClone = node.clone();
-        NodeUtils.removeSolutionStartAndEndStatementsFromNode(nodeClone);
+        removeSolutionStartAndEndStatementsFromNode(nodeClone);
         return nodeClone;
     }
 }

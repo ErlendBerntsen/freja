@@ -116,8 +116,8 @@ public class NodeUtils {
             throw new IllegalArgumentException("The list of statements to be replaced can not be empty.");
         }
         List<Statement> codeBlockStatements = codeBlock.getStatements();
-        Statement firstStatementToBePlaced = statementsToBeReplaced.get(0);
-        Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, firstStatementToBePlaced);
+        Statement firstStatementToBeReplaced = statementsToBeReplaced.get(0);
+        Optional<Integer> startIndex = findIndexOfStatement(codeBlockStatements, firstStatementToBeReplaced);
         if(startIndex.isPresent()){
             NodeList<Statement> newCodeBlock = createNewCodeBlock(startIndex.get(), codeBlockStatements,
                     statementsToBeReplaced, replacementStatements);
@@ -125,7 +125,7 @@ public class NodeUtils {
         }else{
             throw new IllegalArgumentException(
                     String.format("Can not find the statement:%n%s%n%n in the code block:%n%s",
-                            firstStatementToBePlaced, codeBlock));
+                            firstStatementToBeReplaced, codeBlock));
         }
     }
 

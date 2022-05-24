@@ -15,4 +15,8 @@ public class ReplacementMethods {
     public void throwExceptionForUnImplementedMethod(){
         throw new UnsupportedOperationException(TODO.method());
     }
+
+    @TestId(12)
+    @ReplacementCode(id = "2")
+    public void emptyBody(){}
 }

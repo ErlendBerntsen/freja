@@ -34,6 +34,7 @@ class ReplacementBuilderTest {
         assertEquals("1", replacement.getId());
         Statement actualReplacementCode = StaticJavaParser
                 .parseStatement("throw new UnsupportedOperationException(TODO.construtor(\"GPSPoint\"));");
+        actualReplacementCode.setLineComment(Replacement.START_COMMENT);
         BlockStmt actualReplacementCodeAsBlockStmt = new BlockStmt(new NodeList<>(actualReplacementCode));
         assertEquals(actualReplacementCodeAsBlockStmt, replacement.getReplacementCode());
         Optional<CompilationUnit> file = node.findCompilationUnit();
@@ -53,6 +54,13 @@ class ReplacementBuilderTest {
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
         BlockStmt body = getBlockStmtFromBodyDeclaration(node);
         node.remove(body);
+        assertThrows(IllegalArgumentException.class, replacementBuilder::build);
+    }
+
+    @Test
+    void testBuildingReplacementWithEmptyBody(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 12);
+        ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
         assertThrows(IllegalArgumentException.class, replacementBuilder::build);
     }
 

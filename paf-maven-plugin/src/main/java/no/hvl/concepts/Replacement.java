@@ -12,6 +12,9 @@ public class Replacement {
     private CompilationUnit file;
     private BlockStmt replacementCode;
     private List<ImportDeclaration> requiredImports;
+    public static final String START_COMMENT = "TODO - START";
+    public static final String END_COMMENT = "TODO - END";
+
 
     public Replacement(){
 

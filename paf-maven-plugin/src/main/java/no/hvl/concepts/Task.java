@@ -63,7 +63,7 @@ public class Task {
     }
 
     private void removeSolutionFromBlockStmt(BlockStmt blockStmt) {
-        blockStmt.getStatements().removeAll(solution.get().getStatements());
+        blockStmt.getStatements().removeAll(solution.get().getStatementsIncludingSolutionMarkers());
     }
 
 

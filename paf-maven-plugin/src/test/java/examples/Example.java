@@ -27,7 +27,7 @@ public class Example {
     }
 
     @TestId(3)
-    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "1")
     public String helloWorld() {
         /**
          * Doc comment should be removed

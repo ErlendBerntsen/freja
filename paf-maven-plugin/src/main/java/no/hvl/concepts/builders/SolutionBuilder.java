@@ -20,7 +20,7 @@ public class SolutionBuilder {
 
     public Solution build(){
         Solution solution = new Solution();
-        solution.setStatements(findSolutionStatements());
+        solution.setStatementsIncludingSolutionMarkers(findSolutionStatements());
         return solution;
     }
 
@@ -38,7 +38,12 @@ public class SolutionBuilder {
         var statements = body.getStatements();
         for(int i = 0; i < statements.size(); i++){
             if(isStartStatement(statements.get(i))){
-                return i + 1;
+                if(i == statements.size() - 1){
+                    throw new IllegalStateException(
+                            String.format("%s statement cant be the last statement in a code block",
+                            SOLUTION_START_NAME));
+                }
+                return i;
             }
         }
         throw new IllegalStateException(String.format("Cant build solution without a %s statement",
@@ -49,7 +54,7 @@ public class SolutionBuilder {
         var statements = body.getStatements();
         for(int i = 0; i < statements.size(); i++){
             if(isEndStatement(statements.get(i))){
-                return i;
+                return i + 1;
             }
         }
         return statements.size();

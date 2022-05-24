@@ -5,16 +5,16 @@ import com.github.javaparser.ast.stmt.Statement;
 import java.util.List;
 
 public class Solution {
-    private List<Statement> statements;
+    private List<Statement> statementsIncludingSolutionMarkers;
 
     public Solution() {
     }
 
-    public List<Statement> getStatements() {
-        return statements;
+    public List<Statement> getStatementsIncludingSolutionMarkers() {
+        return statementsIncludingSolutionMarkers;
     }
 
-    public void setStatements(List<Statement> statements) {
-        this.statements = statements;
+    public void setStatementsIncludingSolutionMarkers(List<Statement> statementsIncludingSolutionMarkers) {
+        this.statementsIncludingSolutionMarkers = statementsIncludingSolutionMarkers;
     }
 }

@@ -92,7 +92,7 @@ class AnnotationUtilsTest {
     @Test
     void testGettingReplacementIdValueFromImplementAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 3);
-        assertEquals("2", getReplacementIdInImplementAnnotation(node));
+        assertEquals("1", getReplacementIdInImplementAnnotation(node));
     }
 
     @Test

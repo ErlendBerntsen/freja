@@ -1,17 +1,13 @@
 package no.hvl.concepts.builders;
 
-import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Replacement;
 
 import java.util.List;
-import java.util.Optional;
 
 import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;

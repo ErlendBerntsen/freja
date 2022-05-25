@@ -9,6 +9,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
+import no.hvl.exceptions.NoFileFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -204,5 +205,19 @@ class NodeUtilsTest {
         List<Statement> targetStatements = otherMethodBody.getStatements();
         assertThrows(IllegalArgumentException.class,
                 () -> replaceStatements(methodBody, targetStatements, methodBody));
+    }
+
+    @Test
+    void testFindingFileFromNode(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
+        Optional<CompilationUnit> expectedFile = node.findCompilationUnit();
+        assertTrue(expectedFile.isPresent());
+        assertEquals(expectedFile.get(), findFile(node));
+    }
+
+    @Test
+    void testFindingFileFromNodeWithoutFile(){
+        Statement endStatement = StaticJavaParser.parseStatement("SolutionEnd e;");
+        assertThrows(NoFileFoundException.class, () -> findFile(endStatement));
     }
 }

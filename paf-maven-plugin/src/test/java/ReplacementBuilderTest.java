@@ -1,5 +1,6 @@
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -7,12 +8,14 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.builders.ReplacementBuilder;
+import no.hvl.utilities.AnnotationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Optional;
 
+import static no.hvl.utilities.AnnotationUtils.*;
 import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.getNodeWithId;
@@ -37,7 +40,13 @@ class ReplacementBuilderTest {
         BlockStmt actualReplacementCodeAsBlockStmt = new BlockStmt(new NodeList<>(actualReplacementCode));
         assertEquals(actualReplacementCodeAsBlockStmt, replacement.getReplacementCode());
         Optional<CompilationUnit> file = node.findCompilationUnit();
-        file.ifPresent(compilationUnit -> assertEquals(compilationUnit, replacement.getFile()));
+        assertTrue(file.isPresent());
+        assertEquals(file.get(), replacement.getFile());
+        for(ImportDeclaration importDecl : file.get().getImports()){
+            if(isNonAnnotationImportDeclaration(importDecl)){
+                assertTrue(replacement.getRequiredImports().contains(importDecl));
+            }
+        }
     }
 
     @Test

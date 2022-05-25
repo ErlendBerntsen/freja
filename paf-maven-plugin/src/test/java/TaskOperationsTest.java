@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.comments.Comment;
@@ -77,12 +78,6 @@ class TaskOperationsTest {
                     || statementsThatShouldNotBePreserved.contains(originalStatement)){
                 continue;
             }
-            if(!solutionStatements.contains(originalStatement)){
-                System.out.println(originalStatement);
-
-                System.out.println("SOLUTION");
-                System.out.println(solutionStatements);
-            }
             assertTrue(solutionStatements.contains(originalStatement));
         }
     }
@@ -117,6 +112,14 @@ class TaskOperationsTest {
         assertSolutionStartEndStatementsWereRemoved(startCode);
         List<Statement> solutionStatements = task.getSolution().getStatementsIncludingSolutionMarkers();
         assertStatementsWerePreserved(node, startCode, solutionStatements);
+    }
+
+    @Test
+    void testCreatingStartCodeForReplaceSolutionTaskHasRequiredImports(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode();
+        ImportDeclaration importDeclaration = new ImportDeclaration("examples.TODO", false, false);
     }
 
     @Test

@@ -2,6 +2,7 @@ package examples;
 
 import no.hvl.annotations.ReplacementCode;
 import testUtils.TestId;
+import examples.TODO;
 
 public class ReplacementMethods {
 

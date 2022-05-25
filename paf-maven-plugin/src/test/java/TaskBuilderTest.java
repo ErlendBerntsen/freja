@@ -61,7 +61,9 @@ class TaskBuilderTest {
         assertEquals(replacementMap.get("1"), replaceSolutionTask.getReplacement());
         BlockStmt nodeBody = getBlockStmtFromBodyDeclaration(node);
         Solution solution = new SolutionBuilder(nodeBody).build();
-        assertEquals(solution.getStatementsIncludingSolutionMarkers(), replaceSolutionTask.getSolution().getStatementsIncludingSolutionMarkers());
+        assertEquals(solution.getStatementsIncludingSolutionMarkers(),
+                replaceSolutionTask.getSolution().getStatementsIncludingSolutionMarkers());
+
     }
 
     @Test

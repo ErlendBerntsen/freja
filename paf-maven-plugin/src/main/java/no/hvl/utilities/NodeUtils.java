@@ -2,6 +2,7 @@ package no.hvl.utilities;
 
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -13,6 +14,8 @@ import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Replacement;
+import no.hvl.concepts.Solution;
+import no.hvl.exceptions.NoFileFoundException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,6 +116,18 @@ public class NodeUtils {
     }
 
 
+    public static void replaceSolution(BlockStmt codeBlock, Solution solution, Replacement replacement){
+        replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), replacement.getReplacementCode());
+        Optional<CompilationUnit> file = codeBlock.findCompilationUnit();
+        if(file.isPresent()){
+            for(ImportDeclaration requiredImport : replacement.getRequiredImports()){
+                file.get().addImport(requiredImport);
+            }
+        }else{
+            throw new IllegalArgumentException(String.format("Cant find file of code block:  %n%s", codeBlock));
+        }
+    }
+
     public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
                                          BlockStmt replacementCode){
         if(statementsToBeReplaced.isEmpty()){
@@ -174,6 +189,14 @@ public class NodeUtils {
         throw new IllegalArgumentException(String.format("The statement %s does not have a token range", statement));
     }
 
+    public static CompilationUnit findFile(Node node){
+        Optional<CompilationUnit> file = node.findCompilationUnit();
+        if(file.isPresent()){
+            return file.get();
+        }
+        throw new NoFileFoundException(node);
+    }
+
 
     //TODO remove methods below?
     public static HashSet<String> removeNodesFromFiles
@@ -201,5 +224,6 @@ public class NodeUtils {
             return bodyDeclaration.asConstructorDeclaration();
         }
     }
+
 
 }

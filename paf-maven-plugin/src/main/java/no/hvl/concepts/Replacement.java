@@ -15,7 +15,6 @@ public class Replacement {
     public static final String START_COMMENT = "TODO - START";
     public static final String END_COMMENT = "TODO - END";
 
-
     public Replacement(){
 
     }

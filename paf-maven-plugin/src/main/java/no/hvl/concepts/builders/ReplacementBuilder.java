@@ -1,11 +1,11 @@
 package no.hvl.concepts.builders;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.concepts.Replacement;
+import no.hvl.utilities.NodeUtils;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class ReplacementBuilder {
         replacement = new Replacement();
         replacement.setId(findId());
         replacement.setReplacementCode(findReplacementCode());
-        replacement.setFile(findFile());
+        replacement.setFile(NodeUtils.findFile(annotatedNode));
         replacement.setRequiredImports(findRequiredImports());
         return replacement;
     }
@@ -49,14 +49,6 @@ public class ReplacementBuilder {
         }
         throw new IllegalArgumentException(
                 String.format("Types annotated with @%s must have a body.", REPLACEMENT_CODE_NAME));
-    }
-
-
-
-    private CompilationUnit findFile(){
-        return annotatedNode.findCompilationUnit()
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("Types annotated with @%s must be inside a file.", REPLACEMENT_CODE_NAME)));
     }
 
     private List<ImportDeclaration> findRequiredImports(){

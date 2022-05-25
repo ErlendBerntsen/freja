@@ -92,7 +92,7 @@ public class Example {
     }
 
     @TestId(13)
-    @Implement(number = {1,2,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "1")
+    @Implement(number = {1,2,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
     public void solutionEndIsLastStatement() {
         String x;
         SolutionStart s;

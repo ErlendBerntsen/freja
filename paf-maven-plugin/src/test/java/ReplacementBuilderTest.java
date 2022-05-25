@@ -8,6 +8,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.builders.ReplacementBuilder;
+import no.hvl.exceptions.NoFileFoundException;
 import no.hvl.utilities.AnnotationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,6 @@ class ReplacementBuilderTest {
                     throw new UnsupportedOperationException(TODO.method());
                 }""".indent(4));
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
-        assertThrows(IllegalStateException.class, replacementBuilder::build);
+        assertThrows(NoFileFoundException.class, replacementBuilder::build);
     }
 }

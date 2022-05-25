@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -37,8 +38,12 @@ class TaskOperationsTest {
         parser.parseDirectory(TEST_EXAMPLE_RELATIVE_PATH);
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 10);
         Replacement replacement = new ReplacementBuilder(node).build();
+        node = getNodeWithId(parser.getCompilationUnitCopies(), 14);
+        Replacement replacement2 = new ReplacementBuilder(node).build();
         replacementMap = new HashMap<>();
         replacementMap.put(replacement.getId(), replacement);
+        replacementMap.put(replacement2.getId(), replacement);
+
     }
 
     @Test
@@ -95,13 +100,15 @@ class TaskOperationsTest {
     }
 
     @Test
-    void testCreatingStartCodeForReplaceSolutionTaskDoesNotMutateOriginalNode(){
+    void testCreatingStartCodeForReplaceSolutionTaskDoesNotMutateCopies(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        BodyDeclaration<?> nodeClone = node.clone();
+        BodyDeclaration<?> nodeCopy = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        BodyDeclaration<?> nodeCopyClone = nodeCopy.clone();
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> startCode = task.createStartCode();
-        assertEquals(node, nodeClone);
-        assertNotEquals(node, startCode);
+        assertEquals(nodeCopy, nodeCopyClone);
+        assertEquals(node, startCode);
+        assertNotEquals(nodeCopy, node);
     }
 
     @Test
@@ -115,11 +122,50 @@ class TaskOperationsTest {
     }
 
     @Test
-    void testCreatingStartCodeForReplaceSolutionTaskHasRequiredImports(){
+    void testCreatingStartCodeForReplaceSolutionTaskDoesNotAddImportsFromSamePackage(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> startCode = task.createStartCode();
-        ImportDeclaration importDeclaration = new ImportDeclaration("examples.TODO", false, false);
+        ImportDeclaration todoImport = new ImportDeclaration("examples.TODO", false, false);
+        CompilationUnit updatedFile = findFile(startCode);
+        assertFalse(updatedFile.getImports().contains(todoImport));
+    }
+
+    @Test
+    void testCreatingStartCodeForReplaceSolutionTaskAddsRequiredImports(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode();
+        ImportDeclaration listImport = new ImportDeclaration("java.util.List", false, false);
+        CompilationUnit updatedFile = findFile(startCode);
+        assertTrue(updatedFile.getImports().contains(listImport));
+    }
+
+    @Test
+    void testCreatingMultipleStartCodeForReplaceSolutionsDoesNotDuplicateImports(){
+        List<CompilationUnit> files = parser.getCompilationUnitCopies();
+        BodyDeclaration<?> node = getNodeWithId(files, 6);
+        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        task.createStartCode();
+        BodyDeclaration<?> node2 = getNodeWithId(files, 13);
+        ReplaceSolutionTask task2 = (ReplaceSolutionTask) new TaskBuilder(node2, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode2 = task2.createStartCode();
+        CompilationUnit updatedFile = findFile(startCode2);
+        assertTrue(hasExactlyOneListImport(updatedFile));
+    }
+
+    private boolean hasExactlyOneListImport(CompilationUnit file){
+        ImportDeclaration listImport = new ImportDeclaration("java.util.List", false, false);
+        boolean hasListImport = false;
+        for(ImportDeclaration importDecl : file.getImports()){
+            if(listImport.equals(importDecl)){
+                if(hasListImport){
+                    return false;
+                }
+                hasListImport = true;
+            }
+        }
+        return hasListImport;
     }
 
     @Test

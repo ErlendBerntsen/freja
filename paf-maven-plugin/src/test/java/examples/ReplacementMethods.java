@@ -3,6 +3,7 @@ package examples;
 import no.hvl.annotations.ReplacementCode;
 import testUtils.TestId;
 import examples.TODO;
+import java.util.List;
 
 public class ReplacementMethods {
 
@@ -12,6 +13,7 @@ public class ReplacementMethods {
         throw new UnsupportedOperationException(TODO.construtor("GPSPoint"));
     }
 
+    @TestId(14)
     @ReplacementCode(id = "2")
     public void throwExceptionForUnImplementedMethod(){
         throw new UnsupportedOperationException(TODO.method());

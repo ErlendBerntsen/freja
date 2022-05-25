@@ -22,11 +22,10 @@ public class ReplaceSolutionTask extends AbstractTask {
 
     @Override
     public BodyDeclaration<?> createStartCode() {
-        BodyDeclaration<?> nodeClone = getNode().clone();
-        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeClone);
-        BlockStmt replacementCode = replacement.getReplacementCode();
-        replaceStatements(codeBlockWithSolution, solution.getStatementsIncludingSolutionMarkers(), replacementCode);
-        return nodeClone;
+        BodyDeclaration<?> node = getNode();
+        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(node);
+        replaceSolution(codeBlockWithSolution, solution, replacement);
+        return node;
     }
 
     public Solution getSolution() {

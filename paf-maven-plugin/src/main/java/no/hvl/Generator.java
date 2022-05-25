@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
 import static no.hvl.utilities.NodeUtils.*;
 
@@ -51,6 +52,12 @@ public class Generator {
 //        descriptionWriter.createFiles();
     }
 
+    private void createStartCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
+        //TODO
+        //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
+        modifyJavaFiles(assignmentMetaModel.getStartCodeFiles(), assignmentMetaModel.getTasks(), false);
+    }
+
     private void createSolutionCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
         modifyJavaFiles(assignmentMetaModel.getSolutionCodeFiles(), assignmentMetaModel.getTasks(), true);
     }
@@ -72,7 +79,7 @@ public class Generator {
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
         //TODO Remember that ProjectWriter need to know what file names to remove
         List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
-                getAllNodesInFilesAnnotatedWith(files, AnnotationNames.REMOVE_NAME);
+                getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
         removeNodesFromFiles(files, nodesAnnotatedWithRemove);
     }
 
@@ -89,7 +96,7 @@ public class Generator {
         }else{
             newTaskNode = task.createStartCode();
         }
-        removeAnnotationTypeFromNode(newTaskNode, AnnotationNames.IMPLEMENT_NAME);
+        removeAnnotationTypeFromNode(newTaskNode, IMPLEMENT_NAME);
         return newTaskNode;
     }
 
@@ -99,14 +106,10 @@ public class Generator {
             parentNode.get().replace(oldTaskNode, newTaskNode);
         }else{
             throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s"
-                    , AnnotationNames.IMPLEMENT_NAME));
+                    , IMPLEMENT_NAME));
         }
     }
 
-    private void createStartCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
-        //TODO
-        //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
-        modifyJavaFiles(assignmentMetaModel.getStartCodeFiles(), assignmentMetaModel.getTasks(), false);
-    }
+
 
 }

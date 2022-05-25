@@ -13,6 +13,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.exceptions.NoFileFoundException;
@@ -115,16 +116,12 @@ public class NodeUtils {
         statements.forEach(Node::remove);
     }
 
-
     public static void replaceSolution(BlockStmt codeBlock, Solution solution, Replacement replacement){
         replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), replacement.getReplacementCode());
-        Optional<CompilationUnit> file = codeBlock.findCompilationUnit();
-        if(file.isPresent()){
-            for(ImportDeclaration requiredImport : replacement.getRequiredImports()){
-                file.get().addImport(requiredImport);
-            }
-        }else{
-            throw new IllegalArgumentException(String.format("Cant find file of code block:  %n%s", codeBlock));
+        CompilationUnit file = findFile(codeBlock);
+
+        for(ImportDeclaration requiredImport : replacement.getRequiredImports()){
+            file.addImport(requiredImport);
         }
     }
 

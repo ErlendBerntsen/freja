@@ -4,15 +4,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.concepts.tasks.AbstractTask;
-import no.hvl.concepts.AssignmentMetaModel;
-import no.hvl.concepts.builders.AssignmentMetaModelBuilder;
-import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.AnnotationUtils;
-import no.hvl.utilities.NodeUtils;
-import no.hvl.writers.DescriptionWriter;
+import no.hvl.concepts.Assignment;
 import no.hvl.writers.ProjectWriter;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -52,14 +46,14 @@ public class Generator {
 //        descriptionWriter.createFiles();
     }
 
-    private void createStartCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
+    private void createStartCodeJavaFiles(Assignment assignment){
         //TODO
         //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
-        modifyJavaFiles(assignmentMetaModel.getStartCodeFiles(), assignmentMetaModel.getTasks(), false);
+        modifyJavaFiles(assignment.getStartCodeFiles(), assignment.getTasks(), false);
     }
 
-    private void createSolutionCodeJavaFiles(AssignmentMetaModel assignmentMetaModel){
-        modifyJavaFiles(assignmentMetaModel.getSolutionCodeFiles(), assignmentMetaModel.getTasks(), true);
+    private void createSolutionCodeJavaFiles(Assignment assignment){
+        modifyJavaFiles(assignment.getSolutionCodeFiles(), assignment.getTasks(), true);
     }
 
     private void modifyJavaFiles(List<CompilationUnit> files, List<AbstractTask> tasks, boolean isSolutionCode){

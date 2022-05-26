@@ -52,6 +52,10 @@ public class ExerciseBuilder {
         return Optional.empty();
     }
 
+    private boolean isAncestorExercise(Exercise exercise, int indexInNumberArray) {
+        return exercise.getNumberAmongSiblingExercises() == fullNumberAsIntArray[indexInNumberArray];
+    }
+
     private Exercise findParentExercise(Exercise ancestorExercise, int indexInNumberArray){
         if(isParentExercise(ancestorExercise, indexInNumberArray)){
             return ancestorExercise;
@@ -63,6 +67,13 @@ public class ExerciseBuilder {
         }
         Exercise subExercise = createNewSubExercise(ancestorExercise);
         return findParentExercise(subExercise, indexInNumberArray + 1);
+    }
+
+    private boolean isParentExercise(Exercise exercise, int indexInNumberArray){
+        if(isAncestorExercise(exercise, indexInNumberArray)){
+            return (indexInNumberArray == fullNumberAsIntArray.length - 1);
+        }
+        return false;
     }
 
     private Exercise createNewSubExercise(Exercise parentExercise) {
@@ -82,17 +93,6 @@ public class ExerciseBuilder {
         rootExercise.setFullNumberAsString(fullNumberAsIntArray[0] + "_");
         createdExercises.add(rootExercise);
         return rootExercise;
-    }
-
-    private boolean isParentExercise(Exercise exercise, int indexInNumberArray){
-        if(isAncestorExercise(exercise, indexInNumberArray)){
-            return (indexInNumberArray == fullNumberAsIntArray.length - 1);
-        }
-        return false;
-    }
-
-    private boolean isAncestorExercise(Exercise exercise, int indexInNumberArray) {
-        return exercise.getNumberAmongSiblingExercises() == fullNumberAsIntArray[indexInNumberArray];
     }
 
     private void addTaskToParentExercise(Exercise parentExerciseForTask) {

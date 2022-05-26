@@ -20,6 +20,6 @@ public class ReplacementMethods {
     }
 
     @TestId(12)
-    @ReplacementCode(id = "2")
+    @ReplacementCode(id = "3")
     public void emptyBody(){}
 }

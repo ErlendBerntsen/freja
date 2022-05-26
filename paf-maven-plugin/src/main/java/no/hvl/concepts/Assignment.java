@@ -10,14 +10,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class AssignmentMetaModel {
+public class Assignment {
     private List<CompilationUnit> parsedFiles;
     private List<CompilationUnit> startCodeFiles;
     private List<CompilationUnit> solutionCodeFiles;
     private List<Replacement> replacements;
     private List<Exercise> exercises;
 
-    public AssignmentMetaModel(){
+    public Assignment(){
     }
 
     public List<Replacement> getReplacements() {

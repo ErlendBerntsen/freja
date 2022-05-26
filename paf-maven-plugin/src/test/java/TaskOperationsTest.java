@@ -109,8 +109,6 @@ class TaskOperationsTest extends ExamplesParser {
         assertStatementsWerePreserved(node, startCode, solutionStatements);
     }
 
-
-
     @Test
     void testCreatingStartCodeForReplaceSolutionTaskDoesNotAddImportsFromSamePackage(){
         BodyDeclaration<?> startCode = getStartCodeFromNodeWithId(6);
@@ -233,6 +231,5 @@ class TaskOperationsTest extends ExamplesParser {
         }
         return false;
     }
-
 
 }

@@ -32,4 +32,8 @@ public class ExamplesParser {
         replacementMap.put(replacement2.getId(), replacement);
     }
 
+    public void parseAssignmentDir(String assignmentDir) throws IOException {
+        parser.parseDirectory(assignmentDir);
+    }
+
 }

@@ -13,7 +13,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.utils.SourceRoot;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
-import no.hvl.concepts.builders.AssignmentMetaModelBuilder;
+import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.exceptions.NoSourceDirectoryException;
 import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.AnnotationUtils;
@@ -53,9 +53,9 @@ public class Parser {
     }
 
     public void createAssignmentMetaModel(){
-        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModelBuilder(this).build();
-        codeReplacements = assignmentMetaModel.getReplacementsAsHashMap();
-        codeReplacementImports = assignmentMetaModel.getReplacementImportDeclarations();
+        Assignment assignment = new AssignmentBuilder(this).build();
+        codeReplacements = assignment.getReplacementsAsHashMap();
+        codeReplacementImports = assignment.getReplacementImportDeclarations();
     }
 
     public String getStartComment() {

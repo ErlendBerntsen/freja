@@ -4,44 +4,43 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
 import no.hvl.concepts.*;
+import no.hvl.utilities.AnnotationUtils;
+import no.hvl.utilities.GeneralUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
 import static no.hvl.utilities.GeneralUtils.*;
 
-public class AssignmentMetaModelBuilder {
+public class AssignmentBuilder {
 
     private final Parser parser;
     List<CompilationUnit> parsedFiles;
     private HashMap<String, Replacement> replacementMap;
 
-    public AssignmentMetaModelBuilder(Parser parser) {
+    public AssignmentBuilder(Parser parser) {
         this.parser = parser;
     }
 
-    public AssignmentMetaModel build() {
-        AssignmentMetaModel assignmentMetaModel = new AssignmentMetaModel();
+    public Assignment build() {
+        Assignment assignment = new Assignment();
         parsedFiles = parser.getCompilationUnitCopies();
-        assignmentMetaModel.setParsedFiles(parsedFiles);
-        assignmentMetaModel.setStartCodeFiles(parser.getCompilationUnitCopies());
-        assignmentMetaModel.setSolutionCodeFiles(parser.getCompilationUnitCopies());
-        assignmentMetaModel.setReplacements(findReplacements());
-        //assignmentMetaModel.setExercises(findExercises());
-        //TODO
-        //Create exercises
-            //Create tasks (need replacement map)
-                //Create solutions (if relevant)
-        return assignmentMetaModel;
+        assignment.setParsedFiles(parsedFiles);
+        assignment.setStartCodeFiles(parser.getCompilationUnitCopies());
+        assignment.setSolutionCodeFiles(parser.getCompilationUnitCopies());
+        assignment.setReplacements(findReplacements());
+        assignment.setExercises(findExercises());
+        return assignment;
     }
 
     private List<Replacement> findReplacements() {
         List<Replacement> replacements = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
-            var nodesAnnotatedWithReplacementCode =
+            List<BodyDeclaration<?>> nodesAnnotatedWithReplacementCode =
                     getNodesInFileAnnotatedWith(file, REPLACEMENT_CODE_NAME);
             replacements.addAll(createReplacements(nodesAnnotatedWithReplacementCode));
         }
@@ -76,6 +75,7 @@ public class AssignmentMetaModelBuilder {
                     getNodesInFileAnnotatedWith(file, IMPLEMENT_NAME));
         }
         sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
+        checkExerciseNumbers(nodesAnnotatedWithImplement);
         return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));
     }
 

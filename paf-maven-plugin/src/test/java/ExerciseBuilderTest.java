@@ -3,9 +3,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.ExerciseBuilder;
-import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.exceptions.ExerciseNumberException;
 import no.hvl.exceptions.NoFileFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,4 +105,5 @@ public class ExerciseBuilderTest extends ExamplesParser {
         ExerciseBuilder exerciseBuilder = new ExerciseBuilder(node, new ArrayList<>(), replacementMap);
         assertThrows(NoFileFoundException.class, exerciseBuilder::build);
     }
+
 }

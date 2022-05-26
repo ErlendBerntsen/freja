@@ -45,8 +45,7 @@ public abstract class AbstractTask implements TaskOperations {
 
     @Override
     public BodyDeclaration<?> createSolutionCode() {
-        BodyDeclaration<?> nodeClone = node.clone();
-        removeSolutionStartAndEndStatementsFromNode(nodeClone);
-        return nodeClone;
+        removeSolutionStartAndEndStatementsFromNode(node);
+        return node;
     }
 }

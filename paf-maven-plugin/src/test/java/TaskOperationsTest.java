@@ -6,7 +6,6 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import no.hvl.Parser;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
@@ -16,6 +15,7 @@ import no.hvl.concepts.tasks.AbstractTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testUtils.ExamplesParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +27,13 @@ import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.getNodeWithId;
 
-class TaskOperationsTest {
-    private Parser parser;
-    private HashMap<String, Replacement> replacementMap;
-    private static final String TEST_EXAMPLE_RELATIVE_PATH = "src/test/java/examples";
+class TaskOperationsTest extends ExamplesParser {
+
+    private HashMap<String,Replacement> replacementMap;
 
     @BeforeEach
-    public void init() throws IOException {
-        parser = new Parser();
-        parser.parseDirectory(TEST_EXAMPLE_RELATIVE_PATH);
+    public void setUp() throws IOException {
+        init();
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 10);
         Replacement replacement = new ReplacementBuilder(node).build();
         node = getNodeWithId(parser.getCompilationUnitCopies(), 14);
@@ -43,17 +41,18 @@ class TaskOperationsTest {
         replacementMap = new HashMap<>();
         replacementMap.put(replacement.getId(), replacement);
         replacementMap.put(replacement2.getId(), replacement);
-
     }
 
     @Test
-    void testCreatingSolutionCodeDoesNotMutateOriginalNode(){
+    void testCreatingSolutionCodeDoesNotMutateCopies(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        BodyDeclaration<?> nodeClone = node.clone();
+        BodyDeclaration<?> nodeCopy = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        BodyDeclaration<?> nodeCopyClone = nodeCopy.clone();
         AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> solutionCode = task.createSolutionCode();
-        assertEquals(node, nodeClone);
-        assertNotEquals(node, solutionCode);
+        assertEquals(node, solutionCode);
+        assertEquals(nodeCopyClone, nodeCopy);
+        assertNotEquals(node, nodeCopy);
     }
 
     @Test
@@ -121,21 +120,25 @@ class TaskOperationsTest {
         assertStatementsWerePreserved(node, startCode, solutionStatements);
     }
 
+
+
     @Test
     void testCreatingStartCodeForReplaceSolutionTaskDoesNotAddImportsFromSamePackage(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
+        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId(6);
         ImportDeclaration todoImport = new ImportDeclaration("examples.TODO", false, false);
         CompilationUnit updatedFile = findFile(startCode);
         assertFalse(updatedFile.getImports().contains(todoImport));
     }
 
+    private BodyDeclaration<?> getStartCodeFromNodeWithId (int targetId){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
+        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        return task.createStartCode();
+    }
+
     @Test
     void testCreatingStartCodeForReplaceSolutionTaskAddsRequiredImports(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
+        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId(6);
         ImportDeclaration listImport = new ImportDeclaration("java.util.List", false, false);
         CompilationUnit updatedFile = findFile(startCode);
         assertTrue(updatedFile.getImports().contains(listImport));

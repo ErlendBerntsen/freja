@@ -12,6 +12,7 @@ import no.hvl.Parser;
 import no.hvl.exceptions.NoFileFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testUtils.ExamplesParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,15 +23,11 @@ import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
-class NodeUtilsTest {
-
-    Parser parser;
-    private static final String TEST_EXAMPLE_RELATIVE_PATH = "src/test/java/examples";
+class NodeUtilsTest extends ExamplesParser {
 
     @BeforeEach
-    public void init() throws IOException {
-        parser = new Parser();
-        parser.parseDirectory(TEST_EXAMPLE_RELATIVE_PATH);
+    public void setUp() throws IOException {
+        init();
     }
 
     @Test

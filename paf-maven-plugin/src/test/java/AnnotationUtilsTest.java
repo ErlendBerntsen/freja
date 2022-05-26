@@ -8,6 +8,7 @@ import no.hvl.annotations.CopyOption;
 import no.hvl.exceptions.MissingAnnotationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testUtils.ExamplesParser;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,15 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
 
-class AnnotationUtilsTest {
-
-    Parser parser;
-    private static final String TEST_EXAMPLE_RELATIVE_PATH = "src/test/java/examples";
+class AnnotationUtilsTest extends ExamplesParser {
 
     @BeforeEach
-    public void init() throws IOException {
-        parser = new Parser();
-        parser.parseDirectory(TEST_EXAMPLE_RELATIVE_PATH);
+    public void setUp() throws IOException {
+        init();
     }
 
     @Test

@@ -1,16 +1,16 @@
 package no.hvl.concepts.builders;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.concepts.tasks.AbstractTask;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
-import no.hvl.utilities.AnnotationNames;
-import no.hvl.utilities.AnnotationUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
+import static no.hvl.utilities.AnnotationUtils.*;
+import static no.hvl.utilities.NodeUtils.*;
 
 public class ExerciseBuilder {
 
@@ -27,29 +27,61 @@ public class ExerciseBuilder {
     }
 
     public Exercise build(){
-        fullNumberAsIntArray = AnnotationUtils.getNumberValueInImplementAnnotation(annotatedNode);
-        Exercise parentExerciseForTask = findParentExerciseOfTaskOrCreateNewParent(createdExercises, 0);
-        parentExerciseForTask.setFullNumberAsString(getNumberAsString());
-        parentExerciseForTask.setFile(findFile());
+        fullNumberAsIntArray = getNumberValueInImplementAnnotation(annotatedNode);
+        Exercise parentExerciseForTask = findParentExerciseOfTaskOrCreateNewParent();
+        parentExerciseForTask.setFile(findFile(annotatedNode));
         addTaskToParentExercise(parentExerciseForTask);
         return parentExerciseForTask;
     }
 
-    private Exercise findParentExerciseOfTaskOrCreateNewParent(List<Exercise> exercises, int indexInNumberArray){
-        Optional<Exercise> parentExercise = findParentExercise(exercises, indexInNumberArray);
-        return parentExercise.orElseGet(() -> createNewAncestorExercise(exercises, indexInNumberArray));
+    private Exercise findParentExerciseOfTaskOrCreateNewParent(){
+        Optional<Exercise> ancestorExercise =  findAncestorExercise(createdExercises);
+        if(ancestorExercise.isPresent()){
+            return findParentExercise(ancestorExercise.get(), 0);
+        }else{
+            return findParentExercise(createNewRootExercise(), 0);
+        }
     }
 
-    private Optional<Exercise> findParentExercise(List<Exercise> exercises, int indexInNumberArray) {
+    private Optional<Exercise> findAncestorExercise(List<Exercise> exercises){
         for(Exercise exercise : exercises){
-            if(isParentExercise(exercise, indexInNumberArray)){
+            if(isAncestorExercise(exercise, 0)){
                 return Optional.of(exercise);
-            }
-            if(isAncestorExercise(exercise, indexInNumberArray)){
-                return findParentExercise( exercise.getSubExercises(), ++indexInNumberArray);
             }
         }
         return Optional.empty();
+    }
+
+    private Exercise findParentExercise(Exercise ancestorExercise, int indexInNumberArray){
+        if(isParentExercise(ancestorExercise, indexInNumberArray)){
+            return ancestorExercise;
+        }
+        for(Exercise subExercise : ancestorExercise.getSubExercises()){
+            if(isAncestorExercise(subExercise, indexInNumberArray + 1)){
+                return findParentExercise(subExercise, indexInNumberArray + 1);
+            }
+        }
+        Exercise subExercise = createNewSubExercise(ancestorExercise);
+        return findParentExercise(subExercise, indexInNumberArray + 1);
+    }
+
+    private Exercise createNewSubExercise(Exercise parentExercise) {
+        Exercise subExercise = new Exercise();
+        parentExercise.addSubExercise(subExercise);
+        subExercise.setParentExercise(parentExercise);
+        int numberAmongSiblingExercises = parentExercise.getAmountOfSubExercises();
+        subExercise.setNumberAmongSiblingExercises(numberAmongSiblingExercises);
+        String fullNumber = parentExercise.getFullNumberAsString() + numberAmongSiblingExercises + "_";
+        subExercise.setFullNumberAsString(fullNumber);
+        return subExercise;
+    }
+
+    private Exercise createNewRootExercise(){
+        Exercise rootExercise = new Exercise();
+        rootExercise.setNumberAmongSiblingExercises(fullNumberAsIntArray[0]);
+        rootExercise.setFullNumberAsString(fullNumberAsIntArray[0] + "_");
+        createdExercises.add(rootExercise);
+        return rootExercise;
     }
 
     private boolean isParentExercise(Exercise exercise, int indexInNumberArray){
@@ -61,36 +93,6 @@ public class ExerciseBuilder {
 
     private boolean isAncestorExercise(Exercise exercise, int indexInNumberArray) {
         return exercise.getNumberAmongSiblingExercises() == fullNumberAsIntArray[indexInNumberArray];
-    }
-
-    private Exercise createNewAncestorExercise(List<Exercise> exercises, int indexInNumberArray) {
-        var ancestorExercise = new Exercise();
-        ancestorExercise.setNumberAmongSiblingExercises(fullNumberAsIntArray[indexInNumberArray]);
-        exercises.add(ancestorExercise);
-        if(isParentExercise(ancestorExercise, indexInNumberArray)){
-            return ancestorExercise;
-        }
-        return findParentExerciseOfTaskOrCreateNewParent(ancestorExercise.getSubExercises(), ++indexInNumberArray);
-    }
-
-
-    private String getNumberAsString() {
-        int[] number = AnnotationUtils.getNumberValueInImplementAnnotation(annotatedNode);
-        var exerciseNumberAsString = new StringBuilder();
-        for(int digit : number){
-            exerciseNumberAsString.append(digit);
-            exerciseNumberAsString.append("_");
-        }
-        return exerciseNumberAsString.toString();
-    }
-
-    private CompilationUnit findFile() {
-        Optional<CompilationUnit> file = annotatedNode.findCompilationUnit();
-        if(file.isPresent()){
-            return file.get();
-        }
-        throw new IllegalStateException(String.format("Could not find file of type annotated with @%s," +
-                ". Are you sure this type was parsed from a file?", AnnotationNames.IMPLEMENT_NAME));
     }
 
     private void addTaskToParentExercise(Exercise parentExerciseForTask) {

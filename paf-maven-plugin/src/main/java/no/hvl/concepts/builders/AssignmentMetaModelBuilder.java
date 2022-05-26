@@ -79,7 +79,6 @@ public class AssignmentMetaModelBuilder {
         return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));
     }
 
-
     private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
         List<Exercise> exercises = new ArrayList<>();
         for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithImplement){

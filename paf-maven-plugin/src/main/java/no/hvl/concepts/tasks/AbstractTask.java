@@ -12,7 +12,6 @@ public abstract class AbstractTask implements TaskOperations {
     private String fullNumberAsString;
     private CopyOption copyOption;
 
-
     protected AbstractTask(BodyDeclaration<?> node, String fullNumberAsString, CopyOption copyOption) {
         this.node = node;
         this.fullNumberAsString = fullNumberAsString;
@@ -48,4 +47,5 @@ public abstract class AbstractTask implements TaskOperations {
         removeSolutionStartAndEndStatementsFromNode(node);
         return node;
     }
+
 }

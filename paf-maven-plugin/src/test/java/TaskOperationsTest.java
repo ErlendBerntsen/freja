@@ -9,7 +9,6 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
-import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
@@ -19,7 +18,6 @@ import testUtils.ExamplesParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,18 +27,9 @@ import static testUtils.TestUtils.getNodeWithId;
 
 class TaskOperationsTest extends ExamplesParser {
 
-    private HashMap<String,Replacement> replacementMap;
-
     @BeforeEach
     public void setUp() throws IOException {
         init();
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 10);
-        Replacement replacement = new ReplacementBuilder(node).build();
-        node = getNodeWithId(parser.getCompilationUnitCopies(), 14);
-        Replacement replacement2 = new ReplacementBuilder(node).build();
-        replacementMap = new HashMap<>();
-        replacementMap.put(replacement.getId(), replacement);
-        replacementMap.put(replacement2.getId(), replacement);
     }
 
     @Test

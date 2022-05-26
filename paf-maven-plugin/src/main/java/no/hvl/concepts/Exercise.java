@@ -5,6 +5,7 @@ import no.hvl.concepts.tasks.AbstractTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Exercise {
 
@@ -14,11 +15,13 @@ public class Exercise {
     private List<AbstractTask> abstractTasks;
     private CompilationUnit file;
     private String fullNumberAsString;
+    private Optional<Exercise> parentExercise;
 
     public Exercise() {
         subExercises = new ArrayList<>();
         tasks = new ArrayList<>();
         abstractTasks = new ArrayList<>();
+        parentExercise = Optional.empty();
     }
 
     public int getNumberAmongSiblingExercises() {
@@ -69,19 +72,9 @@ public class Exercise {
         this.fullNumberAsString = fullNumberAsString;
     }
 
-    public String convertNumberArrayToString(int[] number){
-        var taskNumberString = new StringBuilder();
-        for(int digit : number){
-            taskNumberString.append(digit);
-            taskNumberString.append("_");
-        }
-        return taskNumberString.toString();
-    }
-
     public boolean hasTasks(){
         return !tasks.isEmpty();
     }
-
 
     public int getAmountOfTasks(){
         return tasks.size();
@@ -89,5 +82,37 @@ public class Exercise {
 
     public List<AbstractTask> getAbstractTasks() {
         return abstractTasks;
+    }
+
+    public void setAbstractTasks(List<AbstractTask> abstractTasks){
+        this.abstractTasks = abstractTasks;
+    }
+
+    public boolean hasAbstractTasks(){
+        return !abstractTasks.isEmpty();
+    }
+
+    public int getAmountOfAbstractTasks(){
+        return abstractTasks.size();
+    }
+
+    public int getAmountOfSubExercises(){
+        return subExercises.size();
+    }
+
+    public boolean hasParentExercise() {
+        return parentExercise.isPresent();
+    }
+
+    public Optional<Exercise> getParentExercise() {
+        return parentExercise;
+    }
+
+    public void setParentExercise(Exercise parentExercise) {
+        this.parentExercise = Optional.of(parentExercise);
+    }
+
+    public void addSubExercise(Exercise subExercise) {
+        subExercises.add(subExercise);
     }
 }

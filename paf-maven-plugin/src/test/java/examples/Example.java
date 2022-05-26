@@ -12,6 +12,10 @@ public class Example {
     @Implement(number = {1,2}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public int fieldVariable;
 
+    @TestId(17)
+    @Implement(number={4}, copyOption = no.hvl.annotations.CopyOption.REMOVE_EVERYTHING)
+    public int fullCopyOptionName;
+
     @TestId(2)
     public int noImplementAnnotation;
 

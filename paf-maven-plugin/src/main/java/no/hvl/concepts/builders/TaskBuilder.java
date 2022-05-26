@@ -5,6 +5,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.RemoveEverythingTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 
 import java.util.Map;
@@ -35,6 +36,9 @@ public class TaskBuilder {
         switch (copyOption){
             case REPLACE_SOLUTION :
                 return buildSolutionReplacementTask();
+
+            case REMOVE_EVERYTHING:
+                return new RemoveEverythingTask(nodeAnnotatedWithImplement, fullNumberAsString);
             default : throw new IllegalArgumentException(
                     String.format("Could not recognize copyOption: \"%s\"", copyOption.toString()));
         }
@@ -65,7 +69,7 @@ public class TaskBuilder {
     }
 
     private String getFullNumberAsString(int[] exerciseNumber){
-        int taskNumberInParentExercise = parentExercise.getAmountOfTasks() + 1;
+        int taskNumberInParentExercise = parentExercise.getAmountOfAbstractTasks() + 1;
         return convertNumberArrayToString(exerciseNumber, taskNumberInParentExercise);
     }
 

@@ -27,7 +27,11 @@ public class AnnotationUtils {
     public static CopyOption getCopyOptionValueInImplementAnnotation(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
             var expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_COPY_NAME);
-            return CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString());
+            if(expression.isFieldAccessExpr()){
+                return CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString());
+            }else{
+                return CopyOption.getCopy(expression.asNameExpr().getNameAsString());
+            }
         }
         throw new MissingAnnotationException(IMPLEMENT_COPY_NAME);
     }

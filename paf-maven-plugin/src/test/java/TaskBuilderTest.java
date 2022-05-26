@@ -1,11 +1,8 @@
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import no.hvl.Parser;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Exercise;
-import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
-import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.concepts.builders.SolutionBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
@@ -15,26 +12,19 @@ import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
 class TaskBuilderTest extends ExamplesParser {
-    private HashMap<String,Replacement> replacementMap;
 
     @BeforeEach
     public void setUp() throws IOException {
         init();
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 10);
-        Replacement replacement = new ReplacementBuilder(node).build();
-        replacementMap = new HashMap<>();
-        replacementMap.put(replacement.getId(), replacement);
     }
 
     //TODO
-    // Add test for replacement imports?
     //Add tests for build methods for:
     //    REMOVE_EVERYTHING
     //    REMOVE_BODY

@@ -35,6 +35,20 @@ class AnnotationUtilsTest extends ExamplesParser {
     }
 
     @Test
+    void testGettingCopyOptionValueWithStaticImportOfCopyOption(){
+        NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 15);
+        CopyOption copyOption = getCopyOptionValueInImplementAnnotation(node);
+        assertEquals(CopyOption.REMOVE_EVERYTHING, copyOption);
+    }
+
+    @Test
+    void testGettingCopyOptionWithFullPackageName(){
+        NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 17);
+        CopyOption copyOption = getCopyOptionValueInImplementAnnotation(node);
+        assertEquals(CopyOption.REMOVE_EVERYTHING, copyOption);
+    }
+
+    @Test
     void testGettingCopyOptionFromNodeNotAnnotatedWithImplement() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
         assertThrows(MissingAnnotationException.class, () -> getCopyOptionValueInImplementAnnotation(node));
@@ -196,5 +210,7 @@ class AnnotationUtilsTest extends ExamplesParser {
         removeAnnotationTypeFromNode(node, TEST_ID_ANNOTATION_NAME);
         assertFalse(node.isAnnotationPresent(TEST_ID_ANNOTATION_NAME));
     }
+
+
 
 }

@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
+import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.AbstractTask;
 
@@ -105,6 +106,9 @@ public class AssignmentBuilder {
         for(AbstractTask task : tasks){
             BodyDeclaration<?> oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
             BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task, oldTaskNode);
+            if(task.getCopyOption().equals(CopyOption.REMOVE_EVERYTHING)){
+                continue;
+            }
             updateTaskNode(oldTaskNode, newTaskNode);
         }
         return files;
@@ -160,8 +164,8 @@ public class AssignmentBuilder {
         if(parentNode.isPresent()){
             parentNode.get().replace(oldTaskNode, newTaskNode);
         }else{
-            throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s"
-                    , IMPLEMENT_NAME));
+            throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s:%n%s"
+                    , IMPLEMENT_NAME, oldTaskNode));
         }
     }
 

@@ -13,9 +13,9 @@ public class RemoveEverythingTask extends AbstractTask{
     }
 
     @Override
-    public BodyDeclaration<?> createStartCode(BodyDeclaration<?> noteToUpdate) {
-        noteToUpdate.remove();
-        return noteToUpdate;
+    public BodyDeclaration<?> createStartCode(BodyDeclaration<?> nodeToUpdate) {
+        nodeToUpdate.remove();
+        return nodeToUpdate;
     }
 
     @Override

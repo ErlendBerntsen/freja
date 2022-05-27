@@ -5,6 +5,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.RemoveBodyTask;
 import no.hvl.concepts.tasks.RemoveEverythingTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 
@@ -38,10 +39,13 @@ public class TaskBuilder {
                 return buildSolutionReplacementTask();
             case REMOVE_EVERYTHING:
                 return new RemoveEverythingTask(nodeAnnotatedWithImplement, fullNumberAsString);
+            case REMOVE_BODY:
+                return buildRemoveBodyTask();
             default : throw new IllegalArgumentException(
                     String.format("Could not recognize copyOption: \"%s\"", copyOption.toString()));
         }
     }
+
 
     private ReplaceSolutionTask buildSolutionReplacementTask() {
         String replacementId = getReplacementId();
@@ -66,6 +70,16 @@ public class TaskBuilder {
                             IMPLEMENT_COPY_NAME, copyOption.toString()));
         }
     }
+
+    private AbstractTask buildRemoveBodyTask() {
+        if (!nodeHasBlockStmt(nodeAnnotatedWithImplement)){
+            throw new IllegalArgumentException(
+                    String.format("The copyOption \"%s\" is not allowed on field variables," +
+                    " only on methods and constructors", CopyOption.REMOVE_BODY));
+        }
+        return new RemoveBodyTask(nodeAnnotatedWithImplement, fullNumberAsString);
+    }
+
 
     private String getFullNumberAsString(int[] exerciseNumber){
         int taskNumberInParentExercise = parentExercise.getAmountOfAbstractTasks() + 1;

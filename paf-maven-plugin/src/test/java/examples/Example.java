@@ -3,10 +3,7 @@ package examples;
 import no.hvl.annotations.*;
 import testUtils.TestId;
 
-@Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
 public class Example {
-
-
 
     @TestId(1)
     @Implement(number = {1,2}, copyOption = CopyOption.REMOVE_EVERYTHING)
@@ -19,10 +16,21 @@ public class Example {
     @TestId(2)
     public int noImplementAnnotation;
 
+    @TestId(24)
+    @Implement(number = {1},  copyOption = CopyOption.REMOVE_BODY)
+    public int fieldWithReplaceBodyCopyOption;
+
     @TestId(5)
     @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
     public Example(int fieldVariable) {
         this.fieldVariable = fieldVariable;
+    }
+
+    @TestId(23)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_BODY)
+    public Example(int fieldVariable, int fullCopyOptionName) {
+        this.fieldVariable = fieldVariable;
+        this.fullCopyOptionName = fullCopyOptionName;
     }
 
     @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
@@ -102,6 +110,13 @@ public class Example {
         SolutionStart s;
         x = "blablabla";
         SolutionEnd e;
+    }
+
+    @TestId(22)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_BODY)
+    public void bodyShouldBeRemoved(){
+        String x;
+        x = "blablabla";
     }
 
 

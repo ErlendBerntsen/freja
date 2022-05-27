@@ -7,11 +7,13 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.RemoveBodyTask;
 import no.hvl.concepts.tasks.RemoveEverythingTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 import org.junit.jupiter.api.BeforeEach;
@@ -251,6 +253,38 @@ class TaskOperationsTest extends ExamplesParser {
         RemoveEverythingTask task = (RemoveEverythingTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> startCode = task.createStartCode(node);
         assertFalse(parentNode.get().getChildNodes().contains(startCode));
+    }
+
+    @Test
+    void testCreatingStartCodeForRemoveBodyTaskOnMethod(){
+        BlockStmt codeBlock = createRemoveBodyTaskWithTestId(22);
+        assertTrue(codeBlock.isEmpty());
+    }
+
+    @Test
+    void testCreatingStartCodeForRemoveBodyTaskOnConstructor(){
+        BlockStmt codeBlock = createRemoveBodyTaskWithTestId(23);
+        assertTrue(codeBlock.isEmpty());
+    }
+
+    private BlockStmt createRemoveBodyTaskWithTestId(int testId){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), testId);
+        RemoveBodyTask task = (RemoveBodyTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        return getBlockStmtFromBodyDeclaration(startCode);
+    }
+
+    @Test
+    void testCreatingStartCodeForRemoveBodyTaskOnFieldVariable(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 24);
+        TaskBuilder taskBuilder =  new TaskBuilder(node, new Exercise(), replacementMap);
+        try{
+            taskBuilder.build();
+            fail("Should throw error");
+        }catch (IllegalArgumentException e){
+            assertEquals(String.format("The copyOption \"%s\" is not allowed on field variables," +
+                    " only on methods and constructors", CopyOption.REMOVE_BODY), e.getMessage());
+        }
     }
 
 }

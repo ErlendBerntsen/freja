@@ -4,10 +4,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
-import no.hvl.concepts.tasks.AbstractTask;
-import no.hvl.concepts.tasks.RemoveBodyTask;
-import no.hvl.concepts.tasks.RemoveEverythingTask;
-import no.hvl.concepts.tasks.ReplaceSolutionTask;
+import no.hvl.concepts.tasks.*;
 
 import java.util.Map;
 
@@ -41,9 +38,17 @@ public class TaskBuilder {
                 return new RemoveEverythingTask(nodeAnnotatedWithImplement, fullNumberAsString);
             case REMOVE_BODY:
                 return buildRemoveBodyTask();
+            case REMOVE_SOLUTION:
+                return buildRemoveSolutionTask();
             default : throw new IllegalArgumentException(
                     String.format("Could not recognize copyOption: \"%s\"", copyOption.toString()));
         }
+    }
+
+    private AbstractTask buildRemoveSolutionTask() {
+        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
+        Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
+        return new RemoveSolutionTask(nodeAnnotatedWithImplement, fullNumberAsString, solution);
     }
 
 

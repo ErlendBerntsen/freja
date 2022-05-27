@@ -12,12 +12,10 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.TaskBuilder;
-import no.hvl.concepts.tasks.AbstractTask;
-import no.hvl.concepts.tasks.RemoveBodyTask;
-import no.hvl.concepts.tasks.RemoveEverythingTask;
-import no.hvl.concepts.tasks.ReplaceSolutionTask;
+import no.hvl.concepts.tasks.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 import testUtils.ExamplesParser;
 
 import java.io.IOException;
@@ -66,17 +64,17 @@ class TaskOperationsTest extends ExamplesParser {
         }
     }
 
-    private void assertStatementsWerePreserved(BodyDeclaration<?> node, BodyDeclaration<?> solutionCode,
+    private void assertStatementsWerePreserved(BodyDeclaration<?> originalNode, BodyDeclaration<?> newNode,
                                                List<Statement> statementsThatShouldNotBePreserved) {
-        BlockStmt originalCodeBlock = getBlockStmtFromBodyDeclaration(node);
-        BlockStmt solutionCodeBlock = getBlockStmtFromBodyDeclaration(solutionCode);
-        NodeList<Statement> solutionStatements = solutionCodeBlock.getStatements();
+        BlockStmt originalCodeBlock = getBlockStmtFromBodyDeclaration(originalNode);
+        BlockStmt newCodeBlock = getBlockStmtFromBodyDeclaration(newNode);
+        NodeList<Statement> newStatements = newCodeBlock.getStatements();
         for(Statement originalStatement : originalCodeBlock.getStatements()){
             if(isEndStatement(originalStatement) || isStartStatement(originalStatement)
                     || statementsThatShouldNotBePreserved.contains(originalStatement)){
                 continue;
             }
-            assertTrue(solutionStatements.contains(originalStatement));
+            assertTrue(newStatements.contains(originalStatement));
         }
     }
 
@@ -222,20 +220,21 @@ class TaskOperationsTest extends ExamplesParser {
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
         BodyDeclaration<?> startCode = task.createStartCode(nodeToUpdate);
-        assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode);
+        assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode, Replacement.END_COMMENT);
     }
 
-    private void assertReplacementCodeHasEndTodoComment(Solution solution, BodyDeclaration<?> startCode){
+    private void assertReplacementCodeHasEndTodoComment(Solution solution, BodyDeclaration<?> startCode, String comment){
         List<Statement> solutionStatements = solution.getStatementsIncludingSolutionMarkers();
         int lastStatementIndex = solutionStatements.size() - 1;
         Statement lastStatement = solutionStatements.get(lastStatementIndex);
         BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
-        assertTrue(endCommentIsRightAfterReplacementCode(startCodeBlock.getOrphanComments(), lastStatement));
+        assertTrue(endCommentIsRightAfterReplacementCode(startCodeBlock.getOrphanComments(), lastStatement, comment));
     }
 
-    private boolean endCommentIsRightAfterReplacementCode(List<Comment> orphanCommentsInBody, Statement lastStatement){
+    private boolean endCommentIsRightAfterReplacementCode(List<Comment> orphanCommentsInBody, Statement lastStatement,
+                                                          String comment){
         for(Comment orphanComment : orphanCommentsInBody){
-            if(Replacement.END_COMMENT.equals(orphanComment.getContent()) &&
+            if(comment.equals(orphanComment.getContent()) &&
                 orphanComment.getTokenRange().equals(lastStatement.getTokenRange())){
                 return true;
             }
@@ -286,5 +285,52 @@ class TaskOperationsTest extends ExamplesParser {
                     " only on methods and constructors", CopyOption.REMOVE_BODY), e.getMessage());
         }
     }
+
+    @Test
+    void testCreatingRemoveSolutionStartCodeRemovesCorrectStatements(){
+        assertCorrectStatementsAreRemovedFromRemoveSolutionStartCode(25);
+    }
+
+    void assertCorrectStatementsAreRemovedFromRemoveSolutionStartCode(int targetId){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
+        RemoveSolutionTask task = (RemoveSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> startCode = task.createStartCode(nodeToUpdate);
+        assertStatementsWerePreserved(node, startCode, task.getSolution().getStatementsIncludingSolutionMarkers());
+        assertSolutionWasRemoved(task.getSolution(), startCode);
+    }
+
+    private void assertSolutionWasRemoved(Solution solution, BodyDeclaration<?> startCode) {
+        BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
+        for(Statement statement : solution.getStatementsIncludingSolutionMarkers()){
+            assertFalse(startCodeBlock.getStatements().contains(statement));
+        }
+    }
+
+    @Test
+    void testCreatingRemoveSolutionStartCodeInsertTodoComment(){
+        assertRemoveSolutionTodoCommentIsInserted(25);
+    }
+
+    void assertRemoveSolutionTodoCommentIsInserted(int targetId){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(),  targetId);
+        RemoveSolutionTask task = (RemoveSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        assertThrows(AssertionFailedError.class,
+                () ->assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode, Replacement.END_COMMENT));
+        assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode,
+                "TODO - Implement your solution here");
+    }
+
+    @Test
+    void testCreatingRemoveSolutionStartCodeWithDifferentSolutionMarking(){
+        assertCorrectStatementsAreRemovedFromRemoveSolutionStartCode(26);
+        assertRemoveSolutionTodoCommentIsInserted(26);
+        assertCorrectStatementsAreRemovedFromRemoveSolutionStartCode(27);
+        assertRemoveSolutionTodoCommentIsInserted(27);
+    }
+
+
+
 
 }

@@ -119,5 +119,33 @@ public class Example {
         x = "blablabla";
     }
 
+    @TestId(25)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_SOLUTION)
+    public void solutionShouldBeRemoved(){
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+    }
+
+    @TestId(26)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_SOLUTION)
+    public String solutionShouldBeRemoved2(){
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+        return x;
+    }
+
+    @TestId(27)
+    @Implement(number = {1}, copyOption = CopyOption.REMOVE_SOLUTION)
+    public void solutionShouldBeRemoved3(){
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+    }
+
 
 }

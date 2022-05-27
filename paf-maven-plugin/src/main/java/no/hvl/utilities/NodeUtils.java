@@ -7,13 +7,13 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.exceptions.NoFileFoundException;
@@ -120,7 +120,6 @@ public class NodeUtils {
         BlockStmt replacementCodeClone = replacement.getReplacementCode().clone();
         replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), replacementCodeClone);
         CompilationUnit file = findFile(codeBlock);
-
         for(ImportDeclaration requiredImport : replacement.getRequiredImports()){
             file.addImport(requiredImport);
         }
@@ -175,17 +174,41 @@ public class NodeUtils {
     }
 
     private static void insertEndTodoComment(BlockStmt codeBlock, List<Statement> statementsToBeReplaced) {
-        Statement lastStatementToBeReplaced = statementsToBeReplaced.get(statementsToBeReplaced.size()-1);
-        codeBlock.addOrphanComment(createEndComment(lastStatementToBeReplaced));
+        insertEndTodoComment(codeBlock, statementsToBeReplaced, Replacement.END_COMMENT);
     }
 
-    private static LineComment createEndComment(Statement statement){
+    private static void insertEndTodoComment(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
+                                             String comment) {
+        Statement lastStatementToBeReplaced = statementsToBeReplaced.get(statementsToBeReplaced.size()-1);
+        codeBlock.addOrphanComment(createEndComment(lastStatementToBeReplaced, comment));
+    }
+
+    private static LineComment createEndComment(Statement statement, String comment){
         Optional<TokenRange> statementTokenRange = statement.getTokenRange();
         if(statementTokenRange.isPresent()){
-            return new LineComment(statementTokenRange.get(), Replacement.END_COMMENT);
+            return new LineComment(statementTokenRange.get(), comment);
         }
         throw new IllegalArgumentException(String.format("The statement %s does not have a token range", statement));
     }
+
+    public static void removeSolution(BlockStmt codeBlock, Solution solution){
+        replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), new BlockStmt());
+        removeEndTodoComment(codeBlock);
+        insertEndTodoComment(codeBlock, solution.getStatementsIncludingSolutionMarkers(),
+                "TODO - Implement your solution here");
+    }
+
+    private static void removeEndTodoComment(BlockStmt codeBlock) {
+        Optional<Comment> endComment = Optional.empty();
+        for(Comment comment :codeBlock.getOrphanComments()){
+            if(comment.getContent().equals(Replacement.END_COMMENT)){
+                endComment = Optional.of(comment);
+                break;
+            }
+        }
+        endComment.ifPresent(codeBlock::removeOrphanComment);
+    }
+
 
     public static CompilationUnit findFile(Node node){
         Optional<CompilationUnit> file = node.findCompilationUnit();

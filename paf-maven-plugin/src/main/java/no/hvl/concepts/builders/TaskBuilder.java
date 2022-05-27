@@ -36,7 +36,6 @@ public class TaskBuilder {
         switch (copyOption){
             case REPLACE_SOLUTION :
                 return buildSolutionReplacementTask();
-
             case REMOVE_EVERYTHING:
                 return new RemoveEverythingTask(nodeAnnotatedWithImplement, fullNumberAsString);
             default : throw new IllegalArgumentException(

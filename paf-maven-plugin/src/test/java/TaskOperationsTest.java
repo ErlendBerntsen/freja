@@ -1,5 +1,6 @@
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.comments.Comment;
@@ -11,6 +12,7 @@ import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.RemoveEverythingTask;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -199,7 +201,7 @@ class TaskOperationsTest extends ExamplesParser {
     }
 
     @Test
-    void testCreatingStartCodeForReplaceSolutionTaskHasWithEndStatementHasEndTodoComment(){
+    void testCreatingStartCodeForReplaceSolutionTaskWithEndStatementHasEndTodoComment(){
         testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(6);
     }
 
@@ -237,6 +239,18 @@ class TaskOperationsTest extends ExamplesParser {
             }
         }
         return false;
+    }
+
+    @Test
+    void testCreatingStartCodeForRemoveEverythingTask(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
+        Optional<Node> parentNode = node.getParentNode();
+        if(parentNode.isEmpty()){
+            fail("The node must have a parent node");
+        }
+        RemoveEverythingTask task = (RemoveEverythingTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        assertFalse(parentNode.get().getChildNodes().contains(startCode));
     }
 
 }

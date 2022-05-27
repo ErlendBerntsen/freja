@@ -52,19 +52,6 @@ public class Assignment {
         this.exercises = exercises;
     }
 
-    public List<AbstractTask> getTasks(){
-        return getTasksFromExercises(exercises);
-    }
-
-    private List<AbstractTask> getTasksFromExercises(List<Exercise> exercises) {
-        List<AbstractTask> abstractTasks = new ArrayList<>();
-        for(Exercise exercise : exercises){
-            abstractTasks.addAll(exercise.getAbstractTasks());
-            abstractTasks.addAll(getTasksFromExercises(exercise.getSubExercises()));
-        }
-        return abstractTasks;
-    }
-
     public List<CompilationUnit> getParsedFiles() {
         return parsedFiles;
     }

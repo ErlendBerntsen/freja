@@ -2,7 +2,6 @@ package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.annotations.CopyOption;
-import no.hvl.utilities.NodeUtils;
 
 import static no.hvl.utilities.NodeUtils.*;
 
@@ -43,9 +42,9 @@ public abstract class AbstractTask implements TaskOperations {
     }
 
     @Override
-    public BodyDeclaration<?> createSolutionCode() {
-        removeSolutionStartAndEndStatementsFromNode(node);
-        return node;
+    public BodyDeclaration<?> createSolutionCode(BodyDeclaration<?> nodeToUpdate) {
+        removeSolutionStartAndEndStatementsFromNode(nodeToUpdate);
+        return nodeToUpdate;
     }
 
 }

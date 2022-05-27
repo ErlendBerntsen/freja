@@ -1,9 +1,6 @@
-import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.exceptions.ExerciseNumberException;
-import no.hvl.utilities.GeneralUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static no.hvl.utilities.GeneralUtils.*;
@@ -50,12 +47,6 @@ class GeneralUtilsTest {
     }
 
     @Test
-    void testIllegalExerciseNumbers(){
-
-    }
-
-
-    @Test
     void testBuildingAssigmentWithLegalExerciseNumbers(){
         List<int[]> exerciseNumbers = List.of(new int[]{1}, new int[]{2,1}, new int[]{2,1,1},
                 new int[]{2,2}, new int[]{3,1,1});
@@ -68,7 +59,7 @@ class GeneralUtilsTest {
         assertExceptionIsCorrect(exerciseNumbers, List.of(2), List.of(1));
         exerciseNumbers = List.of(new int[]{1,1,1}, new int[]{1,3});
         assertExceptionIsCorrect(exerciseNumbers, List.of(1,3), List.of(1,2));
-        exerciseNumbers = List.of(new int[]{1,1,1}, new int[]{1,1,2});
+        exerciseNumbers = List.of(new int[]{1,1}, new int[]{1,1,2});
         assertExceptionIsCorrect(exerciseNumbers, List.of(1,1,2), List.of(1,1,1));
         exerciseNumbers = List.of(new int[]{1,1,1,5});
         assertExceptionIsCorrect(exerciseNumbers, List.of(1,1,1,5), List.of(1,1,1,4));
@@ -78,6 +69,7 @@ class GeneralUtilsTest {
                                           List<Integer> exerciseNumber, List<Integer> requiredNumber){
         try{
             checkIfExerciseNumbersAreLegal(exerciseNumbers);
+            fail("Exception was not thrown");
         }catch (ExerciseNumberException e){
             assertEquals(String.format("The assignment has an exercise with the number %s" +
                     " without having an exercise with the number %s", exerciseNumber, requiredNumber),
@@ -90,6 +82,7 @@ class GeneralUtilsTest {
         List<int[]> exerciseNumbers = List.of(new int[]{0});
         try{
             checkIfExerciseNumbersAreLegal(exerciseNumbers);
+            fail("Exception was not thrown");
         }catch (ExerciseNumberException e){
             assertEquals("The assignment has an exercise with the number [0]." +
                             " Exercise numbers are not zero-based and starts counting at 1.",
@@ -102,6 +95,7 @@ class GeneralUtilsTest {
         List<int[]> exerciseNumbers = List.of(new int[]{1,0,1});
         try{
             checkIfExerciseNumbersAreLegal(exerciseNumbers);
+            fail("Exception was not thrown");
         }catch (ExerciseNumberException e){
             assertEquals("The assignment has an exercise with the number [1, 0]." +
                             " Exercise numbers are not zero-based and starts counting at 1.",

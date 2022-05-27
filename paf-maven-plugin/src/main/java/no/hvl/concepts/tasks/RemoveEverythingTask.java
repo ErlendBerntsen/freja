@@ -2,7 +2,6 @@ package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.annotations.CopyOption;
-import no.hvl.concepts.Exercise;
 
 import java.util.Objects;
 
@@ -14,8 +13,8 @@ public class RemoveEverythingTask extends AbstractTask{
     }
 
     @Override
-    public BodyDeclaration<?> createStartCode() {
-        return getNode();
+    public BodyDeclaration<?> createStartCode(BodyDeclaration<?> noteToUpdate) {
+        return noteToUpdate;
     }
 
     @Override

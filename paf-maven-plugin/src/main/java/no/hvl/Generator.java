@@ -46,63 +46,7 @@ public class Generator {
 //        descriptionWriter.createFiles();
     }
 
-    private void createStartCodeJavaFiles(Assignment assignment){
-        //TODO
-        //Move to AssignmentMetaModelBuilder so that AssignmentMetaModel can be an immutable record?
-        modifyJavaFiles(assignment.getStartCodeFiles(), assignment.getTasks(), false);
-    }
 
-    private void createSolutionCodeJavaFiles(Assignment assignment){
-        modifyJavaFiles(assignment.getSolutionCodeFiles(), assignment.getTasks(), true);
-    }
-
-    private void modifyJavaFiles(List<CompilationUnit> files, List<AbstractTask> tasks, boolean isSolutionCode){
-        removePafInformation(files);
-        for(AbstractTask task : tasks){
-            Node oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
-            BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task);
-            updateTaskNode(oldTaskNode, newTaskNode);
-        }
-    }
-
-    private void removePafInformation(List<CompilationUnit> files){
-        removeNodesAnnotatedWithRemove(files);
-        removePafImports(files);
-    }
-
-    private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
-        //TODO Remember that ProjectWriter need to know what file names to remove
-        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
-                getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
-        removeNodesFromFiles(files, nodesAnnotatedWithRemove);
-    }
-
-    private void removePafImports(List<CompilationUnit> files) {
-        for(CompilationUnit file : files){
-            removeAnnotationImportsFromFile(file);
-        }
-    }
-
-    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, AbstractTask task) {
-        BodyDeclaration<?> newTaskNode;
-        if(isSolutionCode){
-            newTaskNode = task.createSolutionCode();
-        }else{
-            newTaskNode = task.createStartCode();
-        }
-        removeAnnotationTypeFromNode(newTaskNode, IMPLEMENT_NAME);
-        return newTaskNode;
-    }
-
-    private void updateTaskNode(Node oldTaskNode, Node newTaskNode){
-        Optional<Node> parentNode = oldTaskNode.getParentNode();
-        if(parentNode.isPresent()){
-            parentNode.get().replace(oldTaskNode, newTaskNode);
-        }else{
-            throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s"
-                    , IMPLEMENT_NAME));
-        }
-    }
 
 
 

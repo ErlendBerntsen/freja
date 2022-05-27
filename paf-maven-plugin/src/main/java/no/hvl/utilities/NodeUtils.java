@@ -117,7 +117,8 @@ public class NodeUtils {
     }
 
     public static void replaceSolution(BlockStmt codeBlock, Solution solution, Replacement replacement){
-        replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), replacement.getReplacementCode());
+        BlockStmt replacementCodeClone = replacement.getReplacementCode().clone();
+        replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), replacementCodeClone);
         CompilationUnit file = findFile(codeBlock);
 
         for(ImportDeclaration requiredImport : replacement.getRequiredImports()){

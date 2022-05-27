@@ -33,14 +33,14 @@ class TaskOperationsTest extends ExamplesParser {
     }
 
     @Test
-    void testCreatingSolutionCodeDoesNotMutateCopies(){
+    void testCreatingSolutionCodeDoesNotMutateOriginalNode(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        BodyDeclaration<?> nodeClone = node.clone();
         BodyDeclaration<?> nodeCopy = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        BodyDeclaration<?> nodeCopyClone = nodeCopy.clone();
         AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> solutionCode = task.createSolutionCode();
-        assertEquals(node, solutionCode);
-        assertEquals(nodeCopyClone, nodeCopy);
+        BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeCopy);
+        assertEquals(nodeCopy, solutionCode);
+        assertEquals(node, nodeClone);
         assertNotEquals(node, nodeCopy);
     }
 
@@ -48,7 +48,8 @@ class TaskOperationsTest extends ExamplesParser {
     void testCreatingSolutionCodeRemovesCorrectStatements(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> solutionCode = task.createSolutionCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeToUpdate);
         assertSolutionStartEndStatementsWereRemoved(solutionCode);
         assertStatementsWerePreserved(node, solutionCode, new ArrayList<>());
     }
@@ -79,7 +80,8 @@ class TaskOperationsTest extends ExamplesParser {
     void testCreatingSolutionCodePreservesComments(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 3);
         AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> solutionCode = task.createSolutionCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeToUpdate);
         assertCommentsWerePreserved(node, solutionCode);
     }
 
@@ -88,14 +90,14 @@ class TaskOperationsTest extends ExamplesParser {
     }
 
     @Test
-    void testCreatingStartCodeForReplaceSolutionTaskDoesNotMutateCopies(){
+    void testCreatingStartCodeForReplaceSolutionTaskDoesNotMutateOriginalNode(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
+        BodyDeclaration<?> nodeClone = node.clone();
         BodyDeclaration<?> nodeCopy = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        BodyDeclaration<?> nodeCopyClone = nodeCopy.clone();
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
-        assertEquals(nodeCopy, nodeCopyClone);
-        assertEquals(node, startCode);
+        BodyDeclaration<?> startCode = task.createStartCode(nodeCopy);
+        assertEquals(nodeCopy, startCode);
+        assertEquals(node, nodeClone);
         assertNotEquals(nodeCopy, node);
     }
 
@@ -103,7 +105,8 @@ class TaskOperationsTest extends ExamplesParser {
     void testCreatingStartCodeForReplaceSolutionTaskRemovesCorrectStatements(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> startCode = task.createStartCode(nodeToUpdate);
         assertSolutionStartEndStatementsWereRemoved(startCode);
         List<Statement> solutionStatements = task.getSolution().getStatementsIncludingSolutionMarkers();
         assertStatementsWerePreserved(node, startCode, solutionStatements);
@@ -120,7 +123,8 @@ class TaskOperationsTest extends ExamplesParser {
     private BodyDeclaration<?> getStartCodeFromNodeWithId (int targetId){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
         AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
-        return task.createStartCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        return task.createStartCode(nodeToUpdate);
     }
 
     @Test
@@ -136,10 +140,12 @@ class TaskOperationsTest extends ExamplesParser {
         List<CompilationUnit> files = parser.getCompilationUnitCopies();
         BodyDeclaration<?> node = getNodeWithId(files, 6);
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        task.createStartCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        task.createStartCode(nodeToUpdate);
         BodyDeclaration<?> node2 = getNodeWithId(files, 13);
         ReplaceSolutionTask task2 = (ReplaceSolutionTask) new TaskBuilder(node2, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode2 = task2.createStartCode();
+        BodyDeclaration<?> nodeToUpdate2 = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> startCode2 = task2.createStartCode(nodeToUpdate2);
         CompilationUnit updatedFile = findFile(startCode2);
         assertTrue(hasExactlyOneListImport(updatedFile));
     }
@@ -162,18 +168,18 @@ class TaskOperationsTest extends ExamplesParser {
     void testCreatingStartCodeForReplaceSolutionTaskHasStartTodoComment(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> startCode = task.createStartCode(nodeToUpdate);
         assertReplacementCodeHasStartTodoComment(task, startCode);
     }
 
     private void assertReplacementCodeHasStartTodoComment(ReplaceSolutionTask task, BodyDeclaration<?> startCode){
         Replacement replacement = task.getReplacement();
         Statement firstStatement = getFirstStatementOfReplacementCode(replacement);
-        Statement firstStatementInStartCode = findStatementInStartCode(startCode, firstStatement);
         LineComment startComment = new LineComment(Replacement.START_COMMENT);
-        Optional<Comment> firstStatementComment = firstStatementInStartCode.getComment();
-        assertTrue(firstStatementComment.isPresent());
-        assertEquals(startComment, firstStatementComment.get());
+        firstStatement.setComment(startComment);
+        Statement firstStatementInStartCode = findStatementInStartCode(startCode, firstStatement);
+        assertEquals(firstStatement, firstStatementInStartCode);
     }
 
     private Statement findStatementInStartCode(BodyDeclaration<?> startCode, Statement firstStatement) {
@@ -210,7 +216,8 @@ class TaskOperationsTest extends ExamplesParser {
     private void testCreatingStartCodeForReplaceSolutionTaskHasEndTodoComment(int testId){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), testId);
         ReplaceSolutionTask task = (ReplaceSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
-        BodyDeclaration<?> startCode = task.createStartCode();
+        BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
+        BodyDeclaration<?> startCode = task.createStartCode(nodeToUpdate);
         assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode);
     }
 

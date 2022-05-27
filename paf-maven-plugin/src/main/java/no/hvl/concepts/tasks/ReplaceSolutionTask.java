@@ -21,11 +21,10 @@ public class ReplaceSolutionTask extends AbstractTask {
     }
 
     @Override
-    public BodyDeclaration<?> createStartCode() {
-        BodyDeclaration<?> node = getNode();
-        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(node);
+    public BodyDeclaration<?> createStartCode(BodyDeclaration<?> nodeToUpdate) {
+        BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeToUpdate);
         replaceSolution(codeBlockWithSolution, solution, replacement);
-        return node;
+        return nodeToUpdate;
     }
 
     public Solution getSolution() {

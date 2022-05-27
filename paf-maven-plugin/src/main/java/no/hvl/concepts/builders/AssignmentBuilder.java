@@ -1,26 +1,29 @@
 package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
 import no.hvl.concepts.*;
-import no.hvl.utilities.AnnotationUtils;
-import no.hvl.utilities.GeneralUtils;
+import no.hvl.concepts.tasks.AbstractTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
 import static no.hvl.utilities.GeneralUtils.*;
+import static no.hvl.utilities.NodeUtils.findBodyDeclarationCopyInFiles;
+import static no.hvl.utilities.NodeUtils.removeNodesFromFiles;
 
 public class AssignmentBuilder {
 
     private final Parser parser;
-    List<CompilationUnit> parsedFiles;
+    private List<CompilationUnit> parsedFiles;
     private HashMap<String, Replacement> replacementMap;
+    private List<Exercise> exercises;
 
     public AssignmentBuilder(Parser parser) {
         this.parser = parser;
@@ -30,10 +33,10 @@ public class AssignmentBuilder {
         Assignment assignment = new Assignment();
         parsedFiles = parser.getCompilationUnitCopies();
         assignment.setParsedFiles(parsedFiles);
-        assignment.setStartCodeFiles(parser.getCompilationUnitCopies());
-        assignment.setSolutionCodeFiles(parser.getCompilationUnitCopies());
         assignment.setReplacements(findReplacements());
         assignment.setExercises(findExercises());
+        assignment.setStartCodeFiles(createStartCode());
+        assignment.setSolutionCodeFiles(createSolutionCode());
         return assignment;
     }
 
@@ -80,11 +83,86 @@ public class AssignmentBuilder {
     }
 
     private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
-        List<Exercise> exercises = new ArrayList<>();
+        exercises = new ArrayList<>();
         for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithImplement){
             new ExerciseBuilder(annotatedNode, exercises, replacementMap).build();
         }
         return exercises;
+    }
+
+    private List<CompilationUnit> createStartCode(){
+        return modifyJavaFiles(false);
+    }
+
+    private List<CompilationUnit> createSolutionCode(){
+        return modifyJavaFiles(true);
+    }
+
+    private List<CompilationUnit> modifyJavaFiles(boolean isSolutionCode){
+        List<AbstractTask> tasks = getTasksFromExercises(exercises);
+        List<CompilationUnit> files = parser.getCompilationUnitCopies();
+        removePafInformation(files);
+        for(AbstractTask task : tasks){
+            BodyDeclaration<?> oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
+            BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task, oldTaskNode);
+            updateTaskNode(oldTaskNode, newTaskNode);
+        }
+        return files;
+    }
+
+    private List<AbstractTask> getTasksFromExercises(List<Exercise> exercises) {
+        List<AbstractTask> abstractTasks = new ArrayList<>();
+        for(Exercise exercise : exercises){
+            abstractTasks.addAll(exercise.getAbstractTasks());
+            abstractTasks.addAll(getTasksFromExercises(exercise.getSubExercises()));
+        }
+        return abstractTasks;
+    }
+
+    private void removePafInformation(List<CompilationUnit> files){
+        removeNodesAnnotatedWithRemove(files);
+        removeReplacementCodeAnnotations(files);
+        removePafImports(files);
+    }
+
+    private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
+        //TODO Remember that ProjectWriter need to know what file names to remove
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
+                getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
+        removeNodesFromFiles(files, nodesAnnotatedWithRemove);
+    }
+
+    private void removeReplacementCodeAnnotations(List<CompilationUnit> files) {
+        List<BodyDeclaration<?>> nodes = getAllNodesInFilesAnnotatedWith(files, REPLACEMENT_CODE_NAME);
+        for(BodyDeclaration<?> node : nodes){
+            removeAnnotationTypeFromNode(node, REPLACEMENT_CODE_NAME);
+        }
+    }
+
+    private void removePafImports(List<CompilationUnit> files) {
+        for(CompilationUnit file : files){
+            removeAnnotationImportsFromFile(file);
+        }
+    }
+
+    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, AbstractTask task, BodyDeclaration<?> newTaskNode) {
+        if(isSolutionCode){
+            newTaskNode = task.createSolutionCode(newTaskNode);
+        }else{
+            newTaskNode = task.createStartCode(newTaskNode);
+        }
+        removeAnnotationTypeFromNode(newTaskNode, IMPLEMENT_NAME);
+        return newTaskNode;
+    }
+
+    private void updateTaskNode(Node oldTaskNode, Node newTaskNode){
+        Optional<Node> parentNode = oldTaskNode.getParentNode();
+        if(parentNode.isPresent()){
+            parentNode.get().replace(oldTaskNode, newTaskNode);
+        }else{
+            throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s"
+                    , IMPLEMENT_NAME));
+        }
     }
 
 }

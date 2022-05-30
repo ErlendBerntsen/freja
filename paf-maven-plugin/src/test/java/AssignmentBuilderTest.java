@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static no.hvl.utilities.AnnotationNames.*;
@@ -16,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AssignmentBuilderTest {
 
-    Parser parser;
+    private Parser parser;
+    private List<String> filesToRemove = List.of("Assignment3RemoveClass", "Assignment3RemoveEnum",
+            "Assignment3RemoveInterface", "Assignment3RemoveAnnotation");
 
     @BeforeEach
     void setUp() throws IOException {
@@ -46,7 +50,22 @@ public class AssignmentBuilderTest {
         assertTrue(nodesAnnotatedWithRemove.isEmpty());
         assertEquals(1, files.size());
         for(CompilationUnit file : files){
-            assertTrue(file.getClassByName("Assignment3RemoveClass").isEmpty());
+            assertTrue(file.getClassByName("Assignment3Exercises").isPresent());
+        }
+    }
+
+    @Test
+    void testClassesAnnotatedWithRemoveAreAddedToList() throws IOException {
+        parser.parseDirectory("src/test/java/examples/assignment3");
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        HashSet<String> fileNamesToRemove = assignment.getFileNamesToRemove();
+        assertEquals(4, fileNamesToRemove.size());
+        List<String> filesToRemoveWithJavaExtension = new ArrayList<>();
+        for(String file : filesToRemove){
+            filesToRemoveWithJavaExtension.add(file + ".java");
+        }
+        for(String fileName : fileNamesToRemove){
+            assertTrue(filesToRemoveWithJavaExtension.contains(fileName));
         }
     }
 

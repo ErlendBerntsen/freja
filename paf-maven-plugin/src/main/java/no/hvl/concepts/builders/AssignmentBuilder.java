@@ -8,10 +8,7 @@ import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.AbstractTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
@@ -25,6 +22,7 @@ public class AssignmentBuilder {
     private List<CompilationUnit> parsedFiles;
     private HashMap<String, Replacement> replacementMap;
     private List<Exercise> exercises;
+    private HashSet<String> fileNamesToRemove;
 
     public AssignmentBuilder(Parser parser) {
         this.parser = parser;
@@ -38,6 +36,7 @@ public class AssignmentBuilder {
         assignment.setExercises(findExercises());
         assignment.setStartCodeFiles(createStartCode());
         assignment.setSolutionCodeFiles(createSolutionCode());
+        assignment.setFileNamesToRemove(fileNamesToRemove);
         return assignment;
     }
 
@@ -130,10 +129,8 @@ public class AssignmentBuilder {
     }
 
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
-        //TODO Remember that ProjectWriter need to know what file names to remove
-        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
-                getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
-        removeNodesFromFiles(files, nodesAnnotatedWithRemove);
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove = getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
+        fileNamesToRemove = removeNodesFromFiles(files, nodesAnnotatedWithRemove);
     }
 
     private void removeReplacementCodeAnnotations(List<CompilationUnit> files) {

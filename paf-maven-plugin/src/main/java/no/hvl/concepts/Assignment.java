@@ -16,6 +16,7 @@ public class Assignment {
     private List<CompilationUnit> solutionCodeFiles;
     private List<Replacement> replacements;
     private List<Exercise> exercises;
+    private HashSet<String> fileNamesToRemove;
 
     public Assignment(){
     }
@@ -74,5 +75,13 @@ public class Assignment {
 
     public void setSolutionCodeFiles(List<CompilationUnit> solutionCodeFiles) {
         this.solutionCodeFiles = solutionCodeFiles;
+    }
+
+    public HashSet<String> getFileNamesToRemove() {
+        return fileNamesToRemove;
+    }
+
+    public void setFileNamesToRemove(HashSet<String> fileNamesToRemove) {
+        this.fileNamesToRemove = fileNamesToRemove;
     }
 }

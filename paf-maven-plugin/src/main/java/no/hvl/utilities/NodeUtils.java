@@ -218,24 +218,29 @@ public class NodeUtils {
         throw new NoFileFoundException(node);
     }
 
-
-    //TODO remove methods below?
     public static HashSet<String> removeNodesFromFiles
             (List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
         HashSet<String> fileNamesToRemove = new HashSet<>();
-        nodesToRemove.forEach(node -> {
-            if(node.isTypeDeclaration()){
-                var compilationUnitMaybe = node.findCompilationUnit();
-                if(compilationUnitMaybe.isPresent()){
-                    fileNamesToRemove.add(compilationUnitMaybe.get().getStorage().get().getFileName());
-                    //TODO maybe create copy instead?
-                    files.remove(compilationUnitMaybe.get());
-                }
-            }
+        for(BodyDeclaration<?> node : nodesToRemove){
+            saveFileNameIfTypeDeclaration(node, fileNamesToRemove, files);
             node.remove();
-
-        });
+        }
         return fileNamesToRemove;
+    }
+
+    private static void saveFileNameIfTypeDeclaration(BodyDeclaration<?> node, HashSet<String> fileNamesToRemove,
+                                                      List<CompilationUnit> files){
+        if(node.isTypeDeclaration()){
+            CompilationUnit file = findFile(node);
+            Optional<CompilationUnit.Storage> fileStorage = file.getStorage();
+            if(fileStorage.isPresent()){
+                fileNamesToRemove.add(fileStorage.get().getFileName());
+                files.remove(file);
+            }
+            else{
+                throw new IllegalStateException(String.format("Could not find the storage of the file: %n%s", file));
+            }
+        }
     }
 
     public static CallableDeclaration<?> castToCallableDeclaration(BodyDeclaration<?> bodyDeclaration){

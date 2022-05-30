@@ -14,7 +14,7 @@ public class Main {
 
 
     public static void main (String[] args) throws IOException {
-        Generator generator = new Generator(ASSIGNMENT_PROJECT_PATH_DESKTOP, TARGET_PATH_DESKTOP);
+        Generator generator = new Generator(ASSIGNMENT_PROJECT_PATH_LAPTOP, TARGET_PATH_LAPTOP);
         generator.generate();
     }
 

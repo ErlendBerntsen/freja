@@ -10,7 +10,7 @@ import static no.hvl.utilities.NodeUtils.removeSolution;
 
 public class RemoveSolutionTask extends AbstractTask{
     public static final CopyOption copyOption = CopyOption.REMOVE_SOLUTION;
-    private Solution solution;
+    private final Solution solution;
 
     public RemoveSolutionTask (BodyDeclaration<?> node, String fullNumberAsString, Solution solution) {
         super(node, fullNumberAsString, copyOption);

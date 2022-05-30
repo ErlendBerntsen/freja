@@ -18,7 +18,19 @@ public class Example {
 
     @TestId(24)
     @Implement(number = {1},  copyOption = CopyOption.REMOVE_BODY)
+    public int fieldWithRemoveBodyCopyOption;
+
+    @TestId(29)
+    @Implement(number = {1},  copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
     public int fieldWithReplaceBodyCopyOption;
+
+    @TestId(31)
+    @Implement(number = {1},  copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    public int fieldWithReplaceSolutionCopyOption;
+
+    @TestId(32)
+    @Implement(number = {1},  copyOption = CopyOption.REMOVE_SOLUTION)
+    public int fieldWithRemoveSolutionCopyOption;
 
     @TestId(5)
     @Implement(number = {1}, copyOption = CopyOption.REMOVE_EVERYTHING)
@@ -147,5 +159,16 @@ public class Example {
         SolutionEnd e;
     }
 
+    @TestId(28)
+    @Implement(number = {1}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    public void bodyShouldBeReplaced(){
+        String x;
+    }
+
+    @TestId(30)
+    @Implement(number = {1},  copyOption = CopyOption.REPLACE_BODY)
+    public void replaceBodyCopyOptionWithoutReplacementId(){
+        String x;
+    }
 
 }

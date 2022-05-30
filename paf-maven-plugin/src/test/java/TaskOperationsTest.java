@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.getNodeWithId;
@@ -243,6 +244,24 @@ class TaskOperationsTest extends ExamplesParser {
     }
 
     @Test
+    void testCreatingStartCodeForReplaceSolutionOnFieldVariable(){
+        testCreatingFieldVariableStartCode(31, CopyOption.REPLACE_SOLUTION);
+    }
+
+    private void testCreatingFieldVariableStartCode(int targetId, CopyOption copyOption){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
+        TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
+        try{
+            taskBuilder.build();
+            fail("Should throw exception");
+        }catch (Exception e){
+            assertTrue(e instanceof IllegalArgumentException);
+            assertEquals(e.getMessage(), String.format("The copyOption \"%s\" is not allowed on field variables," +
+                    " only on methods and constructors", copyOption));
+        }
+    }
+
+    @Test
     void testCreatingStartCodeForRemoveEverythingTask(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
         Optional<Node> parentNode = node.getParentNode();
@@ -275,15 +294,7 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreatingStartCodeForRemoveBodyTaskOnFieldVariable(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 24);
-        TaskBuilder taskBuilder =  new TaskBuilder(node, new Exercise(), replacementMap);
-        try{
-            taskBuilder.build();
-            fail("Should throw error");
-        }catch (IllegalArgumentException e){
-            assertEquals(String.format("The copyOption \"%s\" is not allowed on field variables," +
-                    " only on methods and constructors", CopyOption.REMOVE_BODY), e.getMessage());
-        }
+        testCreatingFieldVariableStartCode(24, CopyOption.REMOVE_BODY);
     }
 
     @Test
@@ -328,6 +339,42 @@ class TaskOperationsTest extends ExamplesParser {
         assertRemoveSolutionTodoCommentIsInserted(26);
         assertCorrectStatementsAreRemovedFromRemoveSolutionStartCode(27);
         assertRemoveSolutionTodoCommentIsInserted(27);
+    }
+
+    @Test
+    void testCreatingReplaceBodyStartCode(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 28);
+        ReplaceBodyTask task = (ReplaceBodyTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
+        BlockStmt replacementCodeBlock = task.getReplacement().getReplacementCode();
+        assertEquals(replacementCodeBlock, startCodeBlock);
+    }
+
+    @Test
+    void testCreateRemoveSolutionStartCodeWithFieldVariable(){
+        testCreatingFieldVariableStartCode(32, CopyOption.REMOVE_SOLUTION);
+    }
+
+    @Test
+    void testCreateReplaceBodyStartCodeWithFieldVariable(){
+        testCreatingFieldVariableStartCode(29, CopyOption.REPLACE_BODY);
+    }
+
+    @Test
+    void testCreateReplaceBodyStartCodeWithoutReplacementId(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 30);
+        TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
+        try{
+            taskBuilder.build();
+            fail("Should throw exception");
+        }catch (Exception e){
+            assertEquals(IllegalStateException.class, e.getClass());
+            assertEquals(e.getMessage(),
+                    String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
+                    IMPLEMENT_ID_NAME, IMPLEMENT_NAME,
+                    IMPLEMENT_COPY_NAME, CopyOption.REPLACE_BODY));
+        }
     }
 
 

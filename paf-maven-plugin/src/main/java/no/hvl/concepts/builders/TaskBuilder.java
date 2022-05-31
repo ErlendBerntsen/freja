@@ -27,7 +27,7 @@ public class TaskBuilder {
         this.replacementMap = replacementMap;
     }
 
-    public AbstractTask build(){
+    public Task build(){
         copyOption = getCopyOptionValueInImplementAnnotation(nodeAnnotatedWithImplement);
         int[] exerciseNumber = getNumberValueInImplementAnnotation(nodeAnnotatedWithImplement);
         fullNumberAsString = getFullNumberAsString(exerciseNumber);
@@ -40,13 +40,13 @@ public class TaskBuilder {
         };
     }
 
-    private AbstractTask buildReplaceBodyTask() {
+    private Task buildReplaceBodyTask() {
         throwExceptionIfNoBlockStmt();
         Replacement replacement = getReplacement();
         return new ReplaceBodyTask(nodeAnnotatedWithImplement, fullNumberAsString, replacement);
     }
 
-    private AbstractTask buildRemoveSolutionTask() {
+    private Task buildRemoveSolutionTask() {
         throwExceptionIfNoBlockStmt();
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeAnnotatedWithImplement);
         Solution solution = new SolutionBuilder(codeBlockWithSolution).build();
@@ -83,7 +83,7 @@ public class TaskBuilder {
         }
     }
 
-    private AbstractTask buildRemoveBodyTask() {
+    private Task buildRemoveBodyTask() {
         throwExceptionIfNoBlockStmt();
         return new RemoveBodyTask(nodeAnnotatedWithImplement, fullNumberAsString);
     }
@@ -98,7 +98,7 @@ public class TaskBuilder {
 
 
     private String getFullNumberAsString(int[] exerciseNumber){
-        int taskNumberInParentExercise = parentExercise.getAmountOfAbstractTasks() + 1;
+        int taskNumberInParentExercise = parentExercise.getAmountOfTasks() + 1;
         return convertNumberArrayToString(exerciseNumber, taskNumberInParentExercise);
     }
 

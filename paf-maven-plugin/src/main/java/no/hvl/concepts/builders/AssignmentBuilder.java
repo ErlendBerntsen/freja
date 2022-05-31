@@ -6,15 +6,14 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
-import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.Task;
 
 import java.util.*;
 
 import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
 import static no.hvl.utilities.GeneralUtils.*;
-import static no.hvl.utilities.NodeUtils.findBodyDeclarationCopyInFiles;
-import static no.hvl.utilities.NodeUtils.removeNodesFromFiles;
+import static no.hvl.utilities.NodeUtils.*;
 
 public class AssignmentBuilder {
 
@@ -99,10 +98,10 @@ public class AssignmentBuilder {
     }
 
     private List<CompilationUnit> modifyJavaFiles(boolean isSolutionCode){
-        List<AbstractTask> tasks = getTasksFromExercises(exercises);
+        List<Task> tasks = getTasksFromExercises(exercises);
         List<CompilationUnit> files = parser.getCompilationUnitCopies();
         removePafInformation(files);
-        for(AbstractTask task : tasks){
+        for(Task task : tasks){
             BodyDeclaration<?> oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
             BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task, oldTaskNode);
             if(task.getCopyOption().equals(CopyOption.REMOVE_EVERYTHING)){
@@ -113,13 +112,13 @@ public class AssignmentBuilder {
         return files;
     }
 
-    private List<AbstractTask> getTasksFromExercises(List<Exercise> exercises) {
-        List<AbstractTask> abstractTasks = new ArrayList<>();
+    private List<Task> getTasksFromExercises(List<Exercise> exercises) {
+        List<Task> tasks = new ArrayList<>();
         for(Exercise exercise : exercises){
-            abstractTasks.addAll(exercise.getAbstractTasks());
-            abstractTasks.addAll(getTasksFromExercises(exercise.getSubExercises()));
+            tasks.addAll(exercise.getTasks());
+            tasks.addAll(getTasksFromExercises(exercise.getSubExercises()));
         }
-        return abstractTasks;
+        return tasks;
     }
 
     private void removePafInformation(List<CompilationUnit> files){
@@ -146,7 +145,7 @@ public class AssignmentBuilder {
         }
     }
 
-    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, AbstractTask task, BodyDeclaration<?> newTaskNode) {
+    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, Task task, BodyDeclaration<?> newTaskNode) {
         if(isSolutionCode){
             newTaskNode = task.createSolutionCode(newTaskNode);
         }else{

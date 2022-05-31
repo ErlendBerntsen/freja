@@ -8,7 +8,7 @@ import no.hvl.concepts.Solution;
 
 import static no.hvl.utilities.NodeUtils.*;
 
-public class ReplaceSolutionTask extends AbstractTask {
+public class ReplaceSolutionTask extends Task {
     public static final CopyOption copyOption = CopyOption.REPLACE_SOLUTION;
     private final Solution solution;
     private final Replacement replacement;

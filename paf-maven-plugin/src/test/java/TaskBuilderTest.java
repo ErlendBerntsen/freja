@@ -5,7 +5,7 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.SolutionBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
-import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.Task;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class TaskBuilderTest extends ExamplesParser {
     @Test
     void testBuildingTask(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         assertEquals("1_2_3_1_", task.getFullNumberAsString());
         assertEquals(CopyOption.REPLACE_SOLUTION, task.getCopyOption());
         assertEquals(node, task.getNode());
@@ -43,7 +43,7 @@ class TaskBuilderTest extends ExamplesParser {
     @Test
     void testBuildingReplaceSolutionTask(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         assertTrue(task instanceof ReplaceSolutionTask);
         ReplaceSolutionTask replaceSolutionTask = (ReplaceSolutionTask) task;
         assertEquals(replacementMap.get("1"), replaceSolutionTask.getReplacement());

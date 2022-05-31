@@ -1,7 +1,7 @@
 package no.hvl.concepts.builders;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
-import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.Task;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 
@@ -96,7 +96,7 @@ public class ExerciseBuilder {
     }
 
     private void addTaskToParentExercise(Exercise parentExerciseForTask) {
-        AbstractTask task = new TaskBuilder(annotatedNode, parentExerciseForTask, replacementMap).build();
+        Task task = new TaskBuilder(annotatedNode, parentExerciseForTask, replacementMap).build();
         parentExerciseForTask.addAbstractTask(task);
     }
 

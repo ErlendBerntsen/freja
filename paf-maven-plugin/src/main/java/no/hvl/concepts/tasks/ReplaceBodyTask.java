@@ -6,7 +6,7 @@ import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.Replacement;
 import no.hvl.utilities.NodeUtils;
 
-public class ReplaceBodyTask extends AbstractTask{
+public class ReplaceBodyTask extends Task {
 
     private final Replacement replacement;
     public static final CopyOption copyOption = CopyOption.REPLACE_BODY;

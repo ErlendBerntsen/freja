@@ -2,15 +2,15 @@ package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
+import no.hvl.concepts.Assignment;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 
 public class ProjectWriter {
 
@@ -31,6 +31,19 @@ public class ProjectWriter {
         this.targetDirectoryPath = targetDirectoryPath;
     }
 
+    public ProjectWriter(String sourceDirectoryPath, String targetDirectoryPath, Assignment assignment){
+        this.sourceDirectoryPath = sourceDirectoryPath;
+        this.targetDirectoryPath = targetDirectoryPath;
+        this.fileNamesToRemove = assignment.getFileNamesToRemove();
+        this.startCodeProjectModifiedFiles = new HashMap<>();
+        this.solutionProjectModifiedFiles = new HashMap<>();
+        assignment.getSolutionCodeFiles().forEach(file ->
+                this.startCodeProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
+        assignment.getSolutionCodeFiles().forEach(file ->
+                this.solutionProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
+
+    }
+
     public void createProject(){
         File sourceDirectory = new File(sourceDirectoryPath);
         File targetDirectory = new File(targetDirectoryPath);
@@ -43,6 +56,12 @@ public class ProjectWriter {
         File startCodeProject = new File(targetDirectory.getAbsolutePath() + File.separator + "startcode");
         startCodeProject.mkdir();
         createFilesAndDirectories(sourceDirectory, startCodeProject, startCodeProjectModifiedFiles, false);
+    }
+
+    public void copyProject() throws IOException {
+        CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetDirectoryPath));
+        Files.walkFileTree(Path.of(sourceDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
+                Integer.MAX_VALUE, copier);
     }
 
     private void emptyTargetDirectory(File targetDirectory){

@@ -4,8 +4,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.ExerciseBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
-import no.hvl.concepts.tasks.AbstractTask;
-import no.hvl.exceptions.ExerciseNumberException;
+import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.NoFileFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +30,9 @@ public class ExerciseBuilderTest extends ExamplesParser {
     void testBuildingExerciseWithNoSubExercises(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 15);
         Exercise exercise = new ExerciseBuilder(node, new ArrayList<>(), replacementMap).build();
-        assertEquals(1, exercise.getAmountOfAbstractTasks());
+        assertEquals(1, exercise.getAmountOfTasks());
         assertEquals(0, exercise.getAmountOfSubExercises());
-        assertTrue(exercise.hasAbstractTasks());
+        assertTrue(exercise.hasTasks());
         assertTrue(exercise.getParentExercise().isEmpty());
         assertEquals(findFile(node), exercise.getFile());
         assertEquals("1_", exercise.getFullNumberAsString());
@@ -43,9 +42,9 @@ public class ExerciseBuilderTest extends ExamplesParser {
     void testBuildingExerciseBuildsTaskCorrectly(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 15);
         Exercise exercise = new ExerciseBuilder(node, new ArrayList<>(), replacementMap).build();
-        AbstractTask exerciseTask = exercise.getAbstractTasks().get(0);
-        exercise.setAbstractTasks(new ArrayList<>());
-        AbstractTask task = new TaskBuilder(node, exercise, replacementMap).build();
+        Task exerciseTask = exercise.getTasks().get(0);
+        exercise.setTasks(new ArrayList<>());
+        Task task = new TaskBuilder(node, exercise, replacementMap).build();
         assertEquals(task, exerciseTask);
     }
 
@@ -91,9 +90,9 @@ public class ExerciseBuilderTest extends ExamplesParser {
         BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 21);
         Exercise sameExercise = new ExerciseBuilder(node2, rootExercises, replacementMap).build();
         assertEquals(exercise, sameExercise);
-        assertEquals(2, exercise.getAmountOfAbstractTasks());
-        assertEquals("4_1_", exercise.getAbstractTasks().get(0).getFullNumberAsString());
-        assertEquals("4_2_", exercise.getAbstractTasks().get(1).getFullNumberAsString());
+        assertEquals(2, exercise.getAmountOfTasks());
+        assertEquals("4_1_", exercise.getTasks().get(0).getFullNumberAsString());
+        assertEquals("4_2_", exercise.getTasks().get(1).getFullNumberAsString());
     }
 
     @Test

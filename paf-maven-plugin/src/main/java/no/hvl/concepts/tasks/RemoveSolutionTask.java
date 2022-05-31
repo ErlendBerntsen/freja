@@ -8,7 +8,7 @@ import no.hvl.concepts.Solution;
 import static no.hvl.utilities.NodeUtils.*;
 import static no.hvl.utilities.NodeUtils.removeSolution;
 
-public class RemoveSolutionTask extends AbstractTask{
+public class RemoveSolutionTask extends Task {
     public static final CopyOption copyOption = CopyOption.REMOVE_SOLUTION;
     private final Solution solution;
 

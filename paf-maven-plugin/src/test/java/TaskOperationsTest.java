@@ -40,7 +40,7 @@ class TaskOperationsTest extends ExamplesParser {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         BodyDeclaration<?> nodeClone = node.clone();
         BodyDeclaration<?> nodeCopy = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeCopy);
         assertEquals(nodeCopy, solutionCode);
         assertEquals(node, nodeClone);
@@ -50,7 +50,7 @@ class TaskOperationsTest extends ExamplesParser {
     @Test
     void testCreatingSolutionCodeRemovesCorrectStatements(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
         BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeToUpdate);
         assertSolutionStartEndStatementsWereRemoved(solutionCode);
@@ -82,7 +82,7 @@ class TaskOperationsTest extends ExamplesParser {
     @Test
     void testCreatingSolutionCodePreservesComments(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 3);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
         BodyDeclaration<?> solutionCode = task.createSolutionCode(nodeToUpdate);
         assertCommentsWerePreserved(node, solutionCode);
@@ -125,7 +125,7 @@ class TaskOperationsTest extends ExamplesParser {
 
     private BodyDeclaration<?> getStartCodeFromNodeWithId (int targetId){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
-        AbstractTask task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
         return task.createStartCode(nodeToUpdate);
     }

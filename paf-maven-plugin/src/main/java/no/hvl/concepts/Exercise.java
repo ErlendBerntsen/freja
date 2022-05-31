@@ -1,7 +1,7 @@
 package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
-import no.hvl.concepts.tasks.AbstractTask;
+import no.hvl.concepts.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,6 @@ public class Exercise {
     private int numberAmongSiblingExercises;
     private List<Exercise> subExercises;
     private List<Task> tasks;
-    private List<AbstractTask> abstractTasks;
     private CompilationUnit file;
     private String fullNumberAsString;
     private Optional<Exercise> parentExercise;
@@ -20,7 +19,6 @@ public class Exercise {
     public Exercise() {
         subExercises = new ArrayList<>();
         tasks = new ArrayList<>();
-        abstractTasks = new ArrayList<>();
         parentExercise = Optional.empty();
     }
 
@@ -40,20 +38,8 @@ public class Exercise {
         this.subExercises = subExercises;
     }
 
-    public void addTask(Task task){
+    public void addAbstractTask(Task task){
         this.tasks.add(task);
-    }
-
-    public void addAbstractTask(AbstractTask task){
-        this.abstractTasks.add(task);
-    }
-
-    public List<Task> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
     }
 
     public CompilationUnit getFile() {
@@ -72,28 +58,20 @@ public class Exercise {
         this.fullNumberAsString = fullNumberAsString;
     }
 
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Task> tasks){
+        this.tasks = tasks;
+    }
+
     public boolean hasTasks(){
         return !tasks.isEmpty();
     }
 
     public int getAmountOfTasks(){
         return tasks.size();
-    }
-
-    public List<AbstractTask> getAbstractTasks() {
-        return abstractTasks;
-    }
-
-    public void setAbstractTasks(List<AbstractTask> abstractTasks){
-        this.abstractTasks = abstractTasks;
-    }
-
-    public boolean hasAbstractTasks(){
-        return !abstractTasks.isEmpty();
-    }
-
-    public int getAmountOfAbstractTasks(){
-        return abstractTasks.size();
     }
 
     public int getAmountOfSubExercises(){

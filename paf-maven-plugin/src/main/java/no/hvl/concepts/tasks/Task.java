@@ -6,12 +6,12 @@ import no.hvl.annotations.CopyOption;
 import static no.hvl.utilities.NodeUtils.*;
 
 
-public abstract class AbstractTask implements TaskOperations {
+public abstract class Task implements TaskOperations {
     private BodyDeclaration<?> node;
     private String fullNumberAsString;
     private CopyOption copyOption;
 
-    protected AbstractTask(BodyDeclaration<?> node, String fullNumberAsString, CopyOption copyOption) {
+    protected Task(BodyDeclaration<?> node, String fullNumberAsString, CopyOption copyOption) {
         this.node = node;
         this.fullNumberAsString = fullNumberAsString;
         this.copyOption = copyOption;

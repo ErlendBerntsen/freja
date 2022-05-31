@@ -6,7 +6,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
 import no.hvl.concepts.Exercise;
-import no.hvl.concepts.Task;
+import no.hvl.concepts.tasks.Task;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -50,8 +50,8 @@ public class DescriptionWriter {
         for(var exerciseWithFile : exercisesWithFile){
             writeGeneralAttributes(exerciseWithFile);
         }
-        var tasks = getTasks(exercise, new ArrayList<>());
-        for(Task task : tasks){
+
+        for(Task task : exercise.getTasks()){
             writeTaskAttributes(task);
         }
 
@@ -176,13 +176,6 @@ public class DescriptionWriter {
         return exercises.stream().distinct().collect(Collectors.toList());
     }
 
-    private List<Task> getTasks(Exercise exercise, List<Task> tasks){
-        tasks.addAll(exercise.getTasks());
-        for(Exercise subExercise : exercise.getSubExercises()){
-            getTasks(subExercise, tasks);
-        }
-        return tasks;
-    }
 
     private String getExerciseFileNameAttribute(Exercise exercise){
         return getExerciseAttribute(exercise, "FileName");

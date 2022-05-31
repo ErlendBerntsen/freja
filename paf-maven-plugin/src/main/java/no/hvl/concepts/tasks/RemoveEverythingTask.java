@@ -5,7 +5,7 @@ import no.hvl.annotations.CopyOption;
 
 import java.util.Objects;
 
-public class RemoveEverythingTask extends AbstractTask{
+public class RemoveEverythingTask extends Task {
     public static final CopyOption copyOption = CopyOption.REMOVE_EVERYTHING;
 
     public RemoveEverythingTask(BodyDeclaration<?> node, String fullNumberAsString) {

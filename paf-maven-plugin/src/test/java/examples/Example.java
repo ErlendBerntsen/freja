@@ -3,6 +3,7 @@ package examples;
 import no.hvl.annotations.*;
 import testUtils.TestId;
 
+@SuppressWarnings("ALL")
 public class Example {
 
     @TestId(1)

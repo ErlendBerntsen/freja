@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class ProjectWriter {
+    public static final String SOLUTION_PROJECT_NAME = "solution";
+    public static final String START_CODE_PROJECT_NAME = "startcode";
 
     private String targetDirectoryPath;
     private String sourceDirectoryPath;
@@ -37,7 +39,7 @@ public class ProjectWriter {
         this.fileNamesToRemove = assignment.getFileNamesToRemove();
         this.startCodeProjectModifiedFiles = new HashMap<>();
         this.solutionProjectModifiedFiles = new HashMap<>();
-        assignment.getSolutionCodeFiles().forEach(file ->
+        assignment.getStartCodeFiles().forEach(file ->
                 this.startCodeProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
         assignment.getSolutionCodeFiles().forEach(file ->
                 this.solutionProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
@@ -49,19 +51,34 @@ public class ProjectWriter {
         File targetDirectory = new File(targetDirectoryPath);
         emptyTargetDirectory(targetDirectory);
 
-        File solutionProject = new File(targetDirectory.getAbsolutePath() + File.separator + "solution");
+        File solutionProject = new File(targetDirectory.getAbsolutePath() + File.separator + SOLUTION_PROJECT_NAME);
         solutionProject.mkdir();
         createFilesAndDirectories(sourceDirectory, solutionProject, solutionProjectModifiedFiles, false);
 
-        File startCodeProject = new File(targetDirectory.getAbsolutePath() + File.separator + "startcode");
+        File startCodeProject = new File(targetDirectory.getAbsolutePath() + File.separator + START_CODE_PROJECT_NAME);
         startCodeProject.mkdir();
         createFilesAndDirectories(sourceDirectory, startCodeProject, startCodeProjectModifiedFiles, false);
     }
 
-    public void copyProject() throws IOException {
-        CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetDirectoryPath));
+    public void createSolutionAndStartProject() throws IOException {
+        File startCodeDir = createDirectory(targetDirectoryPath, START_CODE_PROJECT_NAME);
+        File solutionDir = createDirectory(targetDirectoryPath, SOLUTION_PROJECT_NAME);
+        copyProject(startCodeDir.getAbsolutePath(), startCodeProjectModifiedFiles);
+        copyProject(solutionDir.getAbsolutePath(), solutionProjectModifiedFiles);
+
+    }
+
+    public void copyProject(String targetPath, HashMap<String, CompilationUnit> modifiedFiles) throws IOException {
+        CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetPath),
+                modifiedFiles, fileNamesToRemove);
         Files.walkFileTree(Path.of(sourceDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
                 Integer.MAX_VALUE, copier);
+    }
+
+    private File createDirectory(String parentDir, String dirName){
+        File dir = new File(parentDir + File.separator + dirName);
+        dir.mkdir();
+        return dir;
     }
 
     private void emptyTargetDirectory(File targetDirectory){

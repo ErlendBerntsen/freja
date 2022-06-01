@@ -25,7 +25,7 @@ public class ProjectWriter {
         this.sourceDirectoryPath = sourceDirectoryPath;
         this.targetDirectoryPath = targetDirectoryPath;
         this.assignment = assignment;
-        createPathMatchersToIgnore(assignment.getFileNamesToRemove());
+        createPathMatchersToIgnore();
     }
 
     private void checkPathExists(String path) throws NoSuchFileException {
@@ -38,25 +38,32 @@ public class ProjectWriter {
         return path.toFile().exists();
     }
 
-    private void createPathMatchersToIgnore(HashSet<String> fileNamesToRemove) {
+    private void createPathMatchersToIgnore() {
         this.pathMatchersToIgnore = new ArrayList<>();
-        for(String fileName : fileNamesToRemove){
+        for(String fileName : assignment.getFileNamesToRemove()){
             PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**" + fileName);
             pathMatchersToIgnore.add(pathMatcher);
         }
     }
 
-    public void createProject() throws IOException {
-        File targetDirectory = new File(targetDirectoryPath);
-        emptyTargetDirectory(targetDirectory);
+    public void createAllProjects() throws IOException {
+        clearTargetDir();
         createSolutionAndStartProject();
     }
 
+    public void clearTargetDir() throws IOException {
+        Files.walkFileTree(Path.of(targetDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
+                Integer.MAX_VALUE, new DeleteFileVisitor(Path.of(targetDirectoryPath)));
+    }
+
     public void createSolutionAndStartProject() throws IOException {
-        File startCodeDir = tryToCreateDirectory(targetDirectoryPath, START_CODE_PROJECT_NAME);
-        File solutionDir = tryToCreateDirectory(targetDirectoryPath, SOLUTION_PROJECT_NAME);
-        copyProject(startCodeDir.getAbsolutePath(), getFileNameModifiedFileMap(assignment.getStartCodeFiles()));
-        copyProject(solutionDir.getAbsolutePath(), getFileNameModifiedFileMap(assignment.getSolutionCodeFiles()));
+        createProject(START_CODE_PROJECT_NAME, assignment.getStartCodeFiles());
+        createProject(SOLUTION_PROJECT_NAME, assignment.getSolutionCodeFiles());
+    }
+
+    private void createProject(String name, List<CompilationUnit> modifiedFiles) throws IOException {
+        File directory = tryToCreateDirectory(targetDirectoryPath, name);
+        copyProject(directory.getAbsolutePath(), getFileNameModifiedFileMap(modifiedFiles));
     }
 
     private File tryToCreateDirectory(String parentDir, String dirName) throws IOException {
@@ -71,6 +78,14 @@ public class ProjectWriter {
                 dir.getAbsolutePath()));
     }
 
+    public void copyProject(String targetPath, HashMap<String, CompilationUnit> modifiedFiles)
+            throws IOException {
+        CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetPath),
+                modifiedFiles, pathMatchersToIgnore);
+        Files.walkFileTree(Path.of(sourceDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
+                Integer.MAX_VALUE, copier);
+    }
+
     private HashMap<String, CompilationUnit> getFileNameModifiedFileMap(List<CompilationUnit> modifiedFiles){
         HashMap<String, CompilationUnit> fileNameModifiedFileMap = new HashMap<>();
         for(CompilationUnit file : modifiedFiles){
@@ -83,30 +98,6 @@ public class ProjectWriter {
     public void addPathMatchersToIgnore(String pattern){
         PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
         pathMatchersToIgnore.add(pathMatcher);
-    }
-
-    public void copyProject(String targetPath, HashMap<String, CompilationUnit> modifiedFiles)
-            throws IOException {
-        CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetPath),
-                modifiedFiles, pathMatchersToIgnore);
-        Files.walkFileTree(Path.of(sourceDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
-                Integer.MAX_VALUE, copier);
-    }
-
-    private void emptyTargetDirectory(File targetDirectory){
-        if(targetDirectory.listFiles() == null)return;
-        Arrays.stream(targetDirectory.listFiles()).forEach(file -> {
-            if(!file.getName().equals(".git")){
-                if(file.isDirectory()){
-                    emptyTargetDirectory(file);
-                }
-                try {
-                    Files.delete(file.toPath());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
 }

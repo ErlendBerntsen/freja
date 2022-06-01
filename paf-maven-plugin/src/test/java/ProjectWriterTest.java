@@ -273,5 +273,21 @@ public class ProjectWriterTest {
         assertTrue(fileNames.contains("GPSPoint.java"));
     }
 
+    @Test
+    void testClearingTargetDir() throws IOException {
+        projectWriter.createSolutionAndStartProject();
+        projectWriter.clearTargetDir();
+        File targetDir = new File(targetDirPath);
+        assertTrue(targetDir.exists());
+        int amountOfFiles = Objects.requireNonNull(targetDir.listFiles()).length;
+        assertEquals(0, amountOfFiles);
+    }
+
+    @Test
+    void testGeneratingConsecutiveProjectDoesNotCauseException() throws IOException {
+        projectWriter.createAllProjects();
+        assertDoesNotThrow(() -> projectWriter.createAllProjects());
+    }
+
 
 }

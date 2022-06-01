@@ -20,7 +20,7 @@ public class Generator {
         parser.parse();
         Assignment assignment = new AssignmentBuilder(parser).build();
         ProjectWriter projectWriter = new ProjectWriter(sourcePath, targetPath, assignment);
-        projectWriter.createProject();
+        projectWriter.createAllProjects();
 //
 //        String startCodePath =  targetPath + File.separator + "startcode";
 //        DescriptionWriter descriptionWriter = new DescriptionWriter(startCodePath, assignmentMetaModel.getExercises());

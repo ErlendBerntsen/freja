@@ -5,6 +5,7 @@ import testUtils.TestId;
 
 import static no.hvl.annotations.CopyOption.*;
 
+@SuppressWarnings("ALL")
 public class ExerciseExample {
 
     @TestId(15)
@@ -30,4 +31,12 @@ public class ExerciseExample {
     @TestId(21)
     @Implement(number = {4}, copyOption = REMOVE_EVERYTHING)
     int task6;
+
+    @TestId(33)
+    @Implement(number = {5,1}, copyOption = REMOVE_EVERYTHING)
+    int task7;
+
+    @TestId(34)
+    @Implement(number = {5,1}, copyOption = REMOVE_EVERYTHING)
+    int task8;
 }

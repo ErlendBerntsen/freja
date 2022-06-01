@@ -105,4 +105,28 @@ public class ExerciseBuilderTest extends ExamplesParser {
         assertThrows(NoFileFoundException.class, exerciseBuilder::build);
     }
 
+    @Test
+    void testFileAttributeIsCreatedInAllExercises(){
+        List<Exercise> exercises = new ArrayList<>();
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 33);
+        new ExerciseBuilder(node, exercises, replacementMap).build();
+        BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 34);
+        new ExerciseBuilder(node2, exercises, replacementMap).build();
+        assertEquals(1, exercises.size());
+        for(Exercise exercise : exercises){
+            assertFileAttributeIsNotNull(exercise);
+        }
+
+    }
+
+    private void assertFileAttributeIsNotNull(Exercise exercise) {
+        while(true){
+            assertNotNull(exercise.getFile());
+            if(exercise.getParentExercise().isEmpty()){
+                break;
+            }
+            exercise = exercise.getParentExercise().get();
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Replacement;
@@ -247,5 +248,22 @@ public class NodeUtils {
             throw new IllegalStateException(String.format("Could not find the storage of the file: %n%s", file));
         }
     }
+
+    public static void removeAllComments(Node node){
+        node.removeComment();
+        List<Comment> comments = node.getAllContainedComments();
+        for(Comment comment : comments){
+            comment.remove();
+        }
+    }
+
+    public static String tryToGetSimpleName(Node node){
+        if(node instanceof NodeWithSimpleName){
+            return ((NodeWithSimpleName<?>) node).getNameAsString();
+        }
+        throw new IllegalArgumentException("The node does not have a simple name: " + node);
+    }
+
+
 
 }

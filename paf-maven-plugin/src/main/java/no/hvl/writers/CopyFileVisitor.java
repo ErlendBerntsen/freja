@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static java.nio.file.FileVisitResult.*;
+import static no.hvl.utilities.FileUtils.*;
 
 public class CopyFileVisitor implements FileVisitor<Path> {
 
@@ -47,9 +48,14 @@ public class CopyFileVisitor implements FileVisitor<Path> {
         return CONTINUE;
     }
 
-    private boolean isJavaSourceFolder(Path dir) {
-        String dirName = dir.toFile().getName();
-        return "src".equalsIgnoreCase(dirName) || "source".equalsIgnoreCase(dirName);
+    private boolean fileShouldBeCopied(Path file){
+        Path relativePath = source.relativize(file);
+        for(PathMatcher pathMatcher : pathMatchersToIgnore){
+            if (pathMatcher.matches(relativePath)){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -68,34 +74,11 @@ public class CopyFileVisitor implements FileVisitor<Path> {
     private void createAndWriteToFile(Path file) throws IOException {
         File newFile = new File(target.resolve(source.relativize(file)).toString());
         if(newFile.createNewFile()){
-            String fileContent = printFileContentToString(newFile);
+            String fileContent = printFileContentToString(newFile, modifiedFiles);
             writeContentToFile(newFile, fileContent);
         }else{
             throw new FileAlreadyExistsException(newFile.getAbsolutePath());
         }
-    }
-
-    private void writeContentToFile(File file, String fileContent) throws IOException {
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(fileContent);
-        fileWriter.close();
-    }
-
-    private String printFileContentToString(File newFile) {
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-        String fileName = newFile.getName();
-        CompilationUnit fileAsNode = modifiedFiles.get(fileName);
-        return printer.print(fileAsNode);
-    }
-
-    private boolean fileShouldBeCopied(Path file){
-        Path relativePath = source.relativize(file);
-        for(PathMatcher pathMatcher : pathMatchersToIgnore){
-            if (pathMatcher.matches(relativePath)){
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

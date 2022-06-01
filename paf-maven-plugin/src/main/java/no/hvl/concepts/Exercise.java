@@ -62,6 +62,14 @@ public class Exercise {
         return tasks;
     }
 
+    public List<Task> getTasksIncludingSubExercises(){
+        List<Task> allTasks = new ArrayList<>();
+        for(Exercise subExercise : subExercises){
+            allTasks.addAll(subExercise.getTasksIncludingSubExercises());
+        }
+        return allTasks;
+    }
+
     public void setTasks(List<Task> tasks){
         this.tasks = tasks;
     }

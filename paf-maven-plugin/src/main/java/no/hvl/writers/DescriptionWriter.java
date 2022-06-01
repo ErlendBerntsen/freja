@@ -1,10 +1,14 @@
 package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
 
@@ -14,26 +18,39 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.hvl.utilities.FileUtils.*;
+import static no.hvl.utilities.NodeUtils.*;
+
 public class DescriptionWriter {
 
-    private String targetPath;
+    public static final String DESCRIPTIONS_FOLDER_NAME = "descriptions";
+    private final String rootFolderPath;
+    private String descriptionsDirPath;
     private StringBuilder content = new StringBuilder();
-    private String fileName ="";
-    private List<Exercise>  exercises;
+    private final List<Exercise>  exercises;
 
-    public DescriptionWriter(String targetPath, List<Exercise> exercises) throws IOException {
+    public DescriptionWriter(String rootFolderPath, List<Exercise> exercises) {
+        this.rootFolderPath = rootFolderPath;
         this.exercises = exercises;
-        File descriptionsDir = new File(targetPath + File.separator + "descriptions");
-        this.targetPath = descriptionsDir.getAbsolutePath();
-        descriptionsDir.mkdir();
+    }
+
+    public void createExerciseDescriptions() throws IOException {
+        createDescriptionDir();
+        createDescriptionFiles();
+    }
+
+    public void createDescriptionDir() throws IOException {
+        File descriptionsDir = tryToCreateDirectory(rootFolderPath, DESCRIPTIONS_FOLDER_NAME);
+        this.descriptionsDirPath = descriptionsDir.getAbsolutePath();
     }
 
     public void createFiles() {
+        //TODO Remove
         for (Exercise exercise : exercises){
             try {
                 createFileAttributes(exercise);
                 createTemplate(exercise);
-                File descriptionFile = new File(targetPath + File.separator + "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc");
+                File descriptionFile = new File(descriptionsDirPath + File.separator + "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc");
                 FileWriter fileWriter = new FileWriter(descriptionFile);
                 fileWriter.write(content.toString());
                 fileWriter.close();
@@ -44,92 +61,163 @@ public class DescriptionWriter {
         }
     }
 
-    public void createFileAttributes(Exercise exercise){
+    public void createDescriptionFiles() throws IOException {
+        for (Exercise exercise : exercises){
+            String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
+            File file = tryToCreateFile(descriptionsDirPath, fileName);
+            String content = createFileContent(exercise);
+            writeContentToFile(file, content);
+        }
+    }
+
+    public String createFileContent(Exercise exercise) {
+        return createAttributes(exercise);
+    }
+
+    public String createAttributes(Exercise exercise) {
+        content = new StringBuilder();
+        content.append(createExerciseAttributes(exercise));
+        for(Task task : exercise.getTasksIncludingSubExercises()){
+            content.append(createTaskAttributes(task));
+        }
+        return content.toString();
+    }
+
+    public String createFileAttributes(Exercise exercise){
+        //TODO remove
         content = new StringBuilder();
         var exercisesWithFile = getExercisesWithFile(exercise, new ArrayList<>());
         for(var exerciseWithFile : exercisesWithFile){
-            writeGeneralAttributes(exerciseWithFile);
+            content.append(createExerciseAttributes(exerciseWithFile));
         }
-
         for(Task task : exercise.getTasks()){
-            writeTaskAttributes(task);
+            content.append(createTaskAttributes(task));
         }
-
+        return content.toString();
     }
 
-    private void writeGeneralAttributes(Exercise exercise){
+    public String createExerciseAttributes(Exercise exercise){
+        String exerciseName = "Exercise" + exercise.getFullNumberAsString();
         CompilationUnit file = exercise.getFile();
-        CompilationUnit.Storage storage= file.getStorage().get();
-        fileName = storage.getFileName();
-        String name = "Exercise" + exercise.getFullNumberAsString();
-        String packageName = file.getPackageDeclaration().isPresent()? file.getPackageDeclaration().get().getNameAsString()
-                : "";
-        String typeName = file.getPrimaryType().isPresent()? file.getPrimaryType().get().getNameAsString()
-                : "";
-        createAttribute(name+ "Package", packageName, true);
-        createAttribute(name+ "Filename", fileName, true);
-        createAttribute(name + "FileSimpleName", typeName,true);
+        String packageName = getPackageName(file);
+        String fileName = getFileName(file);
+        String fileSimpleName = getFileSimpleName(file);
+        String attribute = createAttribute(exerciseName + "Package", packageName, true);
+        attribute += createAttribute(exerciseName + "FileName", fileName, true);
+        attribute += createAttribute(exerciseName + "FileSimpleName", fileSimpleName,true);
+        return attribute;
     }
 
-    private void writeTaskAttributes(Task task){
-        String name = "Task" + task.getFullNumberAsString();
-        createAttribute(name + "FullName", getFullName(task.getNode()), false);
-        createAttribute(name + "SimpleName", getSimpleName(task.getNode()), true);
-        String type = task.getNode().getClass().getSimpleName().replace("Declaration", "");
-
-        if(task.getNode().isClassOrInterfaceDeclaration()){
-            type = type.replace("Or", "");
-            type = task.getNode().asClassOrInterfaceDeclaration().isInterface() ?
-                    type.replace("Class", "")
-                    : type.replace("Interface", "");
+    private String getPackageName(CompilationUnit file) {
+        Optional<PackageDeclaration> packageDeclaration = file.getPackageDeclaration();
+        if(packageDeclaration.isPresent()){
+            return packageDeclaration.get().getNameAsString();
         }
-        createAttribute(name + "Type", type, true);
-
+        return "Unknown package";
     }
 
-
-
-    private String getFullName(BodyDeclaration<?> implementNode){
-        var implementNodeClone = implementNode.clone();
-        implementNodeClone.removeComment();
-        implementNodeClone.setAnnotations(new NodeList<>());
-        if(implementNode instanceof NodeWithMembers){
-            ((NodeWithMembers<?>) implementNode).setMembers(new NodeList<>());
+    private String getFileSimpleName(CompilationUnit file) {
+        Optional<TypeDeclaration<?>> typeDeclaration = file.getPrimaryType();
+        if(typeDeclaration.isPresent()){
+            return typeDeclaration.get().getNameAsString();
         }
-        var comments = List.copyOf(implementNodeClone.getAllContainedComments());
-        comments.forEach(Comment::remove);
-
-        String line = implementNodeClone.toString().lines().findFirst().get();
-        if(line.toCharArray()[line.toCharArray().length-1] == '{'){
-            line = line.substring(0, line.length()-1);
-        }
-        line = line.replace("<", "{lt}");
-        line = line.replace(">", "{gt}");
-        line = line.stripTrailing();
-        return line;
-
+        return "Unknown simple file name";
     }
 
-    private String getSimpleName(BodyDeclaration<?> implementNode){
-        if(implementNode.isClassOrInterfaceDeclaration()){
-            return implementNode.asClassOrInterfaceDeclaration().getName().asString();
-        }else if(implementNode.isFieldDeclaration()){
-            return implementNode.asFieldDeclaration().getVariables().get(0).getName().asString();
-        }else if(implementNode.isConstructorDeclaration()){
-            return implementNode.asConstructorDeclaration().getName().asString();
-        }else if(implementNode.isMethodDeclaration()){
-            return implementNode.asMethodDeclaration().getNameAsString();
-        }
-        return "";
+    private String createAttribute(String key, String value, boolean addMacro){
+        String attribute = createAttributeKey(key);
+        attribute += createAttributeValue(value, addMacro);
+        attribute += createNewLine();
+        return attribute;
     }
 
-    private void createAttribute(String key, String value, boolean addMacro){
-        content.append(":").append(key).append(": ").append(addMacro? createInlineLiteralPassMacro(value) : value).append("\n");
+    private String createAttributeKey(String key) {
+        return ":" + key + ": ";
+    }
+
+    private String createAttributeValue(String value, boolean addMacro) {
+        return (addMacro? createInlineLiteralPassMacro(value) : value);
     }
 
     private String createInlineLiteralPassMacro(String value){
         return "pass:normal[`+" + value + "+`]";
     }
+
+    private String createNewLine() {
+        return "\n";
+    }
+
+    public String createTaskAttributes(Task task){
+        String taskName = "Task" + task.getFullNumberAsString();
+        String fullName = getFullName(task);
+        String attribute =  createAttribute(taskName + "FullName", fullName, false);
+        String simpleName = getTaskSimpleName(task);
+        attribute += createAttribute(taskName + "SimpleName", simpleName, true);
+        String type = getTypeAsString(task);
+        attribute += createAttribute(taskName + "Type", type, true);
+        return attribute;
+    }
+
+    private String getTypeAsString(Task task) {
+        Node node = task.getNode();
+        String className = node.getClass().getSimpleName();
+        return className.replace("Declaration", "");
+    }
+
+    private String getFullName(Task task){
+        BodyDeclaration<?> node = task.getNode();
+        BodyDeclaration<?> nodeClone = node.clone();
+        removeUnneededNodes(nodeClone);
+        String line = getFirstLineOfNode(nodeClone);
+        line = removeCurlyBracketAtLineEndIfPresent(line);
+        line = replaceReservedSigns(line);
+        line = line.stripTrailing();
+        return line;
+
+    }
+
+    private void removeUnneededNodes(BodyDeclaration<?> node) {
+        node.setAnnotations(new NodeList<>());
+        if(node instanceof NodeWithMembers){
+            ((NodeWithMembers<?>) node).setMembers(new NodeList<>());
+        }
+        removeAllComments(node);
+    }
+
+    private String getFirstLineOfNode(BodyDeclaration<?> nodeClone) {
+        String nodeAsString = nodeClone.toString();
+        Optional<String> firstLine = nodeAsString.lines().findFirst();
+        if(firstLine.isPresent()){
+            return firstLine.get();
+        }
+        throw new IllegalArgumentException("There are no lines of code in the node: " + nodeAsString);
+    }
+
+    private String removeCurlyBracketAtLineEndIfPresent(String line) {
+        line = line.stripTrailing();
+        char[] lineCharArray  = line.toCharArray();
+        if(lineCharArray[lineCharArray.length-1] == '{'){
+            return line.substring(0, line.length()-1);
+        }
+        return line;
+    }
+
+    private String replaceReservedSigns(String line) {
+        line = line.replace("<", "{lt}");
+        line = line.replace(">", "{gt}");
+        return line;
+    }
+
+    private String getTaskSimpleName(Task task){
+        BodyDeclaration<?> node = task.getNode();
+        if(node.isFieldDeclaration()){
+            VariableDeclarator firstField = node.asFieldDeclaration().getVariable(0);
+            return tryToGetSimpleName(firstField);
+        }else{
+            return tryToGetSimpleName(node);
+        }
+    }
+
 
     private void createTemplate(Exercise exercise){
         content.append("\n= *Exercise ").append(exercise.getNumberAmongSiblingExercises()).append("*\n");
@@ -203,5 +291,9 @@ public class DescriptionWriter {
 
     private String getTaskAttribute(Task task, String attribute){
         return "{Task" + task.getFullNumberAsString() + attribute + "}";
+    }
+
+    public String getDescriptionsDirPath() {
+        return descriptionsDirPath;
     }
 }

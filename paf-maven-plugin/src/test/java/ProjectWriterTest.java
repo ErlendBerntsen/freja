@@ -18,6 +18,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static testUtils.TestUtils.*;
 
 public class ProjectWriterTest {
 
@@ -27,11 +28,11 @@ public class ProjectWriterTest {
     private String targetDirPath;
 
     @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    private final TemporaryFolder tempFolder = new TemporaryFolder();
 
     @BeforeEach
     void setUp() throws IOException {
-        getSrcDirPath();
+        srcDirPath = getPafTestExamplePath();
         tempFolder.create();
         targetDirPath = tempFolder.getRoot().getPath();
         Parser parser = new Parser(srcDirPath);
@@ -40,12 +41,6 @@ public class ProjectWriterTest {
         projectWriter = new ProjectWriter(srcDirPath, targetDirPath, assignment);
     }
 
-    private void getSrcDirPath() {
-        String pafMavenPluginPath = System.getProperty("user.dir");
-        File file = new File(pafMavenPluginPath);
-        String parentPath = file.getParent();
-        srcDirPath = parentPath + File.separator + "paf-test-example";
-    }
 
     @Test
     void testStartCodeAndSolutionDirAreCreated() throws IOException {
@@ -70,29 +65,6 @@ public class ProjectWriterTest {
         }
     }
 
-    private List<String> getAllFileNames(File dir) {
-        List<String> fileNames = new ArrayList<>();
-        for(File file : Objects.requireNonNull(dir.listFiles())){
-            if(file.isFile()){
-                fileNames.add(file.getName());
-            }
-            else if(file.isDirectory()){
-                fileNames.addAll(getAllFileNames(file));
-            }
-        }
-        return fileNames;
-    }
-
-    private List<String> getAllDirectoryNames(File dir){
-        List<String> directories = new ArrayList<>();
-        for(File file : Objects.requireNonNull(dir.listFiles())){
-            if(file.isDirectory()){
-                directories.add(file.getName());
-                directories.addAll(getAllDirectoryNames(file));
-            }
-        }
-        return directories;
-    }
 
     @Test
     void testRemovedFilesAreNotCopied() throws IOException {

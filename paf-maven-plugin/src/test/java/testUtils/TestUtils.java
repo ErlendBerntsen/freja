@@ -7,8 +7,10 @@ import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TestUtils {
@@ -75,5 +77,36 @@ public class TestUtils {
                     "%s annotation with the value: %d", TEST_ID_ANNOTATION_NAME, targetId));
         }
 
+    }
+
+    public static List<String> getAllFileNames(File dir) {
+        List<String> fileNames = new ArrayList<>();
+        for(File file : Objects.requireNonNull(dir.listFiles())){
+            if(file.isFile()){
+                fileNames.add(file.getName());
+            }
+            else if(file.isDirectory()){
+                fileNames.addAll(getAllFileNames(file));
+            }
+        }
+        return fileNames;
+    }
+
+    public static List<String> getAllDirectoryNames(File dir){
+        List<String> directories = new ArrayList<>();
+        for(File file : Objects.requireNonNull(dir.listFiles())){
+            if(file.isDirectory()){
+                directories.add(file.getName());
+                directories.addAll(getAllDirectoryNames(file));
+            }
+        }
+        return directories;
+    }
+
+    public static String getPafTestExamplePath() {
+        String pafMavenPluginPath = System.getProperty("user.dir");
+        File file = new File(pafMavenPluginPath);
+        String parentPath = file.getParent();
+        return parentPath + File.separator + "paf-test-example";
     }
 }

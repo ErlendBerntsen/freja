@@ -19,8 +19,7 @@ public class Generator {
         Parser parser = new Parser(sourcePath);
         parser.parse();
         Assignment assignment = new AssignmentBuilder(parser).build();
-        ProjectWriter projectWriter = new ProjectWriter(assignment.getStartCodeFiles(),
-                assignment.getSolutionCodeFiles(), assignment.getFileNamesToRemove(), sourcePath, targetPath);
+        ProjectWriter projectWriter = new ProjectWriter(sourcePath, targetPath, assignment);
         projectWriter.createProject();
 //
 //        String startCodePath =  targetPath + File.separator + "startcode";

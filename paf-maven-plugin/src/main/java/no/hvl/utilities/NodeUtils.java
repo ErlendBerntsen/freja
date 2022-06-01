@@ -231,14 +231,20 @@ public class NodeUtils {
                                                       List<CompilationUnit> files){
         if(node.isTypeDeclaration()){
             CompilationUnit file = findFile(node);
-            Optional<CompilationUnit.Storage> fileStorage = file.getStorage();
-            if(fileStorage.isPresent()){
-                fileNamesToRemove.add(fileStorage.get().getFileName());
-                files.remove(file);
-            }
-            else{
-                throw new IllegalStateException(String.format("Could not find the storage of the file: %n%s", file));
-            }
+            String fileName = getFileName(file);
+            fileNamesToRemove.add(fileName);
+            files.remove(file);
+        }
+    }
+
+
+    public static String getFileName(CompilationUnit file){
+        Optional<CompilationUnit.Storage> fileStorage = file.getStorage();
+        if(fileStorage.isPresent()){
+            return fileStorage.get().getFileName();
+        }
+        else{
+            throw new IllegalStateException(String.format("Could not find the storage of the file: %n%s", file));
         }
     }
 

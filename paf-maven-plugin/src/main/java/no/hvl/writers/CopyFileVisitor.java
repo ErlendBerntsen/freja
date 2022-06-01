@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 
 import static java.nio.file.FileVisitResult.*;
 
@@ -17,22 +17,25 @@ public class CopyFileVisitor implements FileVisitor<Path> {
 
     private final Path source;
     private final Path target;
-    private HashMap<String, CompilationUnit> modifiedFiles;
-    private final HashSet<String> fileNamesToRemove;
+    private final HashMap<String, CompilationUnit> modifiedFiles;
+    private final List<PathMatcher> pathMatchersToIgnore;
     private boolean isVisitingInJavaSourceFolder = false;
 
     public CopyFileVisitor(Path source, Path target,
-                           HashMap<String, CompilationUnit> modifiedFiles, HashSet<String> fileNamesToRemove) {
+                           HashMap<String, CompilationUnit> modifiedFiles, List<PathMatcher> pathMatchersToIgnore) {
         this.source = source;
         this.target = target;
         this.modifiedFiles = modifiedFiles;
-        this.fileNamesToRemove = fileNamesToRemove;
+        this.pathMatchersToIgnore = pathMatchersToIgnore;
     }
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         if(isJavaSourceFolder(dir)){
             isVisitingInJavaSourceFolder = true;
+        }
+        else if(!fileShouldBeCopied(dir)){
+            return SKIP_SUBTREE;
         }
         Path targetDir = target.resolve(source.relativize(dir));
         try {
@@ -63,27 +66,48 @@ public class CopyFileVisitor implements FileVisitor<Path> {
     }
 
     private void createAndWriteToFile(Path file) throws IOException {
-        //TODO error handling
         File newFile = new File(target.resolve(source.relativize(file)).toString());
-        newFile.createNewFile();
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-        FileWriter fileWriter = new FileWriter(newFile);
-        fileWriter.write(printer.print(modifiedFiles.get(file.toFile().getName())));
+        if(newFile.createNewFile()){
+            String fileContent = printFileContentToString(newFile);
+            writeContentToFile(newFile, fileContent);
+        }else{
+            throw new FileAlreadyExistsException(newFile.getAbsolutePath());
+        }
+    }
+
+    private void writeContentToFile(File file, String fileContent) throws IOException {
+        FileWriter fileWriter = new FileWriter(file);
+        fileWriter.write(fileContent);
         fileWriter.close();
     }
 
+    private String printFileContentToString(File newFile) {
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+        String fileName = newFile.getName();
+        CompilationUnit fileAsNode = modifiedFiles.get(fileName);
+        return printer.print(fileAsNode);
+    }
+
     private boolean fileShouldBeCopied(Path file){
-        String fileName = file.toFile().getName();
-        return !fileNamesToRemove.contains(fileName);
+        Path relativePath = source.relativize(file);
+        for(PathMatcher pathMatcher : pathMatchersToIgnore){
+            if (pathMatcher.matches(relativePath)){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        return TERMINATE;
+        throw exc;
     }
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        if(exc != null){
+            throw exc;
+        }
         if(isJavaSourceFolder(dir)){
             isVisitingInJavaSourceFolder = false;
         }

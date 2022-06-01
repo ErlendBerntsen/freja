@@ -1,84 +1,96 @@
 package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.DefaultPrettyPrinter;
 import no.hvl.concepts.Assignment;
+import no.hvl.utilities.NodeUtils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 public class ProjectWriter {
     public static final String SOLUTION_PROJECT_NAME = "solution";
     public static final String START_CODE_PROJECT_NAME = "startcode";
 
-    private String targetDirectoryPath;
-    private String sourceDirectoryPath;
-    private HashMap<String, CompilationUnit> startCodeProjectModifiedFiles;
-    private HashMap<String, CompilationUnit> solutionProjectModifiedFiles;
-    private HashSet<String> fileNamesToRemove;
+    private final String targetDirectoryPath;
+    private final String sourceDirectoryPath;
+    private final Assignment assignment;
+    private List<PathMatcher> pathMatchersToIgnore;
 
-    public ProjectWriter(List<CompilationUnit> startCodeProject, List<CompilationUnit> solutionProject,
-                         HashSet<String> fileNamesToRemove, String sourceDirectoryPath, String targetDirectoryPath) {
-        this.fileNamesToRemove = fileNamesToRemove;
-        this.startCodeProjectModifiedFiles = new HashMap<>();
-        this.solutionProjectModifiedFiles = new HashMap<>();
-        startCodeProject.forEach(file -> this.startCodeProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
-        solutionProject.forEach(file -> this.solutionProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
+    public ProjectWriter(String sourceDirectoryPath, String targetDirectoryPath, Assignment assignment)
+            throws NoSuchFileException {
+        checkPathExists(sourceDirectoryPath);
+        checkPathExists(targetDirectoryPath);
         this.sourceDirectoryPath = sourceDirectoryPath;
         this.targetDirectoryPath = targetDirectoryPath;
+        this.assignment = assignment;
+        createPathMatchersToIgnore(assignment.getFileNamesToRemove());
     }
 
-    public ProjectWriter(String sourceDirectoryPath, String targetDirectoryPath, Assignment assignment){
-        this.sourceDirectoryPath = sourceDirectoryPath;
-        this.targetDirectoryPath = targetDirectoryPath;
-        this.fileNamesToRemove = assignment.getFileNamesToRemove();
-        this.startCodeProjectModifiedFiles = new HashMap<>();
-        this.solutionProjectModifiedFiles = new HashMap<>();
-        assignment.getStartCodeFiles().forEach(file ->
-                this.startCodeProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
-        assignment.getSolutionCodeFiles().forEach(file ->
-                this.solutionProjectModifiedFiles.put(file.getStorage().get().getFileName(), file));
-
+    private void checkPathExists(String path) throws NoSuchFileException {
+        if(!fileOrDirExists(Path.of(path))){
+            throw new NoSuchFileException(path);
+        }
     }
 
-    public void createProject(){
-        File sourceDirectory = new File(sourceDirectoryPath);
+    private boolean fileOrDirExists(Path path){
+        return path.toFile().exists();
+    }
+
+    private void createPathMatchersToIgnore(HashSet<String> fileNamesToRemove) {
+        this.pathMatchersToIgnore = new ArrayList<>();
+        for(String fileName : fileNamesToRemove){
+            PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**" + fileName);
+            pathMatchersToIgnore.add(pathMatcher);
+        }
+    }
+
+    public void createProject() throws IOException {
         File targetDirectory = new File(targetDirectoryPath);
         emptyTargetDirectory(targetDirectory);
-
-        File solutionProject = new File(targetDirectory.getAbsolutePath() + File.separator + SOLUTION_PROJECT_NAME);
-        solutionProject.mkdir();
-        createFilesAndDirectories(sourceDirectory, solutionProject, solutionProjectModifiedFiles, false);
-
-        File startCodeProject = new File(targetDirectory.getAbsolutePath() + File.separator + START_CODE_PROJECT_NAME);
-        startCodeProject.mkdir();
-        createFilesAndDirectories(sourceDirectory, startCodeProject, startCodeProjectModifiedFiles, false);
+        createSolutionAndStartProject();
     }
 
     public void createSolutionAndStartProject() throws IOException {
-        File startCodeDir = createDirectory(targetDirectoryPath, START_CODE_PROJECT_NAME);
-        File solutionDir = createDirectory(targetDirectoryPath, SOLUTION_PROJECT_NAME);
-        copyProject(startCodeDir.getAbsolutePath(), startCodeProjectModifiedFiles);
-        copyProject(solutionDir.getAbsolutePath(), solutionProjectModifiedFiles);
-
+        File startCodeDir = tryToCreateDirectory(targetDirectoryPath, START_CODE_PROJECT_NAME);
+        File solutionDir = tryToCreateDirectory(targetDirectoryPath, SOLUTION_PROJECT_NAME);
+        copyProject(startCodeDir.getAbsolutePath(), getFileNameModifiedFileMap(assignment.getStartCodeFiles()));
+        copyProject(solutionDir.getAbsolutePath(), getFileNameModifiedFileMap(assignment.getSolutionCodeFiles()));
     }
 
-    public void copyProject(String targetPath, HashMap<String, CompilationUnit> modifiedFiles) throws IOException {
+    private File tryToCreateDirectory(String parentDir, String dirName) throws IOException {
+        File dir = new File(parentDir + File.separator + dirName);
+        if(fileOrDirExists(dir.toPath())){
+            throw new FileAlreadyExistsException(dir.getAbsolutePath());
+        }
+        if(dir.mkdir()){
+            return dir;
+        }
+        throw new IOException(String.format("Could not create directory: %s for unknown reasons",
+                dir.getAbsolutePath()));
+    }
+
+    private HashMap<String, CompilationUnit> getFileNameModifiedFileMap(List<CompilationUnit> modifiedFiles){
+        HashMap<String, CompilationUnit> fileNameModifiedFileMap = new HashMap<>();
+        for(CompilationUnit file : modifiedFiles){
+            String fileName = NodeUtils.getFileName(file);
+            fileNameModifiedFileMap.put(fileName, file);
+        }
+        return fileNameModifiedFileMap;
+    }
+
+    public void addPathMatchersToIgnore(String pattern){
+        PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+        pathMatchersToIgnore.add(pathMatcher);
+    }
+
+    public void copyProject(String targetPath, HashMap<String, CompilationUnit> modifiedFiles)
+            throws IOException {
         CopyFileVisitor copier = new CopyFileVisitor(Path.of(sourceDirectoryPath), Path.of(targetPath),
-                modifiedFiles, fileNamesToRemove);
+                modifiedFiles, pathMatchersToIgnore);
         Files.walkFileTree(Path.of(sourceDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
                 Integer.MAX_VALUE, copier);
-    }
-
-    private File createDirectory(String parentDir, String dirName){
-        File dir = new File(parentDir + File.separator + dirName);
-        dir.mkdir();
-        return dir;
     }
 
     private void emptyTargetDirectory(File targetDirectory){
@@ -97,36 +109,4 @@ public class ProjectWriter {
         });
     }
 
-    private void createFilesAndDirectories(File srcDir, File dir, HashMap<String, CompilationUnit> modifiedFiles, boolean isSourceFolder){
-        Arrays.stream(srcDir.listFiles()).forEach(file -> {
-           if(file.isDirectory() && !file.getName().equals(".git")){
-               File newDir = new File(dir.getAbsolutePath() + File.separator + file.getName());
-               newDir.mkdir();
-               if("src".equals(file.getName())|| "source".equals(file.getName()) || isSourceFolder){
-                   createFilesAndDirectories(file, newDir, modifiedFiles, true);
-               }else{
-                   createFilesAndDirectories(file, newDir, modifiedFiles,false);
-               }
-           }
-           if(file.isFile() && !fileNamesToRemove.contains(file.getName())){
-
-               File newFile = new File(dir.getAbsolutePath() + File.separator + file.getName());
-               try {
-                   if(!isSourceFolder){
-                       Files.copy(file.toPath(), newFile.toPath());
-                   }else{
-                       newFile.createNewFile();
-                       DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-                       FileWriter fileWriter = new FileWriter(newFile);
-                       fileWriter.write(printer.print(modifiedFiles.get(file.getName())));
-                       fileWriter.close();
-                   }
-
-               } catch (IOException e) {
-                   e.printStackTrace();
-               }
-           }
-        });
-
-    }
 }

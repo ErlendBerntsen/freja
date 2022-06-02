@@ -1,6 +1,7 @@
 package no.hvl.writers;
 
 import no.hvl.utilities.FileUtils;
+import no.hvl.utilities.GeneralUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 
 import static java.nio.file.FileVisitResult.*;
 import static no.hvl.utilities.FileUtils.*;
+import static no.hvl.utilities.GeneralUtils.*;
 
 public class DeleteFileVisitor implements FileVisitor<Path> {
 
@@ -43,7 +45,8 @@ public class DeleteFileVisitor implements FileVisitor<Path> {
         if(isVisitingInDescriptionsFolder){
             File pathAsFile = file.toFile();
             String fileName = pathAsFile.getName();
-            descriptionMap.put(fileName, getContentFromFile(pathAsFile));
+            String fileContent = getContentFromFile(pathAsFile);
+            descriptionMap.put(fileName, removeDescriptionAttributes(fileContent));
         }
         Files.delete(file);
         return CONTINUE;

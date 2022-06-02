@@ -11,7 +11,6 @@ import java.util.HashMap;
 import static testUtils.TestUtils.getNodeWithId;
 
 public class ExamplesParser {
-
     public Parser parser;
     public static final String TEST_EXAMPLE_RELATIVE_PATH = "src/test/java/examples";
     public HashMap<String, Replacement> replacementMap;

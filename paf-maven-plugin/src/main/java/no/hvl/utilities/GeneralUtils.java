@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static no.hvl.utilities.AnnotationUtils.*;
@@ -84,6 +85,12 @@ public class GeneralUtils {
         int lastIndex = requiredNumber.size()-1;
         requiredNumber.set(lastIndex, requiredNumber.get(lastIndex)-1);
         return requiredNumber;
+    }
+
+    public static String removeDescriptionAttributes(String description){
+        return description.lines()
+                .dropWhile(Predicate.not(String::isBlank))
+                .collect(Collectors.joining("\n", "", "\n"));
     }
 
 }

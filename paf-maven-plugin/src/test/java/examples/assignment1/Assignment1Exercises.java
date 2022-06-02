@@ -8,7 +8,7 @@ import static no.hvl.annotations.CopyOption.REPLACE_SOLUTION;
 
 public class Assignment1Exercises {
 
-    @Implement(number = {1}, copyOption = REPLACE_SOLUTION, replacementId = "1")
+    @Implement(number = {1,1}, copyOption = REPLACE_SOLUTION, replacementId = "1")
     public String helloWorld(){
         SolutionStart s;
         String str = "Hello World!";

@@ -24,10 +24,16 @@ public class DescriptionWriter {
     private final String rootFolderPath;
     private String descriptionsDirPath;
     private final List<Exercise>  exercises;
+    private final HashMap<String, String> descriptionsMap;
+    private final HashMap<String, String> oldDescriptionsMap;
 
-    public DescriptionWriter(String rootFolderPath, List<Exercise> exercises) {
+
+    public DescriptionWriter(String rootFolderPath, List<Exercise> exercises,
+                             HashMap<String, String> oldDescriptions) {
         this.rootFolderPath = rootFolderPath;
         this.exercises = exercises;
+        this.oldDescriptionsMap = oldDescriptions;
+        this.descriptionsMap = new HashMap<>();
     }
 
     public void createExerciseDescriptions() throws IOException {
@@ -42,17 +48,27 @@ public class DescriptionWriter {
 
     public void createDescriptionFiles() throws IOException {
         for (Exercise exercise : exercises){
-            String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
+            String fileName = getExerciseFileName(exercise);
             File file = tryToCreateFile(descriptionsDirPath, fileName);
             String content = createFileContent(exercise);
             writeContentToFile(file, content);
         }
     }
 
+    private String getExerciseFileName(Exercise exercise){
+        return "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
+    }
+
     public String createFileContent(Exercise exercise) {
-        String content = createAttributes(exercise);
-        content += createTemplate(exercise);
-        return content;
+        String attributes = createAttributes(exercise);
+        String template = createTemplate(exercise, false);
+        createDescription(exercise, template);
+        return attributes + template;
+    }
+
+    private void createDescription(Exercise exercise, String template) {
+        String fileName = getExerciseFileName(exercise);
+        descriptionsMap.put(fileName, template);
     }
 
     public String createAttributes(Exercise rootExercise) {
@@ -95,10 +111,9 @@ public class DescriptionWriter {
     }
 
     private String createAttribute(String key, String value, boolean addMacro){
-        String attribute = createAttributeKey(key);
-        attribute += createAttributeValue(value, addMacro);
-        attribute += createNewLine();
-        return attribute;
+        String attributeKey = createAttributeKey(key);
+        String attributeValue = createAttributeValue(value, addMacro);
+        return attributeKey + attributeValue + createNewLine();
     }
 
     private String createAttributeKey(String key) {
@@ -189,7 +204,12 @@ public class DescriptionWriter {
     }
 
 
-    public String createTemplate(Exercise exercise){
+    public String createTemplate(Exercise exercise, boolean keepOldTemplate){
+        //TODO this flag should come from some option file
+        if(keepOldTemplate){
+            String fileName = getExerciseFileName(exercise);
+            return oldDescriptionsMap.get(fileName);
+        }
         String template = createTitle(exercise);
         template += createExerciseTemplate(exercise,1);
         return template;
@@ -279,5 +299,9 @@ public class DescriptionWriter {
 
     public String getDescriptionsDirPath() {
         return descriptionsDirPath;
+    }
+
+    public HashMap<String, String> getDescriptionsMap() {
+        return descriptionsMap;
     }
 }

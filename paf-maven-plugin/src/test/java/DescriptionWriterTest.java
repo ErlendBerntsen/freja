@@ -5,7 +5,6 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.concepts.builders.ExerciseBuilder;
 import no.hvl.concepts.tasks.Task;
-import no.hvl.utilities.FileUtils;
 import no.hvl.writers.DescriptionWriter;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +15,8 @@ import testUtils.TestUtils;
 
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.hvl.utilities.FileUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +39,7 @@ public class DescriptionWriterTest {
         Parser parser = new Parser(srcDirPath);
         parser.parse();
         assignment = new AssignmentBuilder(parser).build();
-        descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises());
+        descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), new HashMap<>());
     }
 
     @Test
@@ -124,8 +121,7 @@ public class DescriptionWriterTest {
             String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
             File file = new File(descriptionWriter.getDescriptionsDirPath() + File.separator + fileName);
             String fileContent =  getContentFromFile(file);
-            String content = descriptionWriter.createAttributes(exercise);
-            content += descriptionWriter.createTemplate(exercise);
+            String content = descriptionWriter.createFileContent(exercise);
             assertEquals(content, fileContent);
         }
     }
@@ -222,5 +218,34 @@ public class DescriptionWriterTest {
             exercise = exercise.getParentExercise().get();
         }
         return exercise;
+    }
+
+    @Test
+    void testKeepingOldDescription() throws IOException {
+        descriptionWriter.createFileContent(assignment.getExercises().get(0));
+        HashMap<String, String> oldDescriptions = descriptionWriter.getDescriptionsMap();
+        String oldDescription = oldDescriptions.get("Exercise1.adoc");
+        Parser parser = new Parser();
+        parser.parseDirectory("src/test/java/examples/assignment1");
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), oldDescriptions);
+        Exercise rootExercise = assignment.getExercises().get(0);
+        String newDescription = newDescriptionWriter.createTemplate(rootExercise, true);
+        assertEquals(oldDescription, newDescription);
+    }
+
+    @Test
+    void testOverwritingOldDescription() throws IOException {
+        descriptionWriter.createFileContent(assignment.getExercises().get(0));
+        HashMap<String, String> oldDescriptions = descriptionWriter.getDescriptionsMap();
+        Parser parser = new Parser();
+        parser.parseDirectory("src/test/java/examples/assignment1");
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), oldDescriptions);
+        Exercise rootExercise = assignment.getExercises().get(0);
+        newDescriptionWriter.createFileContent(rootExercise);
+        String newDescription = newDescriptionWriter.getDescriptionsMap().get("Exercise1.adoc");
+        String expectedDescription = newDescriptionWriter.createTemplate(rootExercise, false);
+        assertEquals(expectedDescription, newDescription);
     }
 }

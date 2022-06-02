@@ -97,15 +97,25 @@ public class DescriptionWriterTest {
     void testCreatingAllAdocAttributes() {
         Exercise rootExercise = assignment.getExercises().get(0);
         String allAttributes = descriptionWriter.createAttributes(rootExercise);
+        assertAllAdocAttributesAreCreated(allAttributes, rootExercise);
+    }
+
+    private void assertAllAdocAttributesAreCreated(String stringWithAttributes, Exercise rootExercise){
         for(Exercise exercise : rootExercise.getAllExercisesWithTask()){
-            assertTrue(allAttributes.contains(descriptionWriter.createExerciseAttributes(exercise)));
+            assertTrue(stringWithAttributes.contains(descriptionWriter.createExerciseAttributes(exercise)));
         }
+        assertFalse(rootExercise.getTasksIncludingAllSubExerciseTasks().isEmpty());
         for(Task task : rootExercise.getTasksIncludingAllSubExerciseTasks()){
-            assertTrue(allAttributes.contains(descriptionWriter.createTaskAttributes(task)));
+            assertTrue(stringWithAttributes.contains(descriptionWriter.createTaskAttributes(task)));
         }
     }
 
-
+    @Test
+    void testCreatingContentContainsAllAdocAttributes(){
+        Exercise rootExercise = assignment.getExercises().get(0);
+        String content = descriptionWriter.createFileContent(rootExercise);
+        assertAllAdocAttributesAreCreated(content, rootExercise);
+    }
 
     @Test
     void testWritingContentToFile() throws IOException {

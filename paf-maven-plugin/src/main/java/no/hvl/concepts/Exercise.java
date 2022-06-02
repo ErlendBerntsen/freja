@@ -80,7 +80,7 @@ public class Exercise {
     }
 
     public List<Task> getTasksIncludingAllSubExerciseTasks(){
-        List<Task> allTasks = new ArrayList<>();
+        List<Task> allTasks = new ArrayList<>(tasks);
         for(Exercise subExercise : subExercises){
             allTasks.addAll(subExercise.getTasksIncludingAllSubExerciseTasks());
         }

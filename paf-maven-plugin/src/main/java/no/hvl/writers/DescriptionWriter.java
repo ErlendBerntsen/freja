@@ -12,7 +12,6 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,23 +57,12 @@ public class DescriptionWriter {
         return content;
     }
 
-    public String createAttributes(Exercise exercise) {
+    public String createAttributes(Exercise rootExercise) {
         exerciseTemplate = new StringBuilder();
-        exerciseTemplate.append(createExerciseAttributes(exercise));
-        for(Task task : exercise.getTasksIncludingSubExercises()){
-            exerciseTemplate.append(createTaskAttributes(task));
+        for(Exercise exercise : rootExercise.getAllExercisesWithTask()){
+            exerciseTemplate.append(createExerciseAttributes(exercise));
         }
-        return exerciseTemplate.toString();
-    }
-
-    public String createFileAttributes(Exercise exercise){
-        //TODO remove
-        exerciseTemplate = new StringBuilder();
-        var exercisesWithFile = getExercisesWithFile(exercise, new ArrayList<>());
-        for(var exerciseWithFile : exercisesWithFile){
-            exerciseTemplate.append(createExerciseAttributes(exerciseWithFile));
-        }
-        for(Task task : exercise.getTasks()){
+        for(Task task : rootExercise.getTasksIncludingAllSubExerciseTasks()){
             exerciseTemplate.append(createTaskAttributes(task));
         }
         return exerciseTemplate.toString();
@@ -265,17 +253,6 @@ public class DescriptionWriter {
                 + "----"
                 + createNewLine()
                 + createNewLine();
-    }
-
-    private List<Exercise> getExercisesWithFile(Exercise exercise, List<Exercise> exercises){
-        if(exercise.getFile() != null){
-            exercises.add(exercise);
-        }
-        for(Exercise subExercise : exercise.getSubExercises()){
-
-            exercises.addAll(getExercisesWithFile(subExercise, exercises));
-        }
-        return exercises.stream().distinct().collect(Collectors.toList());
     }
 
     private String getExerciseFileNameAttribute(Exercise exercise){

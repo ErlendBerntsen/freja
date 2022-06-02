@@ -92,13 +92,17 @@ public class DescriptionWriterTest {
 
     @Test
     void testCreatingAllAdocAttributes() {
-        Exercise exercise = assignment.getExercises().get(0);
-        String allAttributes = descriptionWriter.createAttributes(exercise);
-        assertTrue(allAttributes.contains(descriptionWriter.createAttributes(exercise)));
-        for(Task task : exercise.getTasksIncludingSubExercises()){
+        Exercise rootExercise = assignment.getExercises().get(0);
+        String allAttributes = descriptionWriter.createAttributes(rootExercise);
+        for(Exercise exercise : rootExercise.getAllExercisesWithTask()){
+            assertTrue(allAttributes.contains(descriptionWriter.createExerciseAttributes(exercise)));
+        }
+        for(Task task : rootExercise.getTasksIncludingAllSubExerciseTasks()){
             assertTrue(allAttributes.contains(descriptionWriter.createTaskAttributes(task)));
         }
     }
+
+
 
     @Test
     void testWritingContentToFile() throws IOException {

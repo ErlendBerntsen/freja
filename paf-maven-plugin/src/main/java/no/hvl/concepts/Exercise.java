@@ -6,6 +6,7 @@ import no.hvl.concepts.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Exercise {
 
@@ -62,10 +63,26 @@ public class Exercise {
         return tasks;
     }
 
-    public List<Task> getTasksIncludingSubExercises(){
+    public List<Exercise> getExerciseIncludingAllSubExercises(){
+        List<Exercise> allExercises = new ArrayList<>();
+        allExercises.add(this);
+        for(Exercise subExercise : subExercises){
+            allExercises.addAll(subExercise.getExerciseIncludingAllSubExercises());
+        }
+        return allExercises;
+    }
+
+    public List<Exercise> getAllExercisesWithTask(){
+        List<Exercise> allExercises = getExerciseIncludingAllSubExercises();
+        return allExercises.stream()
+                .filter(Exercise::hasTasks)
+                .collect(Collectors.toList());
+    }
+
+    public List<Task> getTasksIncludingAllSubExerciseTasks(){
         List<Task> allTasks = new ArrayList<>();
         for(Exercise subExercise : subExercises){
-            allTasks.addAll(subExercise.getTasksIncludingSubExercises());
+            allTasks.addAll(subExercise.getTasksIncludingAllSubExerciseTasks());
         }
         return allTasks;
     }

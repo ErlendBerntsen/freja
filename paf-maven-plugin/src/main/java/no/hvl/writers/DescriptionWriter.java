@@ -8,7 +8,6 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
 
@@ -26,7 +25,7 @@ public class DescriptionWriter {
     public static final String DESCRIPTIONS_FOLDER_NAME = "descriptions";
     private final String rootFolderPath;
     private String descriptionsDirPath;
-    private StringBuilder content = new StringBuilder();
+    private StringBuilder exerciseTemplate = new StringBuilder();
     private final List<Exercise>  exercises;
 
     public DescriptionWriter(String rootFolderPath, List<Exercise> exercises) {
@@ -44,23 +43,6 @@ public class DescriptionWriter {
         this.descriptionsDirPath = descriptionsDir.getAbsolutePath();
     }
 
-    public void createFiles() {
-        //TODO Remove
-        for (Exercise exercise : exercises){
-            try {
-                createFileAttributes(exercise);
-                createTemplate(exercise);
-                File descriptionFile = new File(descriptionsDirPath + File.separator + "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc");
-                FileWriter fileWriter = new FileWriter(descriptionFile);
-                fileWriter.write(content.toString());
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
     public void createDescriptionFiles() throws IOException {
         for (Exercise exercise : exercises){
             String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
@@ -71,29 +53,31 @@ public class DescriptionWriter {
     }
 
     public String createFileContent(Exercise exercise) {
-        return createAttributes(exercise);
+        String content = createAttributes(exercise);
+        content += createTemplate(exercise);
+        return content;
     }
 
     public String createAttributes(Exercise exercise) {
-        content = new StringBuilder();
-        content.append(createExerciseAttributes(exercise));
+        exerciseTemplate = new StringBuilder();
+        exerciseTemplate.append(createExerciseAttributes(exercise));
         for(Task task : exercise.getTasksIncludingSubExercises()){
-            content.append(createTaskAttributes(task));
+            exerciseTemplate.append(createTaskAttributes(task));
         }
-        return content.toString();
+        return exerciseTemplate.toString();
     }
 
     public String createFileAttributes(Exercise exercise){
         //TODO remove
-        content = new StringBuilder();
+        exerciseTemplate = new StringBuilder();
         var exercisesWithFile = getExercisesWithFile(exercise, new ArrayList<>());
         for(var exerciseWithFile : exercisesWithFile){
-            content.append(createExerciseAttributes(exerciseWithFile));
+            exerciseTemplate.append(createExerciseAttributes(exerciseWithFile));
         }
         for(Task task : exercise.getTasks()){
-            content.append(createTaskAttributes(task));
+            exerciseTemplate.append(createTaskAttributes(task));
         }
-        return content.toString();
+        return exerciseTemplate.toString();
     }
 
     public String createExerciseAttributes(Exercise exercise){
@@ -158,12 +142,6 @@ public class DescriptionWriter {
         return attribute;
     }
 
-    private String getTypeAsString(Task task) {
-        Node node = task.getNode();
-        String className = node.getClass().getSimpleName();
-        return className.replace("Declaration", "");
-    }
-
     private String getFullName(Task task){
         BodyDeclaration<?> node = task.getNode();
         BodyDeclaration<?> nodeClone = node.clone();
@@ -218,39 +196,75 @@ public class DescriptionWriter {
         }
     }
 
-
-    private void createTemplate(Exercise exercise){
-        content.append("\n= *Exercise ").append(exercise.getNumberAmongSiblingExercises()).append("*\n");
-        createExerciseTemplate(exercise,1);
+    private String getTypeAsString(Task task) {
+        Node node = task.getNode();
+        String className = node.getClass().getSimpleName();
+        return className.replace("Declaration", "");
     }
 
-    private void createExerciseTemplate(Exercise exercise, int level){
-        content.append("\n");
-        for(Exercise subExercise : exercise.getSubExercises()){
-            content.append(".".repeat(level)).append(" ");
-            if(subExercise.hasTasks()){
-                content.append("The starting code for this exercise can be found in the file ")
-                        .append(getExerciseFileNameAttribute(subExercise))
-                        .append(", which you can find in the package ")
-                        .append(getExerciseFilePackageAttribute(subExercise))
-                        .append(". Your task is to implement the following:\n\n");
 
+    public String createTemplate(Exercise exercise){
+        String template = createTitle(exercise);
+        template += createExerciseTemplate(exercise,1);
+        return template;
+    }
+
+    public String createTitle(Exercise exercise) {
+        return createNewLine()
+                + "= *Exercise "
+                + exercise.getNumberAmongSiblingExercises()
+                + "*"
+                + createNewLine();
+    }
+
+    public String createExerciseTemplate(Exercise exercise, int level){
+        StringBuilder exerciseTemplate = new StringBuilder();
+        exerciseTemplate.append(createNewLine());
+        for(Exercise subExercise : exercise.getSubExercises()){
+            exerciseTemplate.append(createListItem(".", level));
+            if(subExercise.hasTasks()){
+                exerciseTemplate.append(createExerciseIntroductionTemplate(subExercise));
                 for(Task task : subExercise.getTasks()){
-                    createTaskTemplate(task, level);
+                    exerciseTemplate.append(createListItem("*", level));
+                    exerciseTemplate.append(createTaskTemplate(task));
                 }
             }
-            createExerciseTemplate(subExercise, level + 1);
-
+            exerciseTemplate.append(createExerciseTemplate(subExercise, level + 1));
         }
+        return exerciseTemplate.toString();
     }
 
-    private void createTaskTemplate(Task task, int level){
-        content.append("*".repeat(level)).append(" A ").append(getTaskTypeAttribute(task)).append(":\n")
-                .append("+\n")
-                .append("[source, java, subs=\"attributes+\"]\n")
-                .append("----\n")
-                .append(getTaskFullNameAttribute(task)).append("\n")
-                .append("----\n\n");
+    public String createListItem(String syntax, int nesting) {
+        return syntax.repeat(nesting)  + " ";
+    }
+
+    public String createExerciseIntroductionTemplate(Exercise exercise) {
+        return "The starting code for this exercise can be found in the file "
+                + getExerciseFileNameAttribute(exercise)
+                + ", which you can find in the package "
+                + getExerciseFilePackageAttribute(exercise)
+                + ". Your task is to implement the following:"
+                + createNewLine()
+                + createNewLine();
+    }
+
+    public String createTaskTemplate(Task task){
+        return "A " + getTaskTypeAttribute(task) + ":"
+                + createNewLine()
+                + createJavaCodeBlock(task);
+    }
+
+    private String createJavaCodeBlock(Task task) {
+        return createNewLine()
+                + "[source, java, subs=\"attributes+\"]"
+                + createNewLine()
+                + "----"
+                + createNewLine()
+                + getTaskFullNameAttribute(task)
+                + createNewLine()
+                + "----"
+                + createNewLine()
+                + createNewLine();
     }
 
     private List<Exercise> getExercisesWithFile(Exercise exercise, List<Exercise> exercises){
@@ -264,13 +278,8 @@ public class DescriptionWriter {
         return exercises.stream().distinct().collect(Collectors.toList());
     }
 
-
     private String getExerciseFileNameAttribute(Exercise exercise){
         return getExerciseAttribute(exercise, "FileName");
-    }
-
-    private String getExerciseFileSimpleNameAttribute(Exercise exercise){
-        return getExerciseAttribute(exercise, "FileSimpleName");
     }
 
     private String getExerciseFilePackageAttribute(Exercise exercise){

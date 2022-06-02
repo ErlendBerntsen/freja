@@ -172,4 +172,12 @@ public class Example {
         String x;
     }
 
+
+    @TestId(35)
+    @Implement(number = {1,1,1}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    public void longNumber(){
+        String x;
+    }
+
+
 }

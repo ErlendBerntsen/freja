@@ -1,13 +1,17 @@
+import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.AssignmentBuilder;
+import no.hvl.concepts.builders.ExerciseBuilder;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.writers.DescriptionWriter;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
+import testUtils.ExamplesParser;
+import testUtils.TestUtils;
 
 
 import java.io.*;
@@ -103,8 +107,103 @@ public class DescriptionWriterTest {
             String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
             File file = new File(descriptionWriter.getDescriptionsDirPath() + File.separator + fileName);
             BufferedReader reader = new BufferedReader(new FileReader(file.getAbsolutePath()));
-            String attributes = descriptionWriter.createAttributes(exercise);
-            assertLinesMatch(attributes.lines(), reader.lines());
+            String content = descriptionWriter.createAttributes(exercise);
+            content += descriptionWriter.createTemplate(exercise);
+            assertLinesMatch(content.lines(), reader.lines());
         }
+    }
+
+    @Test
+    void testCreatingTemplateTitle(){
+        Exercise exercise = assignment.getExercises().get(0);
+        String title ="\n= *Exercise 1*\n";
+        assertEquals(title, descriptionWriter.createTitle(exercise));
+    }
+
+    @Test
+    void testCreatingTemplateIntroduction(){
+        Exercise exercise = assignment.getExercises().get(0).getSubExercises().get(2);
+        String introduction = "The starting code for this exercise can be found in the file "
+                + "{Exercise1_3_FileName}"
+                + ", which you can find in the package "
+                + "{Exercise1_3_Package}"
+                + ". Your task is to implement the following:\n\n";
+        assertEquals(introduction, descriptionWriter.createExerciseIntroductionTemplate(exercise));
+    }
+
+    @Test
+    void testCreatingTemplateTask(){
+        Task task = assignment.getExercises().get(0).getSubExercises().get(2).getTasks().get(0);
+        String taskTemplate = "A {Task1_3_1_Type}:\n\n"
+                + "[source, java, subs=\"attributes+\"]"
+                + "\n----\n"
+                +"{Task1_3_1_FullName}"
+                + "\n----\n\n";
+        assertEquals(taskTemplate, descriptionWriter.createTaskTemplate(task));
+    }
+
+    @Test
+    void testCreatingTemplateLists(){
+        Exercise exercise = assignment.getExercises().get(0);
+        String templateList = createTemplateList(exercise, 1);
+        String expectedList =
+                ". \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n" +
+                ". \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n"
+                        +"* \n" +
+                ". \n"
+                        +"* \n";
+        assertEquals(expectedList, templateList);
+    }
+
+    private String createTemplateList(Exercise exercise, int level) {
+        StringBuilder list = new StringBuilder();
+        for(Exercise subExercise : exercise.getSubExercises()){
+            list.append(descriptionWriter.createListItem(".", level));
+            list.append("\n");
+            if(subExercise.hasTasks()){
+                for(Task task : subExercise.getTasks()){
+                    list.append(descriptionWriter.createListItem("*", level));
+                    list.append("\n");
+
+                }
+            }
+            list.append(createTemplateList(subExercise, level + 1));
+        }
+        return list.toString();
+    }
+
+    @Test
+    void testCreatingNestedTemplateList() throws IOException {
+        ExamplesParser examplesParser = new ExamplesParser();
+        examplesParser.init();
+        BodyDeclaration<?> node = TestUtils.getNodeWithId(examplesParser.parser.getCompilationUnitCopies(), 35);
+        Exercise exercise = new ExerciseBuilder(node, new ArrayList<>(), examplesParser.replacementMap).build();
+        Exercise rootExercise = getRootExercise(exercise);
+        String templateList = createTemplateList(rootExercise, 1);
+        String expectedList =
+                ". \n"
+                        +".. \n"
+                        +"** \n";
+        assertEquals(expectedList, templateList);
+
+    }
+
+    private Exercise getRootExercise(Exercise exercise) {
+        while(exercise.getParentExercise().isPresent()){
+            exercise = exercise.getParentExercise().get();
+        }
+        return exercise;
     }
 }

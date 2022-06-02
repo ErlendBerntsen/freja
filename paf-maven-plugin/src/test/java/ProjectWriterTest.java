@@ -3,7 +3,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.io.Files;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
+import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.AssignmentBuilder;
+import no.hvl.writers.DescriptionWriter;
 import no.hvl.writers.ProjectWriter;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -261,5 +263,36 @@ public class ProjectWriterTest {
         assertDoesNotThrow(() -> projectWriter.createAllProjects());
     }
 
+    @Test
+    void testSavingExerciseDescriptionsBeforeClearingTargetFolder() throws IOException {
+        projectWriter.createSolutionAndStartProject();
+        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises());
+        descriptionWriter.createExerciseDescriptions();
+        projectWriter.clearTargetDir();
+        HashMap<String, String> descriptionMap = projectWriter.getDescriptionMap();
+        assertFalse(descriptionMap.isEmpty());
+        for(String fileName : descriptionMap.keySet()){
+            assertEquals(getDescriptionWithFileName(fileName),descriptionMap.get(fileName));
+        }
+    }
+
+    private String getDescriptionWithFileName(String fileName) {
+        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises());
+        for(Exercise exercise : assignment.getExercises()){
+            String exerciseFileName = "Exercise"  + exercise.getNumberAmongSiblingExercises() + ".adoc";
+            if(exerciseFileName.equals(fileName)){
+                return descriptionWriter.createFileContent(exercise);
+            }
+        }
+        throw new IllegalStateException("Could not find exercise description with the file name: " + fileName);
+    }
+
+    @Test
+    void testSavingExerciseDescriptionsBeforeClearingTargetFolderWithNoDescriptions() throws IOException {
+        projectWriter.createSolutionAndStartProject();
+        projectWriter.clearTargetDir();
+        HashMap<String, String> descriptionMap = projectWriter.getDescriptionMap();
+        assertTrue(descriptionMap.isEmpty());
+    }
 
 }

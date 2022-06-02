@@ -1,10 +1,8 @@
 package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.DefaultPrettyPrinter;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -20,7 +18,7 @@ public class CopyFileVisitor implements FileVisitor<Path> {
     private final Path target;
     private final HashMap<String, CompilationUnit> modifiedFiles;
     private final List<PathMatcher> pathMatchersToIgnore;
-    private boolean isVisitingInJavaSourceFolder = false;
+    private boolean isVisitingInJavaSourceFolder;
 
     public CopyFileVisitor(Path source, Path target,
                            HashMap<String, CompilationUnit> modifiedFiles, List<PathMatcher> pathMatchersToIgnore) {
@@ -28,6 +26,7 @@ public class CopyFileVisitor implements FileVisitor<Path> {
         this.target = target;
         this.modifiedFiles = modifiedFiles;
         this.pathMatchersToIgnore = pathMatchersToIgnore;
+        this.isVisitingInJavaSourceFolder = false;
     }
 
     @Override

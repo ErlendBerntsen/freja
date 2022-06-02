@@ -14,7 +14,6 @@ import no.hvl.concepts.tasks.Task;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.hvl.utilities.FileUtils.*;
 import static no.hvl.utilities.NodeUtils.*;
@@ -24,7 +23,6 @@ public class DescriptionWriter {
     public static final String DESCRIPTIONS_FOLDER_NAME = "descriptions";
     private final String rootFolderPath;
     private String descriptionsDirPath;
-    private StringBuilder exerciseTemplate = new StringBuilder();
     private final List<Exercise>  exercises;
 
     public DescriptionWriter(String rootFolderPath, List<Exercise> exercises) {
@@ -58,7 +56,7 @@ public class DescriptionWriter {
     }
 
     public String createAttributes(Exercise rootExercise) {
-        exerciseTemplate = new StringBuilder();
+        StringBuilder exerciseTemplate = new StringBuilder();
         for(Exercise exercise : rootExercise.getAllExercisesWithTask()){
             exerciseTemplate.append(createExerciseAttributes(exercise));
         }

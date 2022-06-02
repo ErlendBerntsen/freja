@@ -19,6 +19,7 @@ public class ProjectWriter {
     private final String sourceDirectoryPath;
     private final Assignment assignment;
     private List<PathMatcher> pathMatchersToIgnore;
+    private final HashMap<String, String> descriptionMap;
 
     public ProjectWriter(String sourceDirectoryPath, String targetDirectoryPath, Assignment assignment)
             throws NoSuchFileException {
@@ -27,6 +28,7 @@ public class ProjectWriter {
         this.sourceDirectoryPath = sourceDirectoryPath;
         this.targetDirectoryPath = targetDirectoryPath;
         this.assignment = assignment;
+        this.descriptionMap = new HashMap<>();
         createPathMatchersToIgnore();
     }
 
@@ -45,7 +47,7 @@ public class ProjectWriter {
 
     public void clearTargetDir() throws IOException {
         Files.walkFileTree(Path.of(targetDirectoryPath), Set.of(FileVisitOption.FOLLOW_LINKS),
-                Integer.MAX_VALUE, new DeleteFileVisitor(Path.of(targetDirectoryPath)));
+                Integer.MAX_VALUE, new DeleteFileVisitor(Path.of(targetDirectoryPath), descriptionMap));
     }
 
     public void createSolutionAndStartProject() throws IOException {
@@ -80,4 +82,7 @@ public class ProjectWriter {
         pathMatchersToIgnore.add(pathMatcher);
     }
 
+    public HashMap<String, String> getDescriptionMap() {
+        return descriptionMap;
+    }
 }

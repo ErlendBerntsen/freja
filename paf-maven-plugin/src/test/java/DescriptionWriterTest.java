@@ -5,6 +5,7 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.concepts.builders.ExerciseBuilder;
 import no.hvl.concepts.tasks.Task;
+import no.hvl.utilities.FileUtils;
 import no.hvl.writers.DescriptionWriter;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static no.hvl.utilities.FileUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
@@ -110,10 +113,10 @@ public class DescriptionWriterTest {
         for(Exercise exercise : assignment.getExercises()){
             String fileName = "Exercise" + exercise.getNumberAmongSiblingExercises() + ".adoc";
             File file = new File(descriptionWriter.getDescriptionsDirPath() + File.separator + fileName);
-            BufferedReader reader = new BufferedReader(new FileReader(file.getAbsolutePath()));
+            String fileContent =  getContentFromFile(file);
             String content = descriptionWriter.createAttributes(exercise);
             content += descriptionWriter.createTemplate(exercise);
-            assertLinesMatch(content.lines(), reader.lines());
+            assertEquals(content, fileContent);
         }
     }
 

@@ -3,14 +3,14 @@ package no.hvl.utilities;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileUtils {
     private FileUtils (){
@@ -68,6 +68,14 @@ public class FileUtils {
         CompilationUnit fileAsNode = modifiedFiles.get(fileName);
         return printer.print(fileAsNode);
     }
+
+    public static String getContentFromFile(File file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file.getAbsolutePath()));
+        String content = reader.lines().collect(Collectors.joining("\n", "", "\n"));
+        reader.close();
+        return content;
+    }
+
 
 
 }

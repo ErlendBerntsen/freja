@@ -9,6 +9,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.annotations.CopyOption;
 import no.hvl.exceptions.MissingAnnotationException;
+import no.hvl.exceptions.NodeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class AnnotationUtils {
                 return CopyOption.getCopy(expression.asNameExpr().getNameAsString());
             }
         }
-        throw new MissingAnnotationException(IMPLEMENT_COPY_NAME);
+        throw new MissingAnnotationException((Node) node, IMPLEMENT_COPY_NAME);
     }
 
     public static Expression getAnnotationMemberValue(NodeWithAnnotations<?> node,
@@ -42,7 +43,7 @@ public class AnnotationUtils {
         if(annotation.isPresent()){
             return getAnnotationMemberValueFromAnnotationExpr(annotation.get(), memberName);
         }else{
-            throw new IllegalArgumentException(
+            throw new NodeException((Node) node,
                     String.format("Could not find annotation \"%s\" on the node:%n%s", annotationName, node));
         }
     }
@@ -57,7 +58,7 @@ public class AnnotationUtils {
                 }
             }
         }
-        throw new IllegalArgumentException(
+        throw new NodeException(annotationExpr,
                 String.format("Could not find annotation member \"%s\" in the annotation:%n%s",
                         memberName, annotationExpr));
     }
@@ -68,7 +69,7 @@ public class AnnotationUtils {
             return expression.asArrayInitializerExpr().getValues().stream()
                     .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray();
         }
-        throw new MissingAnnotationException(IMPLEMENT_NUMBER_NAME);
+        throw new MissingAnnotationException((Node) node, IMPLEMENT_NUMBER_NAME);
     }
 
     public static String getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
@@ -76,7 +77,7 @@ public class AnnotationUtils {
             Expression expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_ID_NAME);
             return expression.asStringLiteralExpr().asString();
         }
-        throw new MissingAnnotationException(IMPLEMENT_ID_NAME);
+        throw new MissingAnnotationException((Node) node, IMPLEMENT_ID_NAME);
     }
 
     public static void removeAnnotationImportsFromFile(CompilationUnit file){
@@ -110,7 +111,7 @@ public class AnnotationUtils {
         if(importQualifier.isPresent()){
             return importQualifier.get().asString();
         }
-        throw new IllegalStateException(String.format
+        throw new NodeException(importDeclaration, String.format
                 ("Import declaration %s has an unrecognizable format", importDeclaration.getNameAsString()));
     }
 

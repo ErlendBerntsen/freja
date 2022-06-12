@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.concepts.Replacement;
+import no.hvl.exceptions.NodeException;
 import no.hvl.utilities.NodeUtils;
 
 import java.util.List;
@@ -42,12 +43,12 @@ public class ReplacementBuilder {
         if(nodeHasBlockStmt(annotatedNode)){
             BlockStmt replacementCodeBlock = getBlockStmtFromBodyDeclaration(annotatedNode);
             if(replacementCodeBlock.isEmpty()){
-                throw new IllegalArgumentException(
+                throw new NodeException(replacementCodeBlock,
                         String.format("Types annotated with @%s can not have an empty body.", REPLACEMENT_CODE_NAME));
             }
             return replacementCodeBlock;
         }
-        throw new IllegalArgumentException(
+        throw new NodeException(annotatedNode,
                 String.format("Types annotated with @%s must have a body.", REPLACEMENT_CODE_NAME));
     }
 

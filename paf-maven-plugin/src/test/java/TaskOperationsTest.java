@@ -13,6 +13,7 @@ import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.*;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -255,9 +256,9 @@ class TaskOperationsTest extends ExamplesParser {
             taskBuilder.build();
             fail("Should throw exception");
         }catch (Exception e){
-            assertTrue(e instanceof IllegalArgumentException);
-            assertEquals(e.getMessage(), String.format("The copyOption \"%s\" is not allowed on field variables," +
-                    " only on methods and constructors", copyOption));
+            assertTrue(e instanceof NodeException);
+            assertTrue(e.getMessage().contains(String.format("The copyOption \"%s\" is not allowed on field variables," +
+                    " only on methods and constructors", copyOption)));
         }
     }
 
@@ -369,11 +370,11 @@ class TaskOperationsTest extends ExamplesParser {
             taskBuilder.build();
             fail("Should throw exception");
         }catch (Exception e){
-            assertEquals(IllegalStateException.class, e.getClass());
-            assertEquals(e.getMessage(),
+            assertEquals(NodeException.class, e.getClass());
+            assertTrue(e.getMessage().contains(
                     String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
                     IMPLEMENT_ID_NAME, IMPLEMENT_NAME,
-                    IMPLEMENT_COPY_NAME, CopyOption.REPLACE_BODY));
+                    IMPLEMENT_COPY_NAME, CopyOption.REPLACE_BODY)));
         }
     }
 

@@ -53,7 +53,7 @@ public class Parser {
             throw new NoSuchFileException(projectDir.getAbsolutePath());
         }
 
-        for(File file : projectDir.listFiles()){
+        for(File file : Objects.requireNonNull(projectDir.listFiles())){
             if("src".equalsIgnoreCase(file.getName())
             || "source".equalsIgnoreCase(file.getName())){
                 return file;

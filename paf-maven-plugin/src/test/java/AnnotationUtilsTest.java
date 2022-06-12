@@ -6,6 +6,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.Parser;
 import no.hvl.annotations.CopyOption;
 import no.hvl.exceptions.MissingAnnotationException;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
@@ -63,21 +64,21 @@ class AnnotationUtilsTest extends ExamplesParser {
     @Test
     void testGettingAnnotationMemberValueFromNonExistingAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NodeException.class,
                 () -> getAnnotationMemberValue(node, "", IMPLEMENT_NUMBER_NAME));
     }
 
     @Test
     void testGettingAnnotationMemberValueFromNonExistingAnnotationMember() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NodeException.class,
                 () -> getAnnotationMemberValue(node, IMPLEMENT_NAME, ""));
     }
 
     @Test
     void testGettingAnnotationMemberValueFromSingleValueAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NodeException.class,
                 () -> getAnnotationMemberValue(node, TEST_ID_ANNOTATION_NAME, IMPLEMENT_NUMBER_NAME));
     }
 
@@ -115,7 +116,7 @@ class AnnotationUtilsTest extends ExamplesParser {
     @Test
     void testGettingReplacementIdValueFromImplementAnnotationWithoutReplacementId() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertThrows(IllegalArgumentException.class, () -> getReplacementIdInImplementAnnotation(node));
+        assertThrows(NodeException.class, () -> getReplacementIdInImplementAnnotation(node));
 
     }
 

@@ -7,6 +7,7 @@ import no.hvl.concepts.builders.SolutionBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.concepts.tasks.ReplaceSolutionTask;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
@@ -58,14 +59,14 @@ class TaskBuilderTest extends ExamplesParser {
     void testBuildingReplaceSolutionTaskWithoutReplacementId(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 7);
         TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
-        assertThrows(IllegalStateException.class, taskBuilder::build);
+        assertThrows(NodeException.class, taskBuilder::build);
     }
 
     @Test
     void testBuildingReplaceSolutionTaskWithNonExistingReplacementId(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 11);
         TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
-        assertThrows(IllegalArgumentException.class, taskBuilder::build);
+        assertThrows(NodeException.class, taskBuilder::build);
     }
 
 }

@@ -9,6 +9,7 @@ import no.hvl.Parser;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.exceptions.NoFileFoundException;
+import no.hvl.exceptions.NodeException;
 import no.hvl.utilities.AnnotationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class ReplacementBuilderTest extends ExamplesParser {
     void testBuildingReplacementWithoutReplacementCodeAnnotation(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
-        assertThrows(IllegalArgumentException.class, replacementBuilder::build);
+        assertThrows(NodeException.class, replacementBuilder::build);
     }
 
     @Test
@@ -61,14 +62,14 @@ class ReplacementBuilderTest extends ExamplesParser {
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
         BlockStmt body = getBlockStmtFromBodyDeclaration(node);
         node.remove(body);
-        assertThrows(IllegalArgumentException.class, replacementBuilder::build);
+        assertThrows(NodeException.class, replacementBuilder::build);
     }
 
     @Test
     void testBuildingReplacementWithEmptyBody(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 12);
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
-        assertThrows(IllegalArgumentException.class, replacementBuilder::build);
+        assertThrows(NodeException.class, replacementBuilder::build);
     }
 
     @Test

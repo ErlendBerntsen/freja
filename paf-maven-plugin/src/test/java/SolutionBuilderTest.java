@@ -5,6 +5,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.SolutionBuilder;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
@@ -72,7 +73,7 @@ class SolutionBuilderTest extends ExamplesParser {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), nodeIdWithIllegalSolutionDefinition);
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(node);
         SolutionBuilder solutionBuilder =  new SolutionBuilder(codeBlockWithSolution);
-        assertThrows(IllegalStateException.class, solutionBuilder::build);
+        assertThrows(NodeException.class, solutionBuilder::build);
 
     }
 }

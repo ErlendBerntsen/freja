@@ -7,6 +7,7 @@ import no.hvl.Parser;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
+import no.hvl.exceptions.NodeException;
 
 import java.util.*;
 
@@ -63,7 +64,8 @@ public class AssignmentBuilder {
         for(Replacement replacement : replacements){
             String replacementId = replacement.getId();
             if(replacementMap.containsKey(replacementId)){
-                throw new IllegalStateException(String.format("Type annotated with %s uses an %s that is already defined"
+                throw new NodeException(replacement.getReplacementCode(),
+                        String.format("Type annotated with %s uses an %s that is already defined"
                         , REPLACEMENT_CODE_NAME, REPLACEMENT_CODE_ID_NAME ));
             }
             replacementMap.put(replacementId, replacement);

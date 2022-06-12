@@ -1,5 +1,6 @@
 package no.hvl.utilities;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -17,6 +18,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.exceptions.NoFileFoundException;
+import no.hvl.exceptions.NodeException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,7 +73,7 @@ public class NodeUtils {
                 }
             }
         }
-        throw new IllegalArgumentException(
+        throw new NodeException(bodyDeclaration,
                 String.format("The body declaration does not have a block statement:%n%s", bodyDeclaration));
     }
 
@@ -128,7 +130,7 @@ public class NodeUtils {
     public static void replaceStatements(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
                                          BlockStmt replacementCode){
         if(statementsToBeReplaced.isEmpty()){
-            throw new IllegalArgumentException("The list of statements to be replaced can not be empty.");
+            throw new NodeException(codeBlock, "The list of statements to be replaced can not be empty.");
         }
         List<Statement> codeBlockStatements = codeBlock.getStatements();
         Statement firstStatementToBeReplaced = statementsToBeReplaced.get(0);
@@ -140,7 +142,7 @@ public class NodeUtils {
             insertStartTodoComment(replacementCode);
             insertEndTodoComment(codeBlock, statementsToBeReplaced);
         }else{
-            throw new IllegalArgumentException(
+            throw new NodeException(codeBlock,
                     String.format("Can not find the statement:%n%s%n%n in the code block:%n%s",
                             firstStatementToBeReplaced, codeBlock));
         }
@@ -188,7 +190,7 @@ public class NodeUtils {
         if(statementTokenRange.isPresent()){
             return new LineComment(statementTokenRange.get(), comment);
         }
-        throw new IllegalArgumentException(String.format("The statement %s does not have a token range", statement));
+        throw new NodeException(statement, String.format("The statement %s does not have a token range", statement));
     }
 
     public static void removeSolution(BlockStmt codeBlock, Solution solution){
@@ -261,7 +263,14 @@ public class NodeUtils {
         if(node instanceof NodeWithSimpleName){
             return ((NodeWithSimpleName<?>) node).getNameAsString();
         }
-        throw new IllegalArgumentException("The node does not have a simple name: " + node);
+        throw new NodeException(node, "The node does not have a simple name: " + node);
+    }
+
+    public static Range tryToGetRange(Node node) {
+        if(node.getRange().isPresent()){
+            return node.getRange().get();
+        }
+        throw new IllegalArgumentException(String.format("Could not find the range of the node: %s", node));
     }
 
 

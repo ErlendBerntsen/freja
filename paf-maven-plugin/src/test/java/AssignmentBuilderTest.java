@@ -3,6 +3,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
 import no.hvl.concepts.builders.AssignmentBuilder;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AssignmentBuilderTest {
 
     private Parser parser;
-    private List<String> filesToRemove = List.of("Assignment3RemoveClass", "Assignment3RemoveEnum",
+    private final List<String> filesToRemove = List.of("Assignment3RemoveClass", "Assignment3RemoveEnum",
             "Assignment3RemoveInterface", "Assignment3RemoveAnnotation");
 
     @BeforeEach
@@ -106,7 +107,7 @@ public class AssignmentBuilderTest {
     void testBuildingAssigmentWithDuplicateReplacementIds() throws IOException {
         parser.parseDirectory("src/test/java/examples/assignment2");
         AssignmentBuilder assignmentBuilder = new AssignmentBuilder(parser);
-        assertThrows(IllegalStateException.class, assignmentBuilder::build);
+        assertThrows(NodeException.class, assignmentBuilder::build);
     }
 
 

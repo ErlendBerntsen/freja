@@ -10,6 +10,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import no.hvl.Parser;
 import no.hvl.exceptions.NoFileFoundException;
+import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
@@ -104,7 +105,7 @@ class NodeUtilsTest extends ExamplesParser {
     @Test
     void testGettingBlockStmtFromFieldVariable(){
         BodyDeclaration<?> fieldVariable = getNodeWithId(parser.getCompilationUnitCopies(), 2);
-        assertThrows(IllegalArgumentException.class, () -> getBlockStmtFromBodyDeclaration(fieldVariable));
+        assertThrows(NodeException.class, () -> getBlockStmtFromBodyDeclaration(fieldVariable));
     }
 
     @Test
@@ -189,7 +190,7 @@ class NodeUtilsTest extends ExamplesParser {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         BlockStmt methodBody = getBlockStmtFromBodyDeclaration(node);
         List<Statement> targetStatements = new ArrayList<>();
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NodeException.class,
                 () -> replaceStatements(methodBody, targetStatements, methodBody));
     }
 
@@ -200,7 +201,7 @@ class NodeUtilsTest extends ExamplesParser {
         BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 3);
         BlockStmt otherMethodBody = getBlockStmtFromBodyDeclaration(node2);
         List<Statement> targetStatements = otherMethodBody.getStatements();
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NodeException.class,
                 () -> replaceStatements(methodBody, targetStatements, methodBody));
     }
 

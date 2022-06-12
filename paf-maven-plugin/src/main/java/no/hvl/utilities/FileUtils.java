@@ -7,10 +7,8 @@ import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.HashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileUtils {
     private FileUtils (){

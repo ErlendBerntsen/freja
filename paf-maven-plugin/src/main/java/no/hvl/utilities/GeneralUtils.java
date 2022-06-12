@@ -1,13 +1,13 @@
 package no.hvl.utilities;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
-import no.hvl.concepts.Exercise;
 import no.hvl.exceptions.ExerciseNumberException;
+import no.hvl.exceptions.NodeException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,23 +44,24 @@ public class GeneralUtils {
     }
 
     public static void checkExerciseNumbers(List<BodyDeclaration<?>> nodes){
-        List<int[]> exerciseNumbers = nodes
-                .stream()
-                .map(AnnotationUtils::getNumberValueInImplementAnnotation)
-                .collect(Collectors.toList());
-        checkIfExerciseNumbersAreLegal(exerciseNumbers);
+        Set<List<Integer>> legalNumbers = new HashSet<>();
+        for(BodyDeclaration<?> node: nodes){
+            int[] number = getNumberValueInImplementAnnotation(node);
+            try{
+                checkIfExerciseNumberIsLegal(legalNumbers, number);
+            }catch (ExerciseNumberException e){
+                throw new NodeException(node, e.getMessage());
+            }
+        }
     }
 
-    public static void checkIfExerciseNumbersAreLegal(List<int[]> exerciseNumbers){
-        HashSet<List<Integer>> legalNumbers = new HashSet<>();
-        for(int[] number : exerciseNumbers){
-            List<Integer> digitsInNumber = new ArrayList<>();
-            for (int digit : number) {
-                digitsInNumber.add(digit);
-                throwExceptionIfZeroBased(digitsInNumber);
-                throwExceptionIfMissingRequiredNumber(digitsInNumber, legalNumbers);
-                legalNumbers.add(new ArrayList<>(digitsInNumber));
-            }
+    public static void checkIfExerciseNumberIsLegal(Set<List<Integer>> legalNumbers, int[] number){
+        List<Integer> digitsInNumber = new ArrayList<>();
+        for (int digit : number) {
+            digitsInNumber.add(digit);
+            throwExceptionIfZeroBased(digitsInNumber);
+            throwExceptionIfMissingRequiredNumber(digitsInNumber, legalNumbers);
+            legalNumbers.add(new ArrayList<>(digitsInNumber));
         }
     }
 
@@ -72,7 +73,7 @@ public class GeneralUtils {
     }
 
     private static void throwExceptionIfMissingRequiredNumber(List<Integer> digitsInNumber,
-                                                              HashSet<List<Integer>> legalNumbers) {
+                                                              Set<List<Integer>> legalNumbers) {
         int lastDigit = digitsInNumber.get(digitsInNumber.size()-1);
         List<Integer> requiredNumber = getRequiredNumber(digitsInNumber);
         if(lastDigit != 1 && !legalNumbers.contains(requiredNumber)){

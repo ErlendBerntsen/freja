@@ -5,6 +5,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.CopyOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.*;
+import no.hvl.exceptions.NodeException;
 
 import java.util.Map;
 
@@ -65,7 +66,7 @@ public class TaskBuilder {
     private Replacement getReplacement(){
         String replacementId = getReplacementId();
         if(!replacementMap.containsKey(replacementId)){
-            throw new IllegalArgumentException(
+            throw new NodeException(nodeAnnotatedWithImplement,
                     String.format("The %s \"%s\" does not match any %s of the %s annotations",
                             IMPLEMENT_ID_NAME, replacementId, REPLACEMENT_CODE_ID_NAME, REPLACEMENT_CODE_NAME));
         }
@@ -75,8 +76,8 @@ public class TaskBuilder {
     private String getReplacementId(){
         try{
           return getReplacementIdInImplementAnnotation(nodeAnnotatedWithImplement);
-        }catch (IllegalArgumentException e){
-            throw new IllegalStateException(
+        }catch (NodeException e){
+            throw new NodeException(nodeAnnotatedWithImplement,
                     String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
                             IMPLEMENT_ID_NAME, IMPLEMENT_NAME,
                             IMPLEMENT_COPY_NAME, copyOption.toString()));
@@ -90,7 +91,7 @@ public class TaskBuilder {
 
     private void throwExceptionIfNoBlockStmt(){
         if (!nodeHasBlockStmt(nodeAnnotatedWithImplement)){
-            throw new IllegalArgumentException(
+            throw new NodeException(nodeAnnotatedWithImplement,
                     String.format("The copyOption \"%s\" is not allowed on field variables," +
                             " only on methods and constructors", copyOption));
         }

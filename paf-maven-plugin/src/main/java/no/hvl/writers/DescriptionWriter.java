@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
+import no.hvl.exceptions.NodeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +170,7 @@ public class DescriptionWriter {
         if(firstLine.isPresent()){
             return firstLine.get();
         }
-        throw new IllegalArgumentException("There are no lines of code in the node: " + nodeAsString);
+        throw new NodeException(nodeClone, "There are no lines of code in the node: " + nodeAsString);
     }
 
     private String removeCurlyBracketAtLineEndIfPresent(String line) {

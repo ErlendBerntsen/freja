@@ -39,7 +39,8 @@ public class DescriptionWriterTest {
         Parser parser = new Parser(srcDirPath);
         parser.parse();
         assignment = new AssignmentBuilder(parser).build();
-        descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), new HashMap<>());
+        descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+                new HashMap<>(),false);
     }
 
     @Test
@@ -228,9 +229,10 @@ public class DescriptionWriterTest {
         Parser parser = new Parser();
         parser.parseDirectory("src/test/java/examples/assignment1");
         Assignment assignment = new AssignmentBuilder(parser).build();
-        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), oldDescriptions);
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+                oldDescriptions, true);
         Exercise rootExercise = assignment.getExercises().get(0);
-        String newDescription = newDescriptionWriter.createTemplate(rootExercise, true);
+        String newDescription = newDescriptionWriter.createTemplate(rootExercise);
         assertEquals(oldDescription, newDescription);
     }
 
@@ -241,11 +243,12 @@ public class DescriptionWriterTest {
         Parser parser = new Parser();
         parser.parseDirectory("src/test/java/examples/assignment1");
         Assignment assignment = new AssignmentBuilder(parser).build();
-        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(), oldDescriptions);
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+                oldDescriptions, false);
         Exercise rootExercise = assignment.getExercises().get(0);
         newDescriptionWriter.createFileContent(rootExercise);
         String newDescription = newDescriptionWriter.getDescriptionsMap().get("Exercise1.adoc");
-        String expectedDescription = newDescriptionWriter.createTemplate(rootExercise, false);
+        String expectedDescription = newDescriptionWriter.createTemplate(rootExercise);
         assertEquals(expectedDescription, newDescription);
     }
 }

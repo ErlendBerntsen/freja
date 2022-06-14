@@ -1,6 +1,7 @@
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.io.Files;
+import no.hvl.Configuration;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
 import no.hvl.concepts.Exercise;
@@ -40,7 +41,8 @@ public class ProjectWriterTest {
         Parser parser = new Parser(srcDirPath);
         parser.parse();
         assignment = new AssignmentBuilder(parser).build();
-        projectWriter = new ProjectWriter(srcDirPath, targetDirPath, assignment);
+        var config = new Configuration(srcDirPath, targetDirPath);
+        projectWriter = new ProjectWriter(config, assignment);
     }
 
 
@@ -176,12 +178,14 @@ public class ProjectWriterTest {
 
     @Test
     void testGeneratingInNonExistingSourcePath()  {
-        assertThrows(NoSuchFileException.class, () -> new ProjectWriter("", targetDirPath, assignment));
+        var config = new Configuration("", targetDirPath);
+        assertThrows(NoSuchFileException.class, () -> new ProjectWriter(config, assignment));
     }
 
     @Test
     void testGeneratingInNonExistingTargetPath()  {
-        assertThrows(NoSuchFileException.class, () -> new ProjectWriter(srcDirPath, "", assignment));
+        var config = new Configuration(srcDirPath,"");
+        assertThrows(NoSuchFileException.class, () -> new ProjectWriter(config, assignment));
     }
 
     @Test
@@ -190,7 +194,8 @@ public class ProjectWriterTest {
         filesToRemove.add("test");
         filesToRemove.add("target");
         assignment.setFileNamesToRemove(filesToRemove);
-        projectWriter = new ProjectWriter(srcDirPath, targetDirPath, assignment);
+        var config = new Configuration(srcDirPath, targetDirPath);
+        projectWriter = new ProjectWriter(config, assignment);
         projectWriter.createSolutionAndStartProject();
         File targetDir = new File(targetDirPath);
         List<String> createdDirs = getAllDirectoryNames(targetDir);
@@ -203,7 +208,8 @@ public class ProjectWriterTest {
         HashSet<String> filesToRemove = assignment.getFileNamesToRemove();
         filesToRemove.add("paf-test-example.iml");
         assignment.setFileNamesToRemove(filesToRemove);
-        projectWriter = new ProjectWriter(srcDirPath, targetDirPath, assignment);
+        var config = new Configuration(srcDirPath, targetDirPath);
+        projectWriter = new ProjectWriter(config, assignment);
         projectWriter.createSolutionAndStartProject();
         File targetDir = new File(targetDirPath);
         List<String> createdFiles = getAllFileNames(targetDir);
@@ -267,7 +273,7 @@ public class ProjectWriterTest {
     void testSavingExerciseDescriptionsBeforeClearingTargetFolder() throws IOException {
         projectWriter.createSolutionAndStartProject();
         DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
-                new HashMap<>());
+                new HashMap<>(), false);
         descriptionWriter.createExerciseDescriptions();
         projectWriter.clearTargetDir();
         HashMap<String, String> descriptionMap = projectWriter.getDescriptionMap();
@@ -279,11 +285,11 @@ public class ProjectWriterTest {
 
     private String getDescriptionWithFileName(String fileName) {
         DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
-                new HashMap<>());
+                new HashMap<>(), false);
         for(Exercise exercise : assignment.getExercises()){
             String exerciseFileName = "Exercise"  + exercise.getNumberAmongSiblingExercises() + ".adoc";
             if(exerciseFileName.equals(fileName)){
-                return descriptionWriter.createTemplate(exercise, false);
+                return descriptionWriter.createTemplate(exercise);
             }
         }
         throw new IllegalStateException("Could not find exercise description with the file name: " + fileName);

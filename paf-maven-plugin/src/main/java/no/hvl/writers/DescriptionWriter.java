@@ -27,14 +27,15 @@ public class DescriptionWriter {
     private final List<Exercise>  exercises;
     private final HashMap<String, String> descriptionsMap;
     private final HashMap<String, String> oldDescriptionsMap;
-
+    private final boolean keepOldTemplates;
 
     public DescriptionWriter(String rootFolderPath, List<Exercise> exercises,
-                             HashMap<String, String> oldDescriptions) {
+                             HashMap<String, String> oldDescriptions, boolean keepOldTemplates) {
         this.rootFolderPath = rootFolderPath;
         this.exercises = exercises;
         this.oldDescriptionsMap = oldDescriptions;
         this.descriptionsMap = new HashMap<>();
+        this.keepOldTemplates = keepOldTemplates;
     }
 
     public void createExerciseDescriptions() throws IOException {
@@ -62,7 +63,7 @@ public class DescriptionWriter {
 
     public String createFileContent(Exercise exercise) {
         String attributes = createAttributes(exercise);
-        String template = createTemplate(exercise, false);
+        String template = createTemplate(exercise);
         createDescription(exercise, template);
         return attributes + template;
     }
@@ -204,10 +205,8 @@ public class DescriptionWriter {
         return className.replace("Declaration", "");
     }
 
-
-    public String createTemplate(Exercise exercise, boolean keepOldTemplate){
-        //TODO this flag should come from some option file
-        if(keepOldTemplate){
+    public String createTemplate(Exercise exercise){
+        if(keepOldTemplates){
             String fileName = getExerciseFileName(exercise);
             return oldDescriptionsMap.get(fileName);
         }

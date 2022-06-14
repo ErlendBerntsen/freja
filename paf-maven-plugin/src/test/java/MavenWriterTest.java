@@ -1,3 +1,4 @@
+import no.hvl.Configuration;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
 import no.hvl.concepts.builders.AssignmentBuilder;
@@ -306,7 +307,8 @@ public class MavenWriterTest {
         Parser parser = new Parser(srcDirPath);
         parser.parse();
         Assignment assignment = new AssignmentBuilder(parser).build();
-        ProjectWriter projectWriter = new ProjectWriter(srcDirPath, targetDirPath, assignment);
+        var config = new Configuration(srcDirPath, targetDirPath);
+        ProjectWriter projectWriter = new ProjectWriter(config, assignment);
         projectWriter.createSolutionAndStartProject();
     }
 

@@ -1,6 +1,7 @@
 package no.hvl.writers;
 
 import com.github.javaparser.ast.CompilationUnit;
+import no.hvl.Configuration;
 import no.hvl.concepts.Assignment;
 import no.hvl.utilities.NodeUtils;
 
@@ -15,30 +16,45 @@ public class ProjectWriter {
     public static final String SOLUTION_PROJECT_NAME = "solution";
     public static final String START_CODE_PROJECT_NAME = "startcode";
 
+    private final Configuration config;
     private final String targetDirectoryPath;
     private final String sourceDirectoryPath;
     private final Assignment assignment;
     private List<PathMatcher> pathMatchersToIgnore;
     private final HashMap<String, String> descriptionMap;
 
-    public ProjectWriter(String sourceDirectoryPath, String targetDirectoryPath, Assignment assignment)
+    public ProjectWriter(Configuration config, Assignment assignment)
             throws NoSuchFileException {
+        this.config = config;
+        this.sourceDirectoryPath = config.getSourcePath();
+        this.targetDirectoryPath = config.getTargetPath();
         checkPathExists(sourceDirectoryPath);
         checkPathExists(targetDirectoryPath);
-        this.sourceDirectoryPath = sourceDirectoryPath;
-        this.targetDirectoryPath = targetDirectoryPath;
         this.assignment = assignment;
         this.descriptionMap = new HashMap<>();
         createPathMatchersToIgnore();
     }
 
     private void createPathMatchersToIgnore() {
+        List<String> filesToIgnore = new ArrayList<>(assignment.getFileNamesToRemove());
+        List<String> fileNames = addDoubleStars(assignment.getFileNamesToRemove());
+        filesToIgnore.addAll(fileNames);
+        filesToIgnore.addAll(config.getFilesToIgnore());
         this.pathMatchersToIgnore = new ArrayList<>();
-        for(String fileName : assignment.getFileNamesToRemove()){
-            PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**" + fileName);
+        for(String fileName : filesToIgnore){
+            PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + fileName);
             pathMatchersToIgnore.add(pathMatcher);
         }
     }
+
+    private List<String> addDoubleStars(Collection<String> names){
+        List<String> namesWithDoubleStartsPrefix = new ArrayList<>();
+        for(String name : names){
+            namesWithDoubleStartsPrefix.add("**" + name);
+        }
+        return namesWithDoubleStartsPrefix;
+    }
+
 
     public void createAllProjects() throws IOException {
         clearTargetDir();

@@ -23,12 +23,7 @@ public class Generator {
         projectWriter.createAllProjects();
         String startCodePath =  config.getTargetPath() + File.separator + ProjectWriter.START_CODE_PROJECT_NAME;
         var descriptionWriter = new DescriptionWriter(startCodePath, assignment.getExercises(),
-                projectWriter.getDescriptionMap(), config.isKeepOldDescriptionTemplates());
+                projectWriter.getDescriptionMap(), config.getKeepOldDescriptionTemplates());
         descriptionWriter.createExerciseDescriptions();
     }
-
-
-
-
-
 }

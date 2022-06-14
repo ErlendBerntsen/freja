@@ -208,7 +208,9 @@ public class DescriptionWriter {
     public String createTemplate(Exercise exercise){
         if(keepOldTemplates){
             String fileName = getExerciseFileName(exercise);
-            return oldDescriptionsMap.get(fileName);
+            if(oldDescriptionsMap.containsKey(fileName)){
+                return oldDescriptionsMap.get(fileName);
+            }
         }
         String template = createTitle(exercise);
         template += createExerciseTemplate(exercise,1);

@@ -36,7 +36,7 @@ public class Configuration {
         return filesToIgnore;
     }
 
-    public boolean isKeepOldDescriptionTemplates() {
+    public boolean getKeepOldDescriptionTemplates() {
         return keepOldDescriptionTemplates;
     }
 }

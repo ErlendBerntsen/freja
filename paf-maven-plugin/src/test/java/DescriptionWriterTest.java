@@ -251,4 +251,14 @@ public class DescriptionWriterTest {
         String expectedDescription = newDescriptionWriter.createTemplate(rootExercise);
         assertEquals(expectedDescription, newDescription);
     }
+
+    @Test
+    void testKeepingOldDescriptionThatIsNonexistent() {
+        Exercise rootExercise = assignment.getExercises().get(0);
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+                new HashMap<>(), true);
+        String expectedDescription = descriptionWriter.createTemplate(rootExercise);
+        String actualDescription = newDescriptionWriter.createTemplate(rootExercise);
+        assertEquals(expectedDescription, actualDescription);
+    }
 }

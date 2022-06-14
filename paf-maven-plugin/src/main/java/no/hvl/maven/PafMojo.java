@@ -28,7 +28,7 @@ public class PafMojo extends AbstractMojo {
         Generator generator = new Generator(projectPath, targetPath);
         try {
             generator.generate();
-            MavenWriter mavenWriter = new MavenWriter(targetPath);
+            MavenWriter mavenWriter = new MavenWriter("pom.xml", targetPath);
             mavenWriter.createPomFiles();
         } catch (IOException | ParserConfigurationException | TransformerException | SAXException e) {
             e.printStackTrace();

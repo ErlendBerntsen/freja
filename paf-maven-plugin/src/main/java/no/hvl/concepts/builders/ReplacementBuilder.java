@@ -1,5 +1,7 @@
 package no.hvl.concepts.builders;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.Expression;
@@ -55,6 +57,31 @@ public class ReplacementBuilder {
     private List<ImportDeclaration> findRequiredImports(){
         List<ImportDeclaration> importDeclarations = replacement.getFile().getImports();
         return getNewListWithoutAnnotationImports(importDeclarations);
+    }
+
+    public static Replacement getDefaultReplacement(BodyDeclaration<?> node){
+        var defaultReplacement = new Replacement();
+        String errorMessage = node.isConstructorDeclaration() ? getConstructorMessage(node) : getMethodMessage(node);
+        defaultReplacement.setReplacementCode(getDefaultReplacementCode(errorMessage));
+        return defaultReplacement;
+    }
+
+    private static String getConstructorMessage(BodyDeclaration<?> node){
+        CompilationUnit file = NodeUtils.findFile(node);
+        String className = NodeUtils.getFileSimpleName(file);
+        return String.format("The constructor for the class %s is not implemented", className);
+    }
+
+    private static String getMethodMessage(BodyDeclaration<?> node){
+        String methodName = NodeUtils.tryToGetSimpleName(node);
+        return String.format("The method %s is not implemented", methodName);
+    }
+
+    private static BlockStmt getDefaultReplacementCode(String message) {
+        return StaticJavaParser.parseBlock(String.format("""
+                         { \s
+                        throw new UnsupportedOperationException(\"%s\");
+                        }""",message));
     }
 
 }

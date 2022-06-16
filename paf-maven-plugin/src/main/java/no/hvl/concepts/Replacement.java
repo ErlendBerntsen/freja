@@ -5,6 +5,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Replacement {
 
@@ -49,5 +50,18 @@ public class Replacement {
 
     public void setRequiredImports(List<ImportDeclaration> requiredImports) {
         this.requiredImports = requiredImports;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Replacement that = (Replacement) o;
+        return Objects.equals(id, that.id) && Objects.equals(file, that.file) && replacementCode.equals(that.replacementCode) && Objects.equals(requiredImports, that.requiredImports);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, file, replacementCode, requiredImports);
     }
 }

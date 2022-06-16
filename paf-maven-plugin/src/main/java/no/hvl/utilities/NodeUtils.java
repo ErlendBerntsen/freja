@@ -7,6 +7,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -250,6 +251,14 @@ public class NodeUtils {
         else{
             throw new IllegalStateException(String.format("Could not find the storage of the file: %n%s", file));
         }
+    }
+
+    public static String getFileSimpleName(CompilationUnit file) {
+        Optional<TypeDeclaration<?>> typeDeclaration = file.getPrimaryType();
+        if(typeDeclaration.isPresent()){
+            return typeDeclaration.get().getNameAsString();
+        }
+        return "Unknown simple file name";
     }
 
     public static void removeAllComments(Node node){

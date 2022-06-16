@@ -82,4 +82,28 @@ class ReplacementBuilderTest extends ExamplesParser {
         ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
         assertThrows(NoFileFoundException.class, replacementBuilder::build);
     }
+
+    @Test
+    void testGettingDefaultMethodReplacement(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 36);
+        Replacement defaultReplacement = ReplacementBuilder.getDefaultReplacement(node);
+        BlockStmt defaultReplacementBlock =
+                StaticJavaParser.parseBlock("""
+                        {
+                        throw new UnsupportedOperationException("The method noReplacementId is not implemented");
+                        }""");
+        assertEquals(defaultReplacementBlock, defaultReplacement.getReplacementCode());
+    }
+
+    @Test
+    void testGettingDefaultConstructorReplacement(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 37);
+        Replacement defaultReplacement = ReplacementBuilder.getDefaultReplacement(node);
+        BlockStmt defaultReplacementBlock =
+                StaticJavaParser.parseBlock("""
+                        {
+                        throw new UnsupportedOperationException("The constructor for the class Example is not implemented");
+                        }""");
+        assertEquals(defaultReplacementBlock, defaultReplacement.getReplacementCode());
+    }
 }

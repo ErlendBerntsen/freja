@@ -3,6 +3,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Solution;
+import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.concepts.builders.SolutionBuilder;
 import no.hvl.concepts.builders.TaskBuilder;
 import no.hvl.concepts.tasks.Task;
@@ -56,10 +57,16 @@ class TaskBuilderTest extends ExamplesParser {
     }
 
     @Test
-    void testBuildingReplaceSolutionTaskWithoutReplacementId(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 7);
-        TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
-        assertThrows(NodeException.class, taskBuilder::build);
+    void testBuildingMethodWithReplaceSolutionTaskWithoutReplacementId(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 36);
+        Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
+        assertTrue(task instanceof ReplaceSolutionTask);
+        ReplaceSolutionTask replaceSolutionTask = (ReplaceSolutionTask) task;
+        assertEquals(ReplacementBuilder.getDefaultReplacement(node), replaceSolutionTask.getReplacement());
+        BlockStmt nodeBody = getBlockStmtFromBodyDeclaration(node);
+        Solution solution = new SolutionBuilder(nodeBody).build();
+        assertEquals(solution.getStatementsIncludingSolutionMarkers(),
+                replaceSolutionTask.getSolution().getStatementsIncludingSolutionMarkers());
     }
 
     @Test

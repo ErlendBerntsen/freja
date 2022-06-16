@@ -12,7 +12,7 @@ public class Example {
 
     @TestId(17)
     @Exercise(id ={4}, transformOption = TransformOption.REMOVE_EVERYTHING)
-    public int fullCopyOptionName;
+    public int fullTransformOptionName;
 
     @TestId(2)
     public int noImplementAnnotation;
@@ -41,9 +41,16 @@ public class Example {
 
     @TestId(23)
     @Exercise(id = {1}, transformOption = TransformOption.REMOVE_BODY)
-    public Example(int fieldVariable, int fullCopyOptionName) {
+    public Example(int fieldVariable, int fullTransformOptionName) {
         this.fieldVariable = fieldVariable;
-        this.fullCopyOptionName = fullCopyOptionName;
+        this.fullTransformOptionName = fullTransformOptionName;
+    }
+
+    @TestId(37)
+    @Exercise(id = {1}, transformOption = TransformOption.REPLACE_BODY)
+    public Example(int fieldVariable, int fullTransformOptionName, TransformOption transformOption) {
+        this.fieldVariable = fieldVariable;
+        this.fullTransformOptionName = fullTransformOptionName;
     }
 
     @Exercise(id = {1}, transformOption = TransformOption.REMOVE_EVERYTHING)
@@ -71,6 +78,17 @@ public class Example {
     @TestId(6)
     @Exercise(id = {1,2,3}, transformOption = TransformOption.REPLACE_SOLUTION, replacementId = "1")
     public String removeStartEndStatements() {
+        String x;
+        SolutionStart s;
+        x = "blablabla";
+        SolutionEnd e;
+        x = "blabla";
+        return x;
+    }
+
+    @TestId(36)
+    @Exercise(id = {1,2,3}, transformOption = TransformOption.REPLACE_SOLUTION)
+    public String noReplacementId() {
         String x;
         SolutionStart s;
         x = "blablabla";

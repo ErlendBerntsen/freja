@@ -364,18 +364,12 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreateReplaceBodyStartCodeWithoutReplacementId(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 30);
-        TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
-        try{
-            taskBuilder.build();
-            fail("Should throw exception");
-        }catch (Exception e){
-            assertEquals(NodeException.class, e.getClass());
-            assertTrue(e.getMessage().contains(
-                    String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-                            EXERCISE_REPLACEMENT_ID_NAME, EXERCISE_NAME,
-                            EXERCISE_TRANSFORM_NAME, TransformOption.REPLACE_BODY)));
-        }
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 37);
+        ReplaceBodyTask task = (ReplaceBodyTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
+        BlockStmt replacementCodeBlock = task.getReplacement().getReplacementCode();
+        assertEquals(replacementCodeBlock, startCodeBlock);
     }
 
 

@@ -104,14 +104,6 @@ public class DescriptionWriter {
         return "Unknown package";
     }
 
-    private String getFileSimpleName(CompilationUnit file) {
-        Optional<TypeDeclaration<?>> typeDeclaration = file.getPrimaryType();
-        if(typeDeclaration.isPresent()){
-            return typeDeclaration.get().getNameAsString();
-        }
-        return "Unknown simple file name";
-    }
-
     private String createAttribute(String key, String value, boolean addMacro){
         String attributeKey = createAttributeKey(key);
         String attributeValue = createAttributeValue(value, addMacro);

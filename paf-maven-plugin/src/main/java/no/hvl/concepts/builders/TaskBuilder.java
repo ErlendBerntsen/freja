@@ -20,6 +20,7 @@ public class TaskBuilder {
     private String fullNumberAsString;
     private TransformOption transformOption;
     private final Map<String, Replacement> replacementMap;
+    private final String DEFAULT_REPLACEMENT = "DEFAULT_REPLACEMENT";
 
     public TaskBuilder(BodyDeclaration<?> nodeAnnotatedWithExercise, Exercise parentExercise,
                        Map<String, Replacement> replacementMap) {
@@ -65,6 +66,9 @@ public class TaskBuilder {
 
     private Replacement getReplacement(){
         String replacementId = getReplacementId();
+        if(DEFAULT_REPLACEMENT.equals(replacementId)){
+            return ReplacementBuilder.getDefaultReplacement(nodeAnnotatedWithExercise);
+        }
         if(!replacementMap.containsKey(replacementId)){
             throw new NodeException(nodeAnnotatedWithExercise,
                     String.format("The %s \"%s\" does not match any %s of the %s annotations",
@@ -75,12 +79,13 @@ public class TaskBuilder {
 
     private String getReplacementId(){
         try{
-          return getReplacementIdInExerciseAnnotation(nodeAnnotatedWithExercise);
+            return getReplacementIdInExerciseAnnotation(nodeAnnotatedWithExercise);
         }catch (NodeException e){
-            throw new NodeException(nodeAnnotatedWithExercise,
-                    String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-                            EXERCISE_REPLACEMENT_ID_NAME, EXERCISE_NAME,
-                            EXERCISE_TRANSFORM_NAME, transformOption.toString()));
+            return DEFAULT_REPLACEMENT;
+//            throw new NodeException(nodeAnnotatedWithExercise,
+//                    String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
+//                            EXERCISE_REPLACEMENT_ID_NAME, EXERCISE_NAME,
+//                            EXERCISE_TRANSFORM_NAME, transformOption.toString()));
         }
     }
 

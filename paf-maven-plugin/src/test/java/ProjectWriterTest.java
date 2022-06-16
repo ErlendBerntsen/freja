@@ -234,7 +234,7 @@ public class ProjectWriterTest {
         assertFalse(fileNames.contains("GPSPoint.java"));
     }
 
-    private List<String>  copyWithGlob(String pattern) throws IOException {
+    private List<String> copyWithGlob(String pattern) throws IOException {
         projectWriter.addPathMatchersToIgnore(pattern);
         projectWriter.createSolutionAndStartProject();
         File targetDir = new File(targetDirPath);

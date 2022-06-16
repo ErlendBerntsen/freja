@@ -17,17 +17,17 @@ public class PafMojo extends AbstractMojo {
     private String targetPath;
 
     @Parameter(property = "ignore")
-    private List<String> filesToIgnore;
+    private List<String> ignore;
 
-    @Parameter(property = "keepOldDescriptionTemplate")
-    private boolean keepOldDescriptionTemplate;
+    @Parameter(property = "keepOldDescription")
+    private boolean keepOldDescription;
 
     @Override
     public void execute() {
         String projectPath = System.getProperty("user.dir");
         getLog().info("Project path: " + projectPath);
         getLog().info("Target path: " + targetPath);
-        var configuration = new Configuration(projectPath, targetPath, filesToIgnore, keepOldDescriptionTemplate);
+        var configuration = new Configuration(projectPath, targetPath, ignore, keepOldDescription);
         var generator = new Generator(configuration);
         try {
             generator.generate();

@@ -69,12 +69,11 @@ public class MavenWriterTest {
                             <dependency>
                                 <groupId>no.hvl</groupId>
                                 <artifactId>paf-annotations</artifactId>
-                                <version>1.0-SNAPSHOT</version>
+                                <version>1.1</version>
                             </dependency>
                         </dependencies>""";
         assertXmlStringEquals(nodeAsString, getNodeAsString(dependencies));
     }
-
 
     private void assertXmlStringEquals(String expected, String actual){
         assertLinesMatch(removeLineAndWhitespaceDifferences(expected), removeLineAndWhitespaceDifferences(actual));
@@ -127,7 +126,7 @@ public class MavenWriterTest {
                 <dependency>
                 <groupId>no.hvl</groupId>
                 <artifactId>paf-annotations</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1</version>
                 </dependency>""";
         assertXmlStringEquals(childNodeString, getNodeAsString(childNode));
     }
@@ -161,7 +160,7 @@ public class MavenWriterTest {
                             <dependency>
                                 <groupId>no.hvl</groupId>
                                 <artifactId>paf-annotations</artifactId>
-                                <version>1.0-SNAPSHOT</version>
+                                <version>1.1</version>
                             </dependency>
                         </dependencies>""";
         assertXmlStringEquals(nodeAsString, getNodeAsString(dependencies));
@@ -188,7 +187,7 @@ public class MavenWriterTest {
                     <plugin>
                         <groupId>no.hvl</groupId>
                         <artifactId>paf-maven-plugin</artifactId>
-                        <version>1.0-SNAPSHOT</version>
+                        <version>1.1</version>
                         <configuration>
                             <targetPath>C:\\Users\\Acer\\IntelliJProjects\\HelloWorldOutput</targetPath>
                         </configuration>
@@ -211,7 +210,6 @@ public class MavenWriterTest {
                     e.getMessage());
         }
     }
-
 
     @Test
     void testRemovingAnnotationDependency(){

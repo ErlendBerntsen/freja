@@ -85,7 +85,7 @@ public class DescriptionWriter {
     }
 
     public String createExerciseAttributes(Exercise exercise){
-        String exerciseName = "Exercise" + exercise.getFullNumberAsString();
+        String exerciseName = "Exercise" + exercise.getFullIdAsString();
         CompilationUnit file = exercise.getFile();
         String packageName = getPackageName(file);
         String fileName = getFileName(file);
@@ -135,7 +135,7 @@ public class DescriptionWriter {
     }
 
     public String createTaskAttributes(Task task){
-        String taskName = "Task" + task.getFullNumberAsString();
+        String taskName = "Task" + task.getFullIdAsString();
         String fullName = getFullName(task);
         String attribute =  createAttribute(taskName + "FullName", fullName, false);
         String simpleName = getTaskSimpleName(task);
@@ -284,7 +284,7 @@ public class DescriptionWriter {
     }
 
     private String getExerciseAttribute(Exercise exercise, String attribute){
-        return "{Exercise" + exercise.getFullNumberAsString() +  attribute + "}";
+        return "{Exercise" + exercise.getFullIdAsString() +  attribute + "}";
     }
 
     private String getTaskTypeAttribute(Task task){
@@ -296,7 +296,7 @@ public class DescriptionWriter {
     }
 
     private String getTaskAttribute(Task task, String attribute){
-        return "{Task" + task.getFullNumberAsString() + attribute + "}";
+        return "{Task" + task.getFullIdAsString() + attribute + "}";
     }
 
     public String getDescriptionsDirPath() {

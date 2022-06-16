@@ -1,20 +1,20 @@
 package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 
 import static no.hvl.utilities.NodeUtils.*;
 
 
 public abstract class Task implements TaskOperations {
     private BodyDeclaration<?> node;
-    private String fullNumberAsString;
-    private CopyOption copyOption;
+    private String fullIdAsString;
+    private TransformOption transformOption;
 
-    protected Task(BodyDeclaration<?> node, String fullNumberAsString, CopyOption copyOption) {
+    protected Task(BodyDeclaration<?> node, String fullIdAsString, TransformOption transformOption) {
         this.node = node;
-        this.fullNumberAsString = fullNumberAsString;
-        this.copyOption = copyOption;
+        this.fullIdAsString = fullIdAsString;
+        this.transformOption = transformOption;
     }
 
     public BodyDeclaration<?> getNode() {
@@ -25,20 +25,20 @@ public abstract class Task implements TaskOperations {
         this.node = node;
     }
 
-    public String getFullNumberAsString() {
-        return fullNumberAsString;
+    public String getFullIdAsString() {
+        return fullIdAsString;
     }
 
-    public void setFullNumberAsString(String fullNumberAsString) {
-        this.fullNumberAsString = fullNumberAsString;
+    public void setFullIdAsString(String fullIdAsString) {
+        this.fullIdAsString = fullIdAsString;
     }
 
-    public CopyOption getCopyOption() {
-        return copyOption;
+    public TransformOption getTransformOption() {
+        return transformOption;
     }
 
-    public void setCopyOption(CopyOption copyOption) {
-        this.copyOption = copyOption;
+    public void setTransformOption(TransformOption transformOption) {
+        this.transformOption = transformOption;
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-
 
 import java.io.File;
 import java.util.ArrayList;

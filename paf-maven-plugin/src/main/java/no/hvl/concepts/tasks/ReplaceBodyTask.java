@@ -2,17 +2,17 @@ package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Replacement;
 import no.hvl.utilities.NodeUtils;
 
 public class ReplaceBodyTask extends Task {
 
     private final Replacement replacement;
-    public static final CopyOption copyOption = CopyOption.REPLACE_BODY;
+    public static final TransformOption TRANSFORM_OPTION = TransformOption.REPLACE_BODY;
 
     public ReplaceBodyTask (BodyDeclaration<?> node, String fullNumberAsString, Replacement replacement){
-        super(node, fullNumberAsString, copyOption);
+        super(node, fullNumberAsString, TRANSFORM_OPTION);
         this.replacement = replacement;
     }
 

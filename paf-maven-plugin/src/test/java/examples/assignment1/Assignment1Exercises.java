@@ -1,14 +1,15 @@
 package examples.assignment1;
 
-import no.hvl.annotations.Implement;
+import no.hvl.annotations.Exercise;
 import no.hvl.annotations.ReplacementCode;
 import no.hvl.annotations.SolutionStart;
 
-import static no.hvl.annotations.CopyOption.REPLACE_SOLUTION;
+import static no.hvl.annotations.TransformOption.REPLACE_SOLUTION;
 
+@SuppressWarnings("ALL")
 public class Assignment1Exercises {
 
-    @Implement(number = {1,1}, copyOption = REPLACE_SOLUTION, replacementId = "1")
+    @Exercise(id = {1,1}, transformOption = REPLACE_SOLUTION, replacementId = "1")
     public String helloWorld(){
         SolutionStart s;
         String str = "Hello World!";

@@ -1,24 +1,25 @@
 package no.hvl.dat100ptc.oppgave1;
 
-import no.hvl.annotations.CopyOption;
-import no.hvl.annotations.Implement;
+import no.hvl.annotations.TransformOption;
+import no.hvl.annotations.Exercise;
 import no.hvl.annotations.SolutionEnd;
 import no.hvl.annotations.SolutionStart;
 
+@SuppressWarnings("ALL")
 public class GPSPoint {
 
     // TODO - objektvariable
 
-    @Implement(number = {1,1}, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "")
+    @Exercise(id = {1,1}, transformOption = TransformOption.REMOVE_EVERYTHING, replacementId = "")
     private int time;
-    @Implement(number = {1,1}, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "")
+    @Exercise(id = {1,1}, transformOption = TransformOption.REMOVE_EVERYTHING, replacementId = "")
     private double latitude;
-    @Implement(number = {1,1}, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "")
+    @Exercise(id = {1,1}, transformOption = TransformOption.REMOVE_EVERYTHING, replacementId = "")
     private double longitude;
-    @Implement(number = {1,1}, copyOption = CopyOption.REMOVE_EVERYTHING, replacementId = "")
+    @Exercise(id = {1,1}, transformOption = TransformOption.REMOVE_EVERYTHING, replacementId = "")
     private double elevation;
 
-    @Implement(number = {1,1}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "1")
+    @Exercise(id = {1,1}, transformOption = TransformOption.REPLACE_SOLUTION, replacementId = "1")
     public GPSPoint(int time, double latitude, double longitude, double elevation) {
 
         // TODO - konstruktur
@@ -33,47 +34,47 @@ public class GPSPoint {
     }
 
     // TODO - get/set metoder
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public int getTime() {
         return time;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public void setTime(int time) {
         this.time = time;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public double getLatitude() {
         return latitude;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public double getLongitude() {
         return longitude;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public double getElevation() {
         return elevation;
     }
 
-    @Implement(number = {1,2}, copyOption = CopyOption.REPLACE_BODY, replacementId = "2")
+    @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public void setElevation(double elevation) {
         this.elevation = elevation;
     }
 
-    @Implement(number = {1,3}, copyOption = CopyOption.REPLACE_SOLUTION, replacementId = "2")
+    @Exercise(id = {1,3}, transformOption = TransformOption.REPLACE_SOLUTION, replacementId = "2")
     public String toString() {
         String str;
         SolutionStart s;

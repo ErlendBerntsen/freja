@@ -5,6 +5,7 @@ import testUtils.TestId;
 import examples.TODO;
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public class ReplacementMethods {
 
     @TestId(10)

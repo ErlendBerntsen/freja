@@ -1,6 +1,6 @@
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Solution;
 import no.hvl.concepts.builders.SolutionBuilder;
@@ -36,8 +36,8 @@ class TaskBuilderTest extends ExamplesParser {
     void testBuildingTask(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
-        assertEquals("1_2_3_1_", task.getFullNumberAsString());
-        assertEquals(CopyOption.REPLACE_SOLUTION, task.getCopyOption());
+        assertEquals("1_2_3_1_", task.getFullIdAsString());
+        assertEquals(TransformOption.REPLACE_SOLUTION, task.getTransformOption());
         assertEquals(node, task.getNode());
     }
 

@@ -1,7 +1,5 @@
 package no.hvl.writers;
 
-import no.hvl.utilities.FileUtils;
-import no.hvl.utilities.GeneralUtils;
 
 import java.io.File;
 import java.io.IOException;

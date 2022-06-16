@@ -27,7 +27,7 @@ public class ExerciseBuilder {
     }
 
     public Exercise build(){
-        fullNumberAsIntArray = getNumberValueInImplementAnnotation(annotatedNode);
+        fullNumberAsIntArray = getIdValueInExerciseAnnotation(annotatedNode);
         Exercise parentExerciseForTask = findParentExerciseOfTaskOrCreateNewParent();
         addTaskToParentExercise(parentExerciseForTask);
         return parentExerciseForTask;
@@ -81,8 +81,8 @@ public class ExerciseBuilder {
         subExercise.setParentExercise(parentExercise);
         int numberAmongSiblingExercises = parentExercise.getAmountOfSubExercises();
         subExercise.setNumberAmongSiblingExercises(numberAmongSiblingExercises);
-        String fullNumber = parentExercise.getFullNumberAsString() + numberAmongSiblingExercises + "_";
-        subExercise.setFullNumberAsString(fullNumber);
+        String fullNumber = parentExercise.getFullIdAsString() + numberAmongSiblingExercises + "_";
+        subExercise.setFullIdAsString(fullNumber);
         subExercise.setFile(parentExercise.getFile());
         return subExercise;
     }
@@ -90,7 +90,7 @@ public class ExerciseBuilder {
     private Exercise createNewRootExercise(){
         Exercise rootExercise = new Exercise();
         rootExercise.setNumberAmongSiblingExercises(fullNumberAsIntArray[0]);
-        rootExercise.setFullNumberAsString(fullNumberAsIntArray[0] + "_");
+        rootExercise.setFullIdAsString(fullNumberAsIntArray[0] + "_");
         rootExercise.setFile(findFile(annotatedNode));
         createdExercises.add(rootExercise);
         return rootExercise;

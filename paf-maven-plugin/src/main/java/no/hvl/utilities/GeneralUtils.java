@@ -1,7 +1,7 @@
 package no.hvl.utilities;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
-import no.hvl.exceptions.ExerciseNumberException;
+import no.hvl.exceptions.ExerciseIdException;
 import no.hvl.exceptions.NodeException;
 
 import java.util.ArrayList;
@@ -19,11 +19,11 @@ public class GeneralUtils {
         throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
     }
 
-    public static void sortNodesAnnotatedWithImplementByNumberAsc(List<BodyDeclaration<?>> nodesAnnotatedWithImplement){
-        nodesAnnotatedWithImplement.sort((node1, node2) -> {
-            int[] node1Number = getNumberValueInImplementAnnotation(node1);
-            int[] node2Number = getNumberValueInImplementAnnotation(node2);
-            return compareIntegerArrays(node1Number, node2Number);
+    public static void sortNodesAnnotatedWithExerciseByIdAsc(List<BodyDeclaration<?>> nodesAnnotatedWithExercise){
+        nodesAnnotatedWithExercise.sort((node1, node2) -> {
+            int[] node1Id = getIdValueInExerciseAnnotation(node1);
+            int[] node2Id = getIdValueInExerciseAnnotation(node2);
+            return compareIntegerArrays(node1Id, node2Id);
         });
     }
 
@@ -43,49 +43,49 @@ public class GeneralUtils {
         return -1;
     }
 
-    public static void checkExerciseNumbers(List<BodyDeclaration<?>> nodes){
-        Set<List<Integer>> legalNumbers = new HashSet<>();
+    public static void checkExerciseIds(List<BodyDeclaration<?>> nodes){
+        Set<List<Integer>> legalIds = new HashSet<>();
         for(BodyDeclaration<?> node: nodes){
-            int[] number = getNumberValueInImplementAnnotation(node);
+            int[] id = getIdValueInExerciseAnnotation(node);
             try{
-                checkIfExerciseNumberIsLegal(legalNumbers, number);
-            }catch (ExerciseNumberException e){
+                checkIfExerciseIdIsLegal(legalIds, id);
+            }catch (ExerciseIdException e){
                 throw new NodeException(node, e.getMessage());
             }
         }
     }
 
-    public static void checkIfExerciseNumberIsLegal(Set<List<Integer>> legalNumbers, int[] number){
-        List<Integer> digitsInNumber = new ArrayList<>();
-        for (int digit : number) {
-            digitsInNumber.add(digit);
-            throwExceptionIfZeroBased(digitsInNumber);
-            throwExceptionIfMissingRequiredNumber(digitsInNumber, legalNumbers);
-            legalNumbers.add(new ArrayList<>(digitsInNumber));
+    public static void checkIfExerciseIdIsLegal(Set<List<Integer>> legalIds, int[] id){
+        List<Integer> digitsInId = new ArrayList<>();
+        for (int digit : id) {
+            digitsInId.add(digit);
+            throwExceptionIfZeroBased(digitsInId);
+            throwExceptionIfMissingRequiredId(digitsInId, legalIds);
+            legalIds.add(new ArrayList<>(digitsInId));
         }
     }
 
-    private static void throwExceptionIfZeroBased(List<Integer> digitsInNumber) {
-        int lastDigit = digitsInNumber.get(digitsInNumber.size()-1);
+    private static void throwExceptionIfZeroBased(List<Integer> digitsInId) {
+        int lastDigit = digitsInId.get(digitsInId.size()-1);
         if(lastDigit == 0){
-            throw new ExerciseNumberException(digitsInNumber);
+            throw new ExerciseIdException(digitsInId);
         }
     }
 
-    private static void throwExceptionIfMissingRequiredNumber(List<Integer> digitsInNumber,
-                                                              Set<List<Integer>> legalNumbers) {
-        int lastDigit = digitsInNumber.get(digitsInNumber.size()-1);
-        List<Integer> requiredNumber = getRequiredNumber(digitsInNumber);
-        if(lastDigit != 1 && !legalNumbers.contains(requiredNumber)){
-            throw new ExerciseNumberException(digitsInNumber, requiredNumber);
+    private static void throwExceptionIfMissingRequiredId(List<Integer> digitsInId,
+                                                          Set<List<Integer>> legalIds) {
+        int lastDigit = digitsInId.get(digitsInId.size()-1);
+        List<Integer> requiredId = getRequiredId(digitsInId);
+        if(lastDigit != 1 && !legalIds.contains(requiredId)){
+            throw new ExerciseIdException(digitsInId, requiredId);
         }
     }
 
-    private static List<Integer> getRequiredNumber(List<Integer> digitsInNumber) {
-        List<Integer> requiredNumber = new ArrayList<>(digitsInNumber);
-        int lastIndex = requiredNumber.size()-1;
-        requiredNumber.set(lastIndex, requiredNumber.get(lastIndex)-1);
-        return requiredNumber;
+    private static List<Integer> getRequiredId(List<Integer> digitsInId) {
+        List<Integer> requiredId = new ArrayList<>(digitsInId);
+        int lastIndex = requiredId.size()-1;
+        requiredId.set(lastIndex, requiredId.get(lastIndex)-1);
+        return requiredId;
     }
 
     public static String removeDescriptionAttributes(String description){

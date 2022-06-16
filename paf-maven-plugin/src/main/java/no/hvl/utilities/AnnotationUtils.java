@@ -7,7 +7,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.exceptions.MissingAnnotationException;
 import no.hvl.exceptions.NodeException;
 
@@ -25,16 +25,16 @@ public class AnnotationUtils {
         throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
     }
 
-    public static CopyOption getCopyOptionValueInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
-            var expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_COPY_NAME);
+    public static TransformOption getTransformOptionValueInExerciseAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(EXERCISE_NAME)) {
+            var expression = getAnnotationMemberValue(node, EXERCISE_NAME, EXERCISE_TRANSFORM_NAME);
             if(expression.isFieldAccessExpr()){
-                return CopyOption.getCopy(expression.asFieldAccessExpr().getNameAsString());
+                return TransformOption.getOption(expression.asFieldAccessExpr().getNameAsString());
             }else{
-                return CopyOption.getCopy(expression.asNameExpr().getNameAsString());
+                return TransformOption.getOption(expression.asNameExpr().getNameAsString());
             }
         }
-        throw new MissingAnnotationException((Node) node, IMPLEMENT_COPY_NAME);
+        throw new MissingAnnotationException((Node) node, EXERCISE_TRANSFORM_NAME);
     }
 
     public static Expression getAnnotationMemberValue(NodeWithAnnotations<?> node,
@@ -63,21 +63,21 @@ public class AnnotationUtils {
                         memberName, annotationExpr));
     }
 
-    public static int[] getNumberValueInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
-            var expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_NUMBER_NAME);
+    public static int[] getIdValueInExerciseAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(EXERCISE_NAME)) {
+            var expression = getAnnotationMemberValue(node, EXERCISE_NAME, EXERCISE_ID_NAME);
             return expression.asArrayInitializerExpr().getValues().stream()
                     .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray();
         }
-        throw new MissingAnnotationException((Node) node, IMPLEMENT_NUMBER_NAME);
+        throw new MissingAnnotationException((Node) node, EXERCISE_ID_NAME);
     }
 
-    public static String getReplacementIdInImplementAnnotation(NodeWithAnnotations<?> node){
-        if(node.isAnnotationPresent(IMPLEMENT_NAME)) {
-            Expression expression = getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_ID_NAME);
+    public static String getReplacementIdInExerciseAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(EXERCISE_NAME)) {
+            Expression expression = getAnnotationMemberValue(node, EXERCISE_NAME, EXERCISE_REPLACEMENT_ID_NAME);
             return expression.asStringLiteralExpr().asString();
         }
-        throw new MissingAnnotationException((Node) node, IMPLEMENT_ID_NAME);
+        throw new MissingAnnotationException((Node) node, EXERCISE_REPLACEMENT_ID_NAME);
     }
 
     public static void removeAnnotationImportsFromFile(CompilationUnit file){

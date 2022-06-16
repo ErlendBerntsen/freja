@@ -27,7 +27,8 @@ import java.util.Optional;
 
 public class NodeUtils {
 
-    public NodeUtils() {
+    private NodeUtils(){
+        throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
     }
 
     public static BodyDeclaration<?> findBodyDeclarationCopyInFiles

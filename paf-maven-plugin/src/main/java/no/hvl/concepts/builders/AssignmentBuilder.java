@@ -4,7 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.NodeException;
@@ -73,19 +73,19 @@ public class AssignmentBuilder {
     }
 
     private List<Exercise> findExercises() {
-        List<BodyDeclaration<?>> nodesAnnotatedWithImplement = new ArrayList<>();
+        List<BodyDeclaration<?>> nodesAnnotatedWithExercise = new ArrayList<>();
         for(CompilationUnit file : parsedFiles){
-            nodesAnnotatedWithImplement.addAll(
-                    getNodesInFileAnnotatedWith(file, IMPLEMENT_NAME));
+            nodesAnnotatedWithExercise.addAll(
+                    getNodesInFileAnnotatedWith(file, EXERCISE_NAME));
         }
-        sortNodesAnnotatedWithImplementByNumberAsc(nodesAnnotatedWithImplement);
-        checkExerciseNumbers(nodesAnnotatedWithImplement);
-        return new ArrayList<>(createExercises(nodesAnnotatedWithImplement));
+        sortNodesAnnotatedWithExerciseByIdAsc(nodesAnnotatedWithExercise);
+        checkExerciseIds(nodesAnnotatedWithExercise);
+        return new ArrayList<>(createExercises(nodesAnnotatedWithExercise));
     }
 
-    private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithImplement) {
+    private List<Exercise> createExercises(List<BodyDeclaration<?>> nodesAnnotatedWithExercise) {
         exercises = new ArrayList<>();
-        for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithImplement){
+        for(BodyDeclaration<?> annotatedNode : nodesAnnotatedWithExercise){
             new ExerciseBuilder(annotatedNode, exercises, replacementMap).build();
         }
         return exercises;
@@ -106,7 +106,7 @@ public class AssignmentBuilder {
         for(Task task : tasks){
             BodyDeclaration<?> oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
             BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task, oldTaskNode);
-            if(task.getCopyOption().equals(CopyOption.REMOVE_EVERYTHING)){
+            if(task.getTransformOption().equals(TransformOption.REMOVE_EVERYTHING)){
                 continue;
             }
             updateTaskNode(oldTaskNode, newTaskNode);
@@ -153,7 +153,7 @@ public class AssignmentBuilder {
         }else{
             newTaskNode = task.createStartCode(newTaskNode);
         }
-        removeAnnotationTypeFromNode(newTaskNode, IMPLEMENT_NAME);
+        removeAnnotationTypeFromNode(newTaskNode, EXERCISE_NAME);
         return newTaskNode;
     }
 
@@ -163,7 +163,7 @@ public class AssignmentBuilder {
             parentNode.get().replace(oldTaskNode, newTaskNode);
         }else{
             throw new IllegalStateException(String.format("Can not find parent node of type annotated with @%s:%n%s"
-                    , IMPLEMENT_NAME, oldTaskNode));
+                    , EXERCISE_NAME, oldTaskNode));
         }
     }
 

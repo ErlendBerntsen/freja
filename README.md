@@ -46,14 +46,14 @@ To be able to execute the plugin to generate the artefacts, you need to add a pl
 
 This is used as an annotation on constructs that should be implemented in an exercise. It can be used on classes/interfaces, field variables, constructors and methods. This annotation currently has three members (attributes):
 * `int[] number`: This denotes the exercise number in which this construct should be implemented. The reason for this being an array of numbers is to be able to denote hierarchies in exercises. For example, exercise 1 might have two subexercises, which would be expressed with the arrays `{1,1}` and `{1,2}` respectively.
-* `CopyOption copyOption`: This gives different options for what to do with the annotated construct when generating the start code. For constructs that contain bodies (methods and constructors), the solution can be wrapped between special statements which can be targeted by this copy option. The different options are:
+* `CopyOption transformOption`: This gives different options for what to do with the annotated construct when generating the start code. For constructs that contain bodies (methods and constructors), the solution can be wrapped between special statements which can be targeted by this copy option. The different options are:
     * `REMOVE_EVERYTHING`: Removes everything, both the skeleton and the body of the construct.
   * `REMOVE_BODY`: Removes then entire body, while the skeleton is kept. **NOT IMPLEMENTED PROPERLY YET**
   * `REPLACE_BODY`: Replaces the entire body with some other code that is specified by the `replacementId` attribute.
   * `REMOVE_SOLUTION`: Removes only the solution from the body, while everything outside the marked solution will be kept, including the skeleton. **NOT IMPLEMENTED PROPERLY YET**
   * `REPLACE_SOLUTION`: Replaces only the solution with some other code that is specified by the `replacementId` attribute.
     
-* `String replacementId`: Specifies the id of the `ReplacementCode` annotation to use for replacing some code. This only need to be specified when the `copyOption` is set to `REPLACE_BODY` or `REPLACE_SOLUTION`.
+* `String replacementId`: Specifies the id of the `ReplacementCode` annotation to use for replacing some code. This only need to be specified when the `transformOption` is set to `REPLACE_BODY` or `REPLACE_SOLUTION`.
 
 **@ReplacementCode**
 
@@ -91,7 +91,7 @@ Solution with a return statement:
 
 ## Generated artefacts
 
-So what is actually generated? There will be created two projects in the target path folder that was given in the configuration. One is called `startcode` and the other `solution`. Both projects will copy every file and folder from the source project (.git folder is ignored), while the Java files are modified according to the annotations. The pom file will also be modified to remove dependencies and plugins related to this framework (other dependencies and plugins will be kept). The `solution` project will keep all solutions, but remove all annotations and everything else that is related to this framework. The `startcode` project is similar, but the constructs annotated with `@Implement` are handled according to the `copyOption`.
+So what is actually generated? There will be created two projects in the target path folder that was given in the configuration. One is called `startcode` and the other `solution`. Both projects will copy every file and folder from the source project (.git folder is ignored), while the Java files are modified according to the annotations. The pom file will also be modified to remove dependencies and plugins related to this framework (other dependencies and plugins will be kept). The `solution` project will keep all solutions, but remove all annotations and everything else that is related to this framework. The `startcode` project is similar, but the constructs annotated with `@Implement` are handled according to the `transformOption`.
 
 The `startcode` project will also include a folder called `descriptions` that has a templated description file for each exercise. This is done with [AsciiDoc](https://asciidoc.org/) using attributes. These attributes make it possible to quickly refer to information about constructs that are marked with the `@Implement` annotation. This information includes the construct's simple name, full name, path, filename etc. This information is updated automatically when refactoring the construct, as long as it doesn't change its hierarchical position in the exercise. An example description is also included with each exercise. Both PDF and HTML can be generated from the AsciiDoc files. It is highly recommended installing an AsciiDoc plugin for your IDE to make it easier to work it:
 * [IntelliJ AsciiDoc plugin](https://plugins.jetbrains.com/plugin/7391-asciidoc)

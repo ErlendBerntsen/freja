@@ -54,7 +54,7 @@ public class NodeExceptionTest extends ExamplesParser {
     void testSubExceptionErrorMessage(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
         try{
-            getNumberValueInImplementAnnotation(node);
+            getIdValueInExerciseAnnotation(node);
             fail("Should throw exception");
         }catch (Exception e){
             assertTrue(e instanceof NodeException);
@@ -65,7 +65,7 @@ public class NodeExceptionTest extends ExamplesParser {
                 Line end: 18
                                 
                 Cause: Node is not annotated with "@%s" and thus can't get "%s" value""",
-                    IMPLEMENT_NAME, IMPLEMENT_NUMBER_NAME), e.getMessage());
+                    EXERCISE_NAME, EXERCISE_ID_NAME), e.getMessage());
         }
     }
 

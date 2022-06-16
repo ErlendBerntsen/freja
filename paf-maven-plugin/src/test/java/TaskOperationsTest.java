@@ -7,7 +7,7 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
@@ -118,14 +118,14 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreatingStartCodeForReplaceSolutionTaskDoesNotAddImportsFromSamePackage(){
-        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId(6);
+        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId6();
         ImportDeclaration todoImport = new ImportDeclaration("examples.TODO", false, false);
         CompilationUnit updatedFile = findFile(startCode);
         assertFalse(updatedFile.getImports().contains(todoImport));
     }
 
-    private BodyDeclaration<?> getStartCodeFromNodeWithId (int targetId){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
+    private BodyDeclaration<?> getStartCodeFromNodeWithId6(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);
         Task task = new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> nodeToUpdate = findBodyDeclarationCopyInFiles(parser.getCompilationUnitCopies(), node);
         return task.createStartCode(nodeToUpdate);
@@ -133,7 +133,7 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreatingStartCodeForReplaceSolutionTaskAddsRequiredImports(){
-        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId(6);
+        BodyDeclaration<?> startCode = getStartCodeFromNodeWithId6();
         ImportDeclaration listImport = new ImportDeclaration("java.util.List", false, false);
         CompilationUnit updatedFile = findFile(startCode);
         assertTrue(updatedFile.getImports().contains(listImport));
@@ -246,10 +246,10 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreatingStartCodeForReplaceSolutionOnFieldVariable(){
-        testCreatingFieldVariableStartCode(31, CopyOption.REPLACE_SOLUTION);
+        testCreatingFieldVariableStartCode(31, TransformOption.REPLACE_SOLUTION);
     }
 
-    private void testCreatingFieldVariableStartCode(int targetId, CopyOption copyOption){
+    private void testCreatingFieldVariableStartCode(int targetId, TransformOption transformOption){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), targetId);
         TaskBuilder taskBuilder = new TaskBuilder(node, new Exercise(), replacementMap);
         try{
@@ -257,8 +257,8 @@ class TaskOperationsTest extends ExamplesParser {
             fail("Should throw exception");
         }catch (Exception e){
             assertTrue(e instanceof NodeException);
-            assertTrue(e.getMessage().contains(String.format("The copyOption \"%s\" is not allowed on field variables," +
-                    " only on methods and constructors", copyOption)));
+            assertTrue(e.getMessage().contains(String.format("The transformOption \"%s\" is not allowed on field variables," +
+                    " only on methods and constructors", transformOption)));
         }
     }
 
@@ -295,7 +295,7 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreatingStartCodeForRemoveBodyTaskOnFieldVariable(){
-        testCreatingFieldVariableStartCode(24, CopyOption.REMOVE_BODY);
+        testCreatingFieldVariableStartCode(24, TransformOption.REMOVE_BODY);
     }
 
     @Test
@@ -354,12 +354,12 @@ class TaskOperationsTest extends ExamplesParser {
 
     @Test
     void testCreateRemoveSolutionStartCodeWithFieldVariable(){
-        testCreatingFieldVariableStartCode(32, CopyOption.REMOVE_SOLUTION);
+        testCreatingFieldVariableStartCode(32, TransformOption.REMOVE_SOLUTION);
     }
 
     @Test
     void testCreateReplaceBodyStartCodeWithFieldVariable(){
-        testCreatingFieldVariableStartCode(29, CopyOption.REPLACE_BODY);
+        testCreatingFieldVariableStartCode(29, TransformOption.REPLACE_BODY);
     }
 
     @Test
@@ -373,8 +373,8 @@ class TaskOperationsTest extends ExamplesParser {
             assertEquals(NodeException.class, e.getClass());
             assertTrue(e.getMessage().contains(
                     String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-                    IMPLEMENT_ID_NAME, IMPLEMENT_NAME,
-                    IMPLEMENT_COPY_NAME, CopyOption.REPLACE_BODY)));
+                            EXERCISE_REPLACEMENT_ID_NAME, EXERCISE_NAME,
+                            EXERCISE_TRANSFORM_NAME, TransformOption.REPLACE_BODY)));
         }
     }
 

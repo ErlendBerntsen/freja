@@ -3,8 +3,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
-import no.hvl.Parser;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 import no.hvl.exceptions.MissingAnnotationException;
 import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,66 +28,66 @@ class AnnotationUtilsTest extends ExamplesParser {
     }
 
     @Test
-    void testGettingCopyOptionFromNormalImplementAnnotation() {
+    void testGettingTransformOptionFromNormalImplementAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        CopyOption copyOption = getCopyOptionValueInImplementAnnotation(node);
-        assertEquals(CopyOption.REMOVE_EVERYTHING, copyOption);
+        TransformOption transformOption = getTransformOptionValueInExerciseAnnotation(node);
+        assertEquals(TransformOption.REMOVE_EVERYTHING, transformOption);
     }
 
     @Test
-    void testGettingCopyOptionValueWithStaticImportOfCopyOption(){
+    void testGettingTransformOptionValueWithStaticImportOfTransformOption(){
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 15);
-        CopyOption copyOption = getCopyOptionValueInImplementAnnotation(node);
-        assertEquals(CopyOption.REMOVE_EVERYTHING, copyOption);
+        TransformOption transformOption = getTransformOptionValueInExerciseAnnotation(node);
+        assertEquals(TransformOption.REMOVE_EVERYTHING, transformOption);
     }
 
     @Test
-    void testGettingCopyOptionWithFullPackageName(){
+    void testGettingTransformOptionWithFullPackageName(){
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 17);
-        CopyOption copyOption = getCopyOptionValueInImplementAnnotation(node);
-        assertEquals(CopyOption.REMOVE_EVERYTHING, copyOption);
+        TransformOption transformOption = getTransformOptionValueInExerciseAnnotation(node);
+        assertEquals(TransformOption.REMOVE_EVERYTHING, transformOption);
     }
 
     @Test
-    void testGettingCopyOptionFromNodeNotAnnotatedWithImplement() {
+    void testGettingTransformOptionFromNodeNotAnnotatedWithExercise() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
-        assertThrows(MissingAnnotationException.class, () -> getCopyOptionValueInImplementAnnotation(node));
+        assertThrows(MissingAnnotationException.class, () -> getTransformOptionValueInExerciseAnnotation(node));
     }
 
     @Test
-    void testGettingAnnotationMemberValueFromNormalImplementAnnotation() {
+    void testGettingAnnotationMemberValueFromNormalExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertDoesNotThrow(() -> getAnnotationMemberValue(node, IMPLEMENT_NAME, IMPLEMENT_NUMBER_NAME));
+        assertDoesNotThrow(() -> getAnnotationMemberValue(node, EXERCISE_NAME, EXERCISE_ID_NAME));
     }
 
     @Test
     void testGettingAnnotationMemberValueFromNonExistingAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
         assertThrows(NodeException.class,
-                () -> getAnnotationMemberValue(node, "", IMPLEMENT_NUMBER_NAME));
+                () -> getAnnotationMemberValue(node, "", EXERCISE_ID_NAME));
     }
 
     @Test
     void testGettingAnnotationMemberValueFromNonExistingAnnotationMember() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
         assertThrows(NodeException.class,
-                () -> getAnnotationMemberValue(node, IMPLEMENT_NAME, ""));
+                () -> getAnnotationMemberValue(node, EXERCISE_NAME, ""));
     }
 
     @Test
     void testGettingAnnotationMemberValueFromSingleValueAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
         assertThrows(NodeException.class,
-                () -> getAnnotationMemberValue(node, TEST_ID_ANNOTATION_NAME, IMPLEMENT_NUMBER_NAME));
+                () -> getAnnotationMemberValue(node, TEST_ID_ANNOTATION_NAME, EXERCISE_ID_NAME));
     }
 
     @Test
-    void testGettingNumberValueFromNormalImplementAnnotation() {
+    void testGettingIdValueFromNormalExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertNumberArraysAreEqual(new int[]{1, 2}, getNumberValueInImplementAnnotation(node));
+        assertIdArraysAreEqual(new int[]{1, 2}, getIdValueInExerciseAnnotation(node));
     }
 
-    private void assertNumberArraysAreEqual(int[] expected, int[] actual) {
+    private void assertIdArraysAreEqual(int[] expected, int[] actual) {
         assertEquals(expected.length, actual.length);
         for(int i = 0; i < expected.length; i++){
             assertEquals(expected[i], actual[i]);
@@ -96,27 +95,27 @@ class AnnotationUtilsTest extends ExamplesParser {
     }
 
     @Test
-    void testGettingNumberValueFromNonImplementAnnotation() {
+    void testGettingIdValueFromNonExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
-        assertThrows(MissingAnnotationException.class, () -> getNumberValueInImplementAnnotation(node));
+        assertThrows(MissingAnnotationException.class, () -> getIdValueInExerciseAnnotation(node));
     }
 
     @Test
-    void testGettingReplacementIdValueFromImplementAnnotation() {
+    void testGettingReplacementIdValueFromExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 3);
-        assertEquals("1", getReplacementIdInImplementAnnotation(node));
+        assertEquals("1", getReplacementIdInExerciseAnnotation(node));
     }
 
     @Test
-    void testGettingReplacementIdValueFromNonImplementAnnotation() {
+    void testGettingReplacementIdValueFromNonExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 2);
-        assertThrows(MissingAnnotationException.class, () -> getReplacementIdInImplementAnnotation(node));
+        assertThrows(MissingAnnotationException.class, () -> getReplacementIdInExerciseAnnotation(node));
     }
 
     @Test
-    void testGettingReplacementIdValueFromImplementAnnotationWithoutReplacementId() {
+    void testGettingReplacementIdValueFromExerciseAnnotationWithoutReplacementId() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        assertThrows(NodeException.class, () -> getReplacementIdInImplementAnnotation(node));
+        assertThrows(NodeException.class, () -> getReplacementIdInExerciseAnnotation(node));
 
     }
 
@@ -160,25 +159,25 @@ class AnnotationUtilsTest extends ExamplesParser {
     }
 
     @Test
-    void testGettingImplementAnnotationsFromFile() throws IOException{
+    void testGettingExerciseAnnotationsFromFile() throws IOException{
         CompilationUnit file = StaticJavaParser.parse(
                 Path.of("src/test/java/examples/AnnotatedNodesGetterTestClass.java"));
-        List<BodyDeclaration<?>> annotatedNodes = getNodesInFileAnnotatedWith(file, IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> annotatedNodes = getNodesInFileAnnotatedWith(file, EXERCISE_NAME);
         assertEquals(2, annotatedNodes.size());
         for(BodyDeclaration<?> annotatedNode : annotatedNodes){
-            assertTrue(annotatedNode.isAnnotationPresent(IMPLEMENT_NAME));
+            assertTrue(annotatedNode.isAnnotationPresent(EXERCISE_NAME));
         }
     }
 
     @Test
-    void testGettingImplementAnnotationsFromMultipleFiles() throws IOException{
+    void testGettingExerciseAnnotationsFromMultipleFiles() throws IOException{
         CompilationUnit file = StaticJavaParser.parse(
                 Path.of("src/test/java/examples/AnnotatedNodesGetterTestClass.java"));
         List<CompilationUnit> files = List.of(file, file.clone());
-        List<BodyDeclaration<?>> annotatedNodes = getAllNodesInFilesAnnotatedWith(files, IMPLEMENT_NAME);
+        List<BodyDeclaration<?>> annotatedNodes = getAllNodesInFilesAnnotatedWith(files, EXERCISE_NAME);
         assertEquals(4, annotatedNodes.size());
         for(BodyDeclaration<?> annotatedNode : annotatedNodes){
-            assertTrue(annotatedNode.isAnnotationPresent(IMPLEMENT_NAME));
+            assertTrue(annotatedNode.isAnnotationPresent(EXERCISE_NAME));
         }
     }
 
@@ -186,23 +185,23 @@ class AnnotationUtilsTest extends ExamplesParser {
     void testRemovingAnnotationsFromFile() throws IOException{
         CompilationUnit file = StaticJavaParser.parse(
                 Path.of("src/test/java/examples/AnnotatedNodesGetterTestClass.java"));
-        removeAnnotationTypeFromFile(file, IMPLEMENT_NAME);
-        List<BodyDeclaration<?>> annotatedNodes = getNodesInFileAnnotatedWith(file, IMPLEMENT_NAME);
+        removeAnnotationTypeFromFile(file, EXERCISE_NAME);
+        List<BodyDeclaration<?>> annotatedNodes = getNodesInFileAnnotatedWith(file, EXERCISE_NAME);
         assertEquals(0, annotatedNodes.size());
     }
 
     @Test
     void testRemovingAnnotationDoesNotRemoveAnyOtherAnnotation(){
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        removeAnnotationTypeFromNode(node, IMPLEMENT_NAME);
+        removeAnnotationTypeFromNode(node, EXERCISE_NAME);
         assertTrue(node.isAnnotationPresent(TEST_ID_ANNOTATION_NAME));
     }
 
     @Test
     void testRemovingMultiValueAnnotationFromNode(){
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
-        removeAnnotationTypeFromNode(node, IMPLEMENT_NAME);
-        assertFalse(node.isAnnotationPresent(IMPLEMENT_NAME));
+        removeAnnotationTypeFromNode(node, EXERCISE_NAME);
+        assertFalse(node.isAnnotationPresent(EXERCISE_NAME));
     }
 
     @Test

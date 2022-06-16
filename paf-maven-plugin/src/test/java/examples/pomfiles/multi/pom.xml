@@ -12,7 +12,7 @@
         <dependency>
             <groupId>no.hvl</groupId>
             <artifactId>paf-annotations</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -31,7 +31,7 @@
             <plugin>
                 <groupId>no.hvl</groupId>
                 <artifactId>paf-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1</version>
                 <configuration>
                     <targetPath>C:\Users\Acer\IntelliJProjects\HelloWorldOutput</targetPath>
                 </configuration>

@@ -1,6 +1,6 @@
 package no.hvl.annotations;
 
-public enum CopyOption {
+public enum TransformOption {
     REMOVE_EVERYTHING("REMOVE_EVERYTHING"),
     REMOVE_BODY("REMOVE_BODY"),
     REPLACE_BODY("REPLACE_BODY"),
@@ -9,7 +9,7 @@ public enum CopyOption {
 
     private final String enumName;
 
-    CopyOption(String enumName){
+    TransformOption(String enumName){
         this.enumName = enumName;
     }
 
@@ -18,10 +18,10 @@ public enum CopyOption {
         return enumName;
     }
 
-    public static CopyOption getCopy(String enumName){
-        for(CopyOption copyOption : CopyOption.values()){
-            if(copyOption.toString().equals(enumName)) return copyOption;
+    public static TransformOption getOption(String enumName){
+        for(TransformOption transformOption : TransformOption.values()){
+            if(transformOption.toString().equals(enumName)) return transformOption;
         }
-        return CopyOption.valueOf(enumName);
+        return TransformOption.valueOf(enumName);
     }
 }

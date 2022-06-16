@@ -1,15 +1,15 @@
 package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
-import no.hvl.annotations.CopyOption;
+import no.hvl.annotations.TransformOption;
 
 import java.util.Objects;
 
 public class RemoveEverythingTask extends Task {
-    public static final CopyOption copyOption = CopyOption.REMOVE_EVERYTHING;
+    public static final TransformOption TRANSFORM_OPTION = TransformOption.REMOVE_EVERYTHING;
 
     public RemoveEverythingTask(BodyDeclaration<?> node, String fullNumberAsString) {
-        super(node, fullNumberAsString, copyOption);
+        super(node, fullNumberAsString, TRANSFORM_OPTION);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class RemoveEverythingTask extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         RemoveEverythingTask task = (RemoveEverythingTask) o;
         return Objects.equals(getNode(), task.getNode())
-                && Objects.equals(getFullNumberAsString(), task.getFullNumberAsString());
+                && Objects.equals(getFullIdAsString(), task.getFullIdAsString());
     }
 }

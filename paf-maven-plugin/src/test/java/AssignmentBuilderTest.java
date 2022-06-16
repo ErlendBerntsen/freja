@@ -28,7 +28,7 @@ public class AssignmentBuilderTest {
         parser = new Parser();
     }
 
-    //TODO Test proper assignment with multiple files and all copy options
+    //TODO Test proper assignment with multiple files and all transform options
     @Test
     void testBuildingSimpleAssignment() throws IOException {
         parser.parseDirectory("src/test/java/examples/assignment1");
@@ -96,7 +96,7 @@ public class AssignmentBuilderTest {
     private void assertPafInformationIsRemoved(List<CompilationUnit> files){
         assertTrue(getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME).isEmpty());
         assertTrue(getAllNodesInFilesAnnotatedWith(files, REPLACEMENT_CODE_NAME).isEmpty());
-        assertTrue(getAllNodesInFilesAnnotatedWith(files, IMPLEMENT_NAME).isEmpty());
+        assertTrue(getAllNodesInFilesAnnotatedWith(files, EXERCISE_NAME).isEmpty());
         for(CompilationUnit file : files){
             file.getImports()
                     .forEach(importDeclaration -> assertTrue(isNonAnnotationImportDeclaration(importDeclaration)));

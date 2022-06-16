@@ -67,7 +67,7 @@ public class DescriptionWriterTest {
         Exercise exercise = assignment.getExercises().get(0);
         String attributes = descriptionWriter.createExerciseAttributes(exercise);
         List<String> lines = attributes.lines().collect(Collectors.toList());
-        String name = "Exercise" + exercise.getFullNumberAsString();
+        String name = "Exercise" + exercise.getFullIdAsString();
         String packageAttribute = ":" + name + "Package: pass:normal[`+no.hvl.dat100ptc.oppgave1+`]";
         String fileNameAttribute  = ":" + name + "FileName: pass:normal[`+GPSPoint.java+`]";
         String fileSimpleNameAttribute  = ":" + name + "FileSimpleName: pass:normal[`+GPSPoint+`]";
@@ -82,7 +82,7 @@ public class DescriptionWriterTest {
         Task task = exercise.getSubExercises().get(2).getTasks().get(0);
         String attributes = descriptionWriter.createTaskAttributes(task);
         List<String> lines = attributes.lines().collect(Collectors.toList());
-        String name = "Task" + task.getFullNumberAsString();
+        String name = "Task" + task.getFullIdAsString();
         String fullNameAttribute = ":" + name + "FullName: public String toString()";
         String simpleNameAttribute  = ":" + name + "SimpleName: pass:normal[`+toString+`]";
         String typeAttribute  = ":" + name + "Type: pass:normal[`+Method+`]";
@@ -137,22 +137,25 @@ public class DescriptionWriterTest {
     @Test
     void testCreatingTemplateIntroduction(){
         Exercise exercise = assignment.getExercises().get(0).getSubExercises().get(2);
-        String introduction = "The starting code for this exercise can be found in the file "
-                + "{Exercise1_3_FileName}"
-                + ", which you can find in the package "
-                + "{Exercise1_3_Package}"
-                + ". Your task is to implement the following:\n\n";
+        String introduction = """
+                The starting code for this exercise can be found in the file {Exercise1_3_FileName}, which you can find in the package {Exercise1_3_Package}. Your task is to implement the following:
+
+                """;
         assertEquals(introduction, descriptionWriter.createExerciseIntroductionTemplate(exercise));
     }
 
     @Test
     void testCreatingTemplateTask(){
         Task task = assignment.getExercises().get(0).getSubExercises().get(2).getTasks().get(0);
-        String taskTemplate = "A {Task1_3_1_Type}:\n\n"
-                + "[source, java, subs=\"attributes+\"]"
-                + "\n----\n"
-                +"{Task1_3_1_FullName}"
-                + "\n----\n\n";
+        String taskTemplate = """
+                A {Task1_3_1_Type}:
+
+                [source, java, subs="attributes+"]
+                ----
+                {Task1_3_1_FullName}
+                ----
+
+                """;
         assertEquals(taskTemplate, descriptionWriter.createTaskTemplate(task));
     }
 
@@ -187,7 +190,7 @@ public class DescriptionWriterTest {
             list.append(descriptionWriter.createListItem(".", level));
             list.append("\n");
             if(subExercise.hasTasks()){
-                for(Task task : subExercise.getTasks()){
+                for(int i = 0 ; i < subExercise.getTasks().size(); i++){
                     list.append(descriptionWriter.createListItem("*", level));
                     list.append("\n");
 

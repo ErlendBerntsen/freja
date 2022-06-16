@@ -7,7 +7,7 @@ public class Configuration {
     private final String sourcePath;
     private final String targetPath;
     private final List<String> filesToIgnore;
-    private boolean keepOldDescriptionTemplates;
+    private final boolean keepOldDescriptionTemplates;
 
     public Configuration(String sourcePath, String targetPath,
                          List<String> filesToIgnore, boolean keepOldDescriptionTemplates) {

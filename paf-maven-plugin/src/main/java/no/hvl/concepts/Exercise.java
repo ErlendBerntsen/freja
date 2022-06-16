@@ -14,7 +14,7 @@ public class Exercise {
     private List<Exercise> subExercises;
     private List<Task> tasks;
     private CompilationUnit file;
-    private String fullNumberAsString;
+    private String fullIdAsString;
     private Optional<Exercise> parentExercise;
 
     public Exercise() {
@@ -51,12 +51,12 @@ public class Exercise {
         this.file = file;
     }
 
-    public String getFullNumberAsString() {
-        return fullNumberAsString;
+    public String getFullIdAsString() {
+        return fullIdAsString;
     }
 
-    public void setFullNumberAsString(String fullNumberAsString) {
-        this.fullNumberAsString = fullNumberAsString;
+    public void setFullIdAsString(String fullIdAsString) {
+        this.fullIdAsString = fullIdAsString;
     }
 
     public List<Task> getTasks() {

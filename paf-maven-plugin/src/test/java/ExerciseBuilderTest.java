@@ -35,7 +35,7 @@ public class ExerciseBuilderTest extends ExamplesParser {
         assertTrue(exercise.hasTasks());
         assertTrue(exercise.getParentExercise().isEmpty());
         assertEquals(findFile(node), exercise.getFile());
-        assertEquals("1_", exercise.getFullNumberAsString());
+        assertEquals("1_", exercise.getFullIdAsString());
     }
 
     @Test
@@ -52,11 +52,11 @@ public class ExerciseBuilderTest extends ExamplesParser {
     void testBuildingSubExercise(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 16);
         Exercise exercise = new ExerciseBuilder(node, new ArrayList<>(), replacementMap).build();
-        assertEquals("2_1_", exercise.getFullNumberAsString());
+        assertEquals("2_1_", exercise.getFullIdAsString());
         Optional<Exercise> parentExercise = exercise.getParentExercise();
         assertTrue(parentExercise.isPresent());
         assertEquals(2, parentExercise.get().getNumberAmongSiblingExercises());
-        assertEquals("2_", parentExercise.get().getFullNumberAsString());
+        assertEquals("2_", parentExercise.get().getFullIdAsString());
         List<Exercise> siblingExercises = parentExercise.get().getSubExercises();
         assertEquals(1, siblingExercises.size());
         assertEquals(List.of(exercise), siblingExercises);
@@ -77,8 +77,8 @@ public class ExerciseBuilderTest extends ExamplesParser {
         assertEquals(rootExercises.get(0), exercise_3_2.getParentExercise().get());
         assertEquals(1, exercise_3_1.getNumberAmongSiblingExercises());
         assertEquals(2, exercise_3_2.getNumberAmongSiblingExercises());
-        assertEquals("3_1_", exercise_3_1.getFullNumberAsString());
-        assertEquals("3_2_", exercise_3_2.getFullNumberAsString());
+        assertEquals("3_1_", exercise_3_1.getFullIdAsString());
+        assertEquals("3_2_", exercise_3_2.getFullIdAsString());
     }
 
     @Test
@@ -91,14 +91,14 @@ public class ExerciseBuilderTest extends ExamplesParser {
         Exercise sameExercise = new ExerciseBuilder(node2, rootExercises, replacementMap).build();
         assertEquals(exercise, sameExercise);
         assertEquals(2, exercise.getAmountOfTasks());
-        assertEquals("4_1_", exercise.getTasks().get(0).getFullNumberAsString());
-        assertEquals("4_2_", exercise.getTasks().get(1).getFullNumberAsString());
+        assertEquals("4_1_", exercise.getTasks().get(0).getFullIdAsString());
+        assertEquals("4_2_", exercise.getTasks().get(1).getFullIdAsString());
     }
 
     @Test
     void testBuildingExerciseWithoutFile(){
         BodyDeclaration<?> node = StaticJavaParser.parseBodyDeclaration("""
-                @Implement(number = {1}, copyOption = REMOVE_EVERYTHING)
+                @Exercise(id = {1}, transformOption = REMOVE_EVERYTHING)
                 int task1;
                 """.indent(4));
         ExerciseBuilder exerciseBuilder = new ExerciseBuilder(node, new ArrayList<>(), replacementMap);

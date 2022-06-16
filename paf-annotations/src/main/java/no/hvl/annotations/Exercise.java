@@ -5,10 +5,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
-public @interface Implement {
+public @interface Exercise {
 
-    int[] number();
-    CopyOption copyOption();
+    int[] id();
+    TransformOption transformOption();
     String replacementId() default "";
 
 }

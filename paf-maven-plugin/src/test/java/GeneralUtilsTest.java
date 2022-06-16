@@ -1,4 +1,4 @@
-import no.hvl.exceptions.ExerciseNumberException;
+import no.hvl.exceptions.ExerciseIdException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -49,67 +49,67 @@ class GeneralUtilsTest {
     }
 
     @Test
-    void testBuildingAssigmentWithLegalExerciseNumbers(){
-        List<int[]> exerciseNumbers = List.of(new int[]{1}, new int[]{2,1}, new int[]{2,1,1},
+    void testBuildingAssigmentWithLegalExerciseIds(){
+        List<int[]> exerciseIds = List.of(new int[]{1}, new int[]{2,1}, new int[]{2,1,1},
                 new int[]{2,2}, new int[]{3,1,1});
-        assertDoesNotThrow(() -> checkIfExerciseNumberIsLegal(getLegalNumbers(exerciseNumbers), new int[]{3,1,1}));
+        assertDoesNotThrow(() -> checkIfExerciseIdIsLegal(getLegalIds(exerciseIds), new int[]{3,1,1}));
     }
 
-    private Set<List<Integer>> getLegalNumbers(List<int[]> exerciseNumbers){
-        Set<List<Integer>> legalNumbers = new HashSet<>();
-        for(int i = 0; i < exerciseNumbers.size()-1; i++){
-            int[] number = exerciseNumbers.get(i);
-            checkIfExerciseNumberIsLegal(legalNumbers, number);
+    private Set<List<Integer>> getLegalIds(List<int[]> exerciseIds){
+        Set<List<Integer>> legalIds = new HashSet<>();
+        for(int i = 0; i < exerciseIds.size()-1; i++){
+            int[] id = exerciseIds.get(i);
+            checkIfExerciseIdIsLegal(legalIds, id);
         }
-        return legalNumbers;
+        return legalIds;
     }
 
     @Test
-    void testBuildingAssigmentWithIllegalExerciseNumbers(){
-        List<int[]> exerciseNumbers = List.of(new int[]{2});
-        assertExceptionIsCorrect(exerciseNumbers, List.of(2), List.of(1));
-        exerciseNumbers = List.of(new int[]{1,1,1}, new int[]{1,3});
-        assertExceptionIsCorrect(exerciseNumbers, List.of(1,3), List.of(1,2));
-        exerciseNumbers = List.of(new int[]{1,1}, new int[]{1,1,2});
-        assertExceptionIsCorrect(exerciseNumbers, List.of(1,1,2), List.of(1,1,1));
-        exerciseNumbers = List.of(new int[]{1,1,1,5});
-        assertExceptionIsCorrect(exerciseNumbers, List.of(1,1,1,5), List.of(1,1,1,4));
+    void testBuildingAssigmentWithIllegalExerciseIds(){
+        List<int[]> exerciseIds = List.of(new int[]{2});
+        assertExceptionIsCorrect(exerciseIds, List.of(2), List.of(1));
+        exerciseIds = List.of(new int[]{1,1,1}, new int[]{1,3});
+        assertExceptionIsCorrect(exerciseIds, List.of(1,3), List.of(1,2));
+        exerciseIds = List.of(new int[]{1,1}, new int[]{1,1,2});
+        assertExceptionIsCorrect(exerciseIds, List.of(1,1,2), List.of(1,1,1));
+        exerciseIds = List.of(new int[]{1,1,1,5});
+        assertExceptionIsCorrect(exerciseIds, List.of(1,1,1,5), List.of(1,1,1,4));
     }
 
-    private void assertExceptionIsCorrect(List<int[]> exerciseNumbers,
-                                          List<Integer> exerciseNumber, List<Integer> requiredNumber){
+    private void assertExceptionIsCorrect(List<int[]> exerciseIds,
+                                          List<Integer> exerciseId, List<Integer> requiredId){
         try{
-            Set<List<Integer>> legalNumbers = getLegalNumbers(exerciseNumbers);
-            int[] numberToCheck = exerciseNumbers.get(exerciseNumbers.size()-1);
-            checkIfExerciseNumberIsLegal(legalNumbers, numberToCheck);
+            Set<List<Integer>> legalIds = getLegalIds(exerciseIds);
+            int[] IdToCheck = exerciseIds.get(exerciseIds.size()-1);
+            checkIfExerciseIdIsLegal(legalIds, IdToCheck);
             fail("Exception was not thrown");
-        }catch (ExerciseNumberException e){
-            assertEquals(String.format("The assignment has an exercise with the number %s" +
-                    " without having an exercise with the number %s", exerciseNumber, requiredNumber),
+        }catch (ExerciseIdException e){
+            assertEquals(String.format("The assignment has an exercise with the id %s" +
+                    " without having an exercise with the id %s", exerciseId, requiredId),
                     e.getMessage());
         }
     }
 
     @Test
-    void testBuildingZeroBasedExerciseNumber(){
+    void testBuildingZeroBasedExerciseId(){
         try{
-            checkIfExerciseNumberIsLegal(new HashSet<>(), new int[]{0});
+            checkIfExerciseIdIsLegal(new HashSet<>(), new int[]{0});
             fail("Exception was not thrown");
-        }catch (ExerciseNumberException e){
-            assertEquals("The assignment has an exercise with the number [0]." +
-                            " Exercise numbers are not zero-based and starts counting at 1.",
+        }catch (ExerciseIdException e){
+            assertEquals("The assignment has an exercise with the id [0]." +
+                            " Exercise ids are not zero-based and starts counting at 1.",
                     e.getMessage());
         }
     }
 
     @Test
-    void testBuildingZeroBasedExerciseNumber2(){
+    void testBuildingZeroBasedExerciseId2(){
         try{
-            checkIfExerciseNumberIsLegal(new HashSet<>(), new int[]{1,0,1});
+            checkIfExerciseIdIsLegal(new HashSet<>(), new int[]{1,0,1});
             fail("Exception was not thrown");
-        }catch (ExerciseNumberException e){
-            assertEquals("The assignment has an exercise with the number [1, 0]." +
-                            " Exercise numbers are not zero-based and starts counting at 1.",
+        }catch (ExerciseIdException e){
+            assertEquals("The assignment has an exercise with the id [1, 0]." +
+                            " Exercise ids are not zero-based and starts counting at 1.",
                     e.getMessage());
         }
     }

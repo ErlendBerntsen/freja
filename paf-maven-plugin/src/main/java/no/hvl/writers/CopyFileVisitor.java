@@ -60,7 +60,7 @@ public class CopyFileVisitor implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         if(fileShouldBeCopied(file)){
-            if(isVisitingInJavaSourceFolder){
+            if(isVisitingInJavaSourceFolder && isJavaFile(file)){
                 createAndWriteToFile(file);
             }
             else{

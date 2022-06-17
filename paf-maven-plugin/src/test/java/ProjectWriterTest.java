@@ -303,4 +303,12 @@ public class ProjectWriterTest {
         assertTrue(descriptionMap.isEmpty());
     }
 
+    @Test
+    void testCopyingNonJavaFileInJavaSourceFolder() throws IOException {
+        projectWriter.createSolutionAndStartProject();
+        File targetDir = new File(targetDirPath);
+        List<String> createdFiles = getAllFileNames(targetDir);
+        assertTrue(createdFiles.contains("input.txt"));
+    }
+
 }

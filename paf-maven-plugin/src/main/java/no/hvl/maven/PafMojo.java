@@ -19,15 +19,15 @@ public class PafMojo extends AbstractMojo {
     @Parameter(property = "ignore")
     private List<String> ignore;
 
-    @Parameter(property = "keepOldDescription")
-    private boolean keepOldDescription;
+    @Parameter(property = "keepOldDescriptions")
+    private boolean keepOldDescriptions;
 
     @Override
     public void execute() {
         String projectPath = System.getProperty("user.dir");
         getLog().info("Project path: " + projectPath);
         getLog().info("Target path: " + targetPath);
-        var configuration = new Configuration(projectPath, targetPath, ignore, keepOldDescription);
+        var configuration = new Configuration(projectPath, targetPath, ignore, keepOldDescriptions);
         var generator = new Generator(configuration);
         try {
             generator.generate();

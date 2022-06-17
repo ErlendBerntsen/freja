@@ -2,6 +2,7 @@ package no.hvl.utilities;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
+import com.google.common.io.Files;
 
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
@@ -52,6 +53,11 @@ public class FileUtils {
     public static boolean isJavaSourceFolder(Path dir) {
         String dirName = dir.toFile().getName();
         return "src".equalsIgnoreCase(dirName) || "source".equalsIgnoreCase(dirName);
+    }
+
+    public static boolean isJavaFile(Path dir){
+        String fileExtension = Files.getFileExtension(dir.toString());
+        return "java".equals(fileExtension);
     }
 
     public static void writeContentToFile(File file, String fileContent) throws IOException {

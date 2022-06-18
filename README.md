@@ -176,7 +176,9 @@ Would produce the asciidoc file `Exercise1.adoc` :
 ----
 ```
 
-The value of the attribute keys may seem a little cryptic. This is just to make the value be in monospace text (this is identical with wrapping some text in backticks in markdown) when swapping out the attribute key. The example description template displays some syntax of asciidoc, such as title, lists, attribute usage, and source code block. Take note of the `subs="attributes+"` in the source code block definition. This allows for using attributes in the source code block. The output of this asciidoc would be similar to something like this in markdown:
+The value of the attribute keys may seem a little cryptic. This is just to make the value be in monospace text (this is identical with wrapping some text in backticks in markdown) when swapping out the attribute key. The example description template displays some syntax of asciidoc, such as title, lists, attribute usage, and source code block. Take note of the `subs="attributes+"` in the source code block definition. This allows for using attributes in the source code block. This template description may be a little barebone, but you can edit it however you like. Just make sure to set `keepOldDescriptions` to true in the maven plugin configurations to not overwrite the changes when regenerating artefacts.
+
+The output of this asciidoc would be similar to something like this in markdown:
 
 # Exercise 1
 

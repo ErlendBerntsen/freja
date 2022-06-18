@@ -39,7 +39,7 @@ To be able to execute the plugin to generate the artefacts, you need to add a pl
 ```
 
 The `targetPath` configuration option is the only one that is required. There are more options that  are optional:
-* `keepOldDescriptions` is a boolean attribute that when set to true, prevents the old descriptions (if any) from being overwritten by the default description templates when regenerating files. See the part on [exercise descriptions](#Exercise Descriptions) for more information. If there aren't any old description files in the target folder than the default template is used instead. This option is set to `false` by default.
+* `keepOldDescriptions` is a boolean attribute that when set to true, prevents the old descriptions (if any) from being overwritten by the default description templates when regenerating files. See the part on [exercise descriptions](#exercise-descriptions) for more information. If there aren't any old description files in the target folder than the default template is used instead. This option is set to `false` by default.
 * `ignore` is an attribute that takes a list of strings as arguments. This is for specifying files and folders that should be ignored when generating the artefacts. The path of these files and folders should be specified relative to the root folder path using [glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)). This is very similar to how a .gitignore file works. Use the `<ignore>` element tag for both the list and for each list element. An example is shown below with some common patterns:
 ```xml
 <ignore>
@@ -178,7 +178,7 @@ Would produce the asciidoc file `Exercise1.adoc` :
 
 The value of the attribute keys may seem a little cryptic. This is just to make the value be in monospace text (this is identical with wrapping some text in backticks in markdown) when swapping out the attribute key. The example description template displays some syntax of asciidoc, such as title, lists, attribute usage, and source code block. Take note of the `subs="attributes+"` in the source code block definition. This allows for using attributes in the source code block. This template description may be a little barebone, but you can edit it however you like. Just make sure to set `keepOldDescriptions` to true in the maven plugin configurations to not overwrite the changes when regenerating artefacts.
 
-The output of this asciidoc would be similar to something like this in markdown:
+The PDF output of the asciidoc example above can be seen [here](AsciiDocExample.pdf). It would be similar to something like this down below in markdown:
 
 # Exercise 1
 

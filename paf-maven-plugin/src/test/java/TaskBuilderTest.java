@@ -53,7 +53,6 @@ class TaskBuilderTest extends ExamplesParser {
         Solution solution = new SolutionBuilder(nodeBody).build();
         assertEquals(solution.getStatementsIncludingSolutionMarkers(),
                 replaceSolutionTask.getSolution().getStatementsIncludingSolutionMarkers());
-
     }
 
     @Test

@@ -13,12 +13,11 @@ public class Replacement {
     private CompilationUnit file;
     private BlockStmt replacementCode;
     private List<ImportDeclaration> requiredImports;
+    private List<String> thrownExceptions;
     public static final String START_COMMENT = "TODO - START";
     public static final String END_COMMENT = "TODO - END";
 
-    public Replacement(){
-
-    }
+    public Replacement(){}
 
     public String getId() {
         return id;
@@ -52,6 +51,18 @@ public class Replacement {
         this.requiredImports = requiredImports;
     }
 
+    public List<String> getThrownExceptions() {
+        return thrownExceptions;
+    }
+
+    public void setThrownExceptions(List<String> thrownExceptions) {
+        this.thrownExceptions = thrownExceptions;
+    }
+
+    public boolean throwsExceptions(){
+        return getThrownExceptions() != null && !getThrownExceptions().isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -64,4 +75,5 @@ public class Replacement {
     public int hashCode() {
         return Objects.hash(id, file, replacementCode, requiredImports);
     }
+
 }

@@ -1,7 +1,9 @@
 package no.hvl.concepts.tasks;
 
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.TypeParameter;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
@@ -24,6 +26,12 @@ public class ReplaceSolutionTask extends Task {
     public BodyDeclaration<?> createStartCode(BodyDeclaration<?> nodeToUpdate) {
         BlockStmt codeBlockWithSolution = getBlockStmtFromBodyDeclaration(nodeToUpdate);
         replaceSolution(codeBlockWithSolution, solution, replacement);
+        if(replacement.throwsExceptions()){
+            CallableDeclaration<?> nodeAsCallableDeclaration = nodeToUpdate.asCallableDeclaration();
+            for(String exception : replacement.getThrownExceptions()){
+                nodeAsCallableDeclaration.addThrownException(new TypeParameter(exception));
+            }
+        }
         return nodeToUpdate;
     }
 

@@ -3,13 +3,17 @@ package no.hvl.concepts.builders;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.ReferenceType;
 import no.hvl.concepts.Replacement;
 import no.hvl.exceptions.NodeException;
 import no.hvl.utilities.NodeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static no.hvl.utilities.AnnotationNames.*;
@@ -31,6 +35,7 @@ public class ReplacementBuilder {
         replacement.setReplacementCode(findReplacementCode());
         replacement.setFile(NodeUtils.findFile(annotatedNode));
         replacement.setRequiredImports(findRequiredImports());
+        replacement.setThrownExceptions(findThrownExceptions());
         return replacement;
     }
 
@@ -82,6 +87,16 @@ public class ReplacementBuilder {
                          { \s
                         throw new UnsupportedOperationException(\"%s\");
                         }""",message));
+    }
+
+    private List<String> findThrownExceptions() {
+        CallableDeclaration<?> callableDeclaration = annotatedNode.asCallableDeclaration();
+        NodeList<ReferenceType> exceptions =  callableDeclaration.getThrownExceptions();
+        List<String> thrownExceptions = new ArrayList<>();
+        for(ReferenceType exception : exceptions){
+            thrownExceptions.add(exception.asString());
+        }
+        return thrownExceptions;
     }
 
 }

@@ -24,15 +24,14 @@ public class ExamplesParser {
     private void createReplacementMap() {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 10);
         Replacement replacement = new ReplacementBuilder(node).build();
-        node = getNodeWithId(parser.getCompilationUnitCopies(), 14);
-        Replacement replacement2 = new ReplacementBuilder(node).build();
+        BodyDeclaration<?> node2 = getNodeWithId(parser.getCompilationUnitCopies(), 14);
+        Replacement replacement2 = new ReplacementBuilder(node2).build();
+        BodyDeclaration<?> node3 = getNodeWithId(parser.getCompilationUnitCopies(), 39);
+        Replacement replacement3 = new ReplacementBuilder(node3).build();
         replacementMap = new HashMap<>();
         replacementMap.put(replacement.getId(), replacement);
-        replacementMap.put(replacement2.getId(), replacement);
-    }
-
-    public void parseAssignmentDir(String assignmentDir) throws IOException {
-        parser.parseDirectory(assignmentDir);
+        replacementMap.put(replacement2.getId(), replacement2);
+        replacementMap.put(replacement3.getId(), replacement3);
     }
 
 }

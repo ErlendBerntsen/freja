@@ -197,5 +197,12 @@ public class Example {
         String x;
     }
 
+    @TestId(40)
+    @Exercise(id = {1,1,1}, transformOption = TransformOption.REPLACE_BODY, replacementId = "5")
+    public void shouldHaveThrownExceptionsInDeclarationAfterTransformation(){
+        String x;
+    }
+
+
 
 }

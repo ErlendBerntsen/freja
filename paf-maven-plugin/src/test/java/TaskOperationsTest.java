@@ -3,10 +3,12 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.Type;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.Replacement;
@@ -23,8 +25,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static no.hvl.utilities.AnnotationNames.*;
+
 import static no.hvl.utilities.NodeUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.getNodeWithId;
@@ -327,9 +330,10 @@ class TaskOperationsTest extends ExamplesParser {
     void assertRemoveSolutionTodoCommentIsInserted(int targetId){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(),  targetId);
         RemoveSolutionTask task = (RemoveSolutionTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        Solution taskSolution = task.getSolution();
         BodyDeclaration<?> startCode = task.createStartCode(node);
         assertThrows(AssertionFailedError.class,
-                () ->assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode, Replacement.END_COMMENT));
+                () -> assertReplacementCodeHasEndTodoComment(taskSolution, startCode, Replacement.END_COMMENT));
         assertReplacementCodeHasEndTodoComment(task.getSolution(), startCode,
                 "TODO - Implement your solution here");
     }
@@ -370,6 +374,20 @@ class TaskOperationsTest extends ExamplesParser {
         BlockStmt startCodeBlock = getBlockStmtFromBodyDeclaration(startCode);
         BlockStmt replacementCodeBlock = task.getReplacement().getReplacementCode();
         assertEquals(replacementCodeBlock, startCodeBlock);
+    }
+
+    @Test
+    void testCreatingStartCodeWithUnhandledThrownExceptions(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 40);
+        ReplaceBodyTask task = (ReplaceBodyTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
+        BodyDeclaration<?> startCode = task.createStartCode(node);
+        System.out.println(startCode);
+        CallableDeclaration<?> callableDeclaration = startCode.asCallableDeclaration();
+        List<String> thrownExceptions = callableDeclaration.getThrownExceptions()
+                .stream()
+                .map(Type::asString)
+                .collect(Collectors.toList());
+        assertEquals(List.of("FileNotFoundException", "IOException"), thrownExceptions);
     }
 
 

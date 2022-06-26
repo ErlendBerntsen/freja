@@ -5,17 +5,16 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
-import no.hvl.Parser;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.builders.ReplacementBuilder;
 import no.hvl.exceptions.NoFileFoundException;
 import no.hvl.exceptions.NodeException;
-import no.hvl.utilities.AnnotationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static no.hvl.utilities.AnnotationUtils.*;
@@ -105,5 +104,21 @@ class ReplacementBuilderTest extends ExamplesParser {
                         throw new UnsupportedOperationException("The constructor for the class Example is not implemented");
                         }""");
         assertEquals(defaultReplacementBlock, defaultReplacement.getReplacementCode());
+    }
+
+    @Test
+    void testBuildingReplacementWithUnhandledCheckedException(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 38);
+        Replacement replacement = new ReplacementBuilder(node).build();
+        List<String> exceptions = replacement.getThrownExceptions();
+        assertEquals("FileNotFoundException", exceptions.get(0));
+    }
+
+    @Test
+    void testBuildingReplacementWithMultipleUnhandledCheckedException(){
+        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 39);
+        Replacement replacement = new ReplacementBuilder(node).build();
+        List<String> exceptions = replacement.getThrownExceptions();
+        assertEquals(List.of("FileNotFoundException", "IOException"), exceptions);
     }
 }

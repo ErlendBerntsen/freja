@@ -23,7 +23,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
-public class ProjectWriterTest {
+class ProjectWriterTest {
 
     private Assignment assignment;
     private ProjectWriter projectWriter;

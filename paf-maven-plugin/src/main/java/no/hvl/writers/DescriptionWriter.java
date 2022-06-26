@@ -5,7 +5,6 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
 import no.hvl.concepts.Exercise;
@@ -22,6 +21,7 @@ import static no.hvl.utilities.NodeUtils.*;
 public class DescriptionWriter {
 
     public static final String DESCRIPTIONS_FOLDER_NAME = "descriptions";
+    private static final String NEW_LINE = "\n";
     private final String rootFolderPath;
     private String descriptionsDirPath;
     private final List<Exercise>  exercises;
@@ -107,7 +107,7 @@ public class DescriptionWriter {
     private String createAttribute(String key, String value, boolean addMacro){
         String attributeKey = createAttributeKey(key);
         String attributeValue = createAttributeValue(value, addMacro);
-        return attributeKey + attributeValue + createNewLine();
+        return attributeKey + attributeValue + NEW_LINE;
     }
 
     private String createAttributeKey(String key) {
@@ -120,10 +120,6 @@ public class DescriptionWriter {
 
     private String createInlineLiteralPassMacro(String value){
         return "pass:normal[`+" + value + "+`]";
-    }
-
-    private String createNewLine() {
-        return "\n";
     }
 
     public String createTaskAttributes(Task task){
@@ -210,28 +206,37 @@ public class DescriptionWriter {
     }
 
     public String createTitle(Exercise exercise) {
-        return createNewLine()
+        return NEW_LINE
                 + "= *Exercise "
                 + exercise.getNumberAmongSiblingExercises()
                 + "*"
-                + createNewLine();
+                + NEW_LINE;
     }
 
     public String createExerciseTemplate(Exercise exercise, int level){
         StringBuilder exerciseTemplate = new StringBuilder();
-        exerciseTemplate.append(createNewLine());
+        exerciseTemplate.append(NEW_LINE);
+        if(exercise.hasTasks()){
+            exerciseTemplate.append(createCompleteTaskTemplate(exercise, level));
+        }
         for(Exercise subExercise : exercise.getSubExercises()){
             exerciseTemplate.append(createListItem(".", level));
             if(subExercise.hasTasks()){
-                exerciseTemplate.append(createExerciseIntroductionTemplate(subExercise));
-                for(Task task : subExercise.getTasks()){
-                    exerciseTemplate.append(createListItem("*", level));
-                    exerciseTemplate.append(createTaskTemplate(task));
-                }
+                exerciseTemplate.append(createCompleteTaskTemplate(subExercise, level));
             }
             exerciseTemplate.append(createExerciseTemplate(subExercise, level + 1));
         }
         return exerciseTemplate.toString();
+    }
+
+    private String createCompleteTaskTemplate(Exercise exercise, int level){
+        StringBuilder completeTaskTemplate = new StringBuilder();
+        completeTaskTemplate.append(createExerciseIntroductionTemplate(exercise));
+        for(Task task : exercise.getTasks()){
+            completeTaskTemplate.append(createListItem("*", level));
+            completeTaskTemplate.append(createTaskTemplate(task));
+        }
+        return completeTaskTemplate.toString();
     }
 
     public String createListItem(String syntax, int nesting) {
@@ -244,27 +249,27 @@ public class DescriptionWriter {
                 + ", which you can find in the package "
                 + getExerciseFilePackageAttribute(exercise)
                 + ". Your task is to implement the following:"
-                + createNewLine()
-                + createNewLine();
+                + NEW_LINE
+                + NEW_LINE;
     }
 
     public String createTaskTemplate(Task task){
         return "A " + getTaskTypeAttribute(task) + ":"
-                + createNewLine()
+                + NEW_LINE
                 + createJavaCodeBlock(task);
     }
 
     private String createJavaCodeBlock(Task task) {
-        return createNewLine()
+        return NEW_LINE
                 + "[source, java, subs=\"attributes+\"]"
-                + createNewLine()
+                + NEW_LINE
                 + "----"
-                + createNewLine()
+                + NEW_LINE
                 + getTaskFullNameAttribute(task)
-                + createNewLine()
+                + NEW_LINE
                 + "----"
-                + createNewLine()
-                + createNewLine();
+                + NEW_LINE
+                + NEW_LINE;
     }
 
     private String getExerciseFileNameAttribute(Exercise exercise){

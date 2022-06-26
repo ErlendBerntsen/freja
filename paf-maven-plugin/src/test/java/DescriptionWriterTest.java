@@ -22,7 +22,7 @@ import static no.hvl.utilities.FileUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.*;
 
-public class DescriptionWriterTest {
+class DescriptionWriterTest {
 
     private String targetDirPath;
     private Assignment assignment;
@@ -263,5 +263,27 @@ public class DescriptionWriterTest {
         String expectedDescription = descriptionWriter.createTemplate(rootExercise);
         String actualDescription = newDescriptionWriter.createTemplate(rootExercise);
         assertEquals(expectedDescription, actualDescription);
+    }
+
+    @Test
+    void testCreatingDescriptionTemplateWithNoSubExercises(){
+        Exercise rootExercise = assignment.getExercises().get(1);
+        String template = descriptionWriter.createTemplate(rootExercise);
+        String expected = """
+                
+                = *Exercise 2*
+                                
+                The starting code for this exercise can be found in the file {Exercise2_FileName}, which you can find in the package {Exercise2_Package}. Your task is to implement the following:
+                                
+                * A {Task2_1_Type}:
+                                
+                [source, java, subs="attributes+"]
+                ----
+                {Task2_1_FullName}
+                ----
+                
+                """;
+        assertEquals(expected, template);
+
     }
 }

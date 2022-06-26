@@ -184,7 +184,7 @@ class ProjectWriterTest {
 
     @Test
     void testGeneratingInNonExistingTargetPath()  {
-        var config = new Configuration(srcDirPath,"");
+        var config = new Configuration(srcDirPath,"asdkjhashdjk");
         assertThrows(NoSuchFileException.class, () -> new ProjectWriter(config, assignment));
     }
 
@@ -238,7 +238,7 @@ class ProjectWriterTest {
         projectWriter.addPathMatchersToIgnore(pattern);
         projectWriter.createSolutionAndStartProject();
         File targetDir = new File(targetDirPath);
-        return  getAllFileNames(targetDir);
+        return getAllFileNames(targetDir);
     }
 
     @Test
@@ -309,6 +309,24 @@ class ProjectWriterTest {
         File targetDir = new File(targetDirPath);
         List<String> createdFiles = getAllFileNames(targetDir);
         assertTrue(createdFiles.contains("input.txt"));
+    }
+
+    @Test
+    void testCreatingProjectsUsingRelativeTargetPath() throws IOException {
+        var config = new Configuration(srcDirPath, "output");
+        var newProjectWriter = new ProjectWriter(config, assignment);
+        newProjectWriter.clearTargetDir();
+        List<String> originalFileNames = getAllFileNames(new File(srcDirPath));
+        List<String> originalDirNames = getAllDirectoryNames(new File(srcDirPath));
+        originalDirNames.remove("output");
+        newProjectWriter.createSolutionAndStartProject();
+        File targetDir = new File(config.getTargetPath());
+        originalFileNames.removeAll(assignment.getFileNamesToRemove());
+        for(File file : Objects.requireNonNull(targetDir.listFiles())){
+            assertEquals(originalFileNames, getAllFileNames(file));
+            assertEquals(originalDirNames, getAllDirectoryNames(file));
+        }
+        newProjectWriter.clearTargetDir();
     }
 
 }

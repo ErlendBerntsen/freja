@@ -48,6 +48,10 @@ public class CopyFileVisitor implements FileVisitor<Path> {
     }
 
     private boolean fileShouldBeCopied(Path file){
+        if(target.getParent().equals(file.toAbsolutePath())){
+            return false;
+        }
+
         Path relativePath = source.relativize(file);
         for(PathMatcher pathMatcher : pathMatchersToIgnore){
             if (pathMatcher.matches(relativePath)){

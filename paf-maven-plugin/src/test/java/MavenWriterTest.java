@@ -33,7 +33,7 @@ import static no.hvl.writers.ProjectWriter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static testUtils.TestUtils.getPafTestExamplePath;
 
-public class MavenWriterTest {
+class MavenWriterTest {
 
     private MavenWriter mavenWriter;
 

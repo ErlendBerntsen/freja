@@ -28,6 +28,9 @@ public class DeleteFileVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs){
+        if(".git".equals(dir.getFileName().toString())){
+            return SKIP_SUBTREE;
+        }
         if(isDescriptionsFolder(dir)){
             isVisitingInDescriptionsFolder = true;
         }

@@ -221,8 +221,8 @@ public class DescriptionWriter {
         }
         for(Exercise subExercise : exercise.getSubExercises()){
             exerciseTemplate.append("=").append(createListItem("=", level));
-            char alphabetNumber = (char) ('a' + subExercise.getNumberAmongSiblingExercises() - 1);
-            exerciseTemplate.append(alphabetNumber).append(")");
+            exerciseTemplate.append(getNumberingStyle(subExercise.getNumberAmongSiblingExercises(), level));
+            exerciseTemplate.append(")");
             exerciseTemplate.append(createExerciseTemplate(subExercise, level + 1));
         }
         return exerciseTemplate.toString();
@@ -243,10 +243,14 @@ public class DescriptionWriter {
     }
 
     public String createExerciseIntroductionTemplate(Exercise exercise) {
+        String packageDescription = "";
+        if(!getPackageName(exercise.getFile()).equals("Unknown package")){
+            packageDescription = ", which you can find in the package "
+                    + getExerciseFilePackageAttribute(exercise);
+        }
         return "The starting code for this exercise can be found in the file "
                 + getExerciseFileNameAttribute(exercise)
-                + ", which you can find in the package "
-                + getExerciseFilePackageAttribute(exercise)
+                + packageDescription
                 + ". Your task is to implement the following:"
                 + NEW_LINE
                 + NEW_LINE;
@@ -269,6 +273,14 @@ public class DescriptionWriter {
                 + "----"
                 + NEW_LINE
                 + NEW_LINE;
+    }
+
+    private String getNumberingStyle(int numberAmongSiblingExercises, int level){
+        if(level%2 == 1){
+            char alphabetNumber = (char) ('a' + numberAmongSiblingExercises - 1);
+            return String.valueOf(alphabetNumber);
+        }
+        return String.valueOf(numberAmongSiblingExercises);
     }
 
     private String getExerciseFileNameAttribute(Exercise exercise){

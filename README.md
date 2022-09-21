@@ -160,8 +160,8 @@ Would produce the asciidoc file `Exercise1.adoc` :
 :Exercise1_Package: pass:normal[`+no.hvl+`]
 :Exercise1_FileName: pass:normal[`+HelloWorld.java+`]
 :Exercise1_FileSimpleName: pass:normal[`+HelloWorld+`]
-:Task1_1_FullName: public String helloWorldNewName()
-:Task1_1_SimpleName: pass:normal[`+helloWorldNewName+`]
+:Task1_1_FullName: public String helloWorld()
+:Task1_1_SimpleName: pass:normal[`+helloWorld+`]
 :Task1_1_Type: pass:normal[`+Method+`]
 
 = *Exercise 1*
@@ -186,7 +186,7 @@ The PDF output of the asciidoc example above can be seen [here](AsciiDocExample.
 
     * A `Method`:
   ```java
-public String helloWorldNewName()
+public String helloWorld()
 ```
 
 

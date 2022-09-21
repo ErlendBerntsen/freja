@@ -217,23 +217,22 @@ public class DescriptionWriter {
         StringBuilder exerciseTemplate = new StringBuilder();
         exerciseTemplate.append(NEW_LINE);
         if(exercise.hasTasks()){
-            exerciseTemplate.append(createCompleteTaskTemplate(exercise, level));
+            exerciseTemplate.append(createCompleteTaskTemplate(exercise));
         }
         for(Exercise subExercise : exercise.getSubExercises()){
-            exerciseTemplate.append(createListItem(".", level));
-            if(subExercise.hasTasks()){
-                exerciseTemplate.append(createCompleteTaskTemplate(subExercise, level));
-            }
+            exerciseTemplate.append("=").append(createListItem("=", level));
+            char alphabetNumber = (char) ('a' + subExercise.getNumberAmongSiblingExercises() - 1);
+            exerciseTemplate.append(alphabetNumber).append(")");
             exerciseTemplate.append(createExerciseTemplate(subExercise, level + 1));
         }
         return exerciseTemplate.toString();
     }
 
-    private String createCompleteTaskTemplate(Exercise exercise, int level){
+    private String createCompleteTaskTemplate(Exercise exercise){
         StringBuilder completeTaskTemplate = new StringBuilder();
         completeTaskTemplate.append(createExerciseIntroductionTemplate(exercise));
         for(Task task : exercise.getTasks()){
-            completeTaskTemplate.append(createListItem("*", level));
+            completeTaskTemplate.append("* ");
             completeTaskTemplate.append(createTaskTemplate(task));
         }
         return completeTaskTemplate.toString();

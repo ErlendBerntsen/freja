@@ -48,11 +48,11 @@ public class ProjectWriter {
     }
 
     private List<String> addDoubleStars(Collection<String> names){
-        List<String> namesWithDoubleStartsPrefix = new ArrayList<>();
+        List<String> namesWithDoubleStarsPrefix = new ArrayList<>();
         for(String name : names){
-            namesWithDoubleStartsPrefix.add("**" + name);
+            namesWithDoubleStarsPrefix.add("**" + name);
         }
-        return namesWithDoubleStartsPrefix;
+        return namesWithDoubleStarsPrefix;
     }
 
 

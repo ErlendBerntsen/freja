@@ -2,7 +2,6 @@ package no.hvl;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Configuration {
@@ -15,6 +14,7 @@ public class Configuration {
                          List<String> filesToIgnore, boolean keepOldDescriptionTemplates) {
         this.sourcePath = sourcePath;
         this.targetPath = getAbsoluteTargetPath(sourcePath, targetPath);
+        filesToIgnore.add("**.git");
         this.filesToIgnore = filesToIgnore;
         this.keepOldDescriptionTemplates = keepOldDescriptionTemplates;
     }
@@ -22,7 +22,7 @@ public class Configuration {
     public Configuration(String sourcePath, String targetPath) {
         this.sourcePath = sourcePath;
         this.targetPath = getAbsoluteTargetPath(sourcePath, targetPath);
-        this.filesToIgnore = new ArrayList<>();
+        this.filesToIgnore = List.of("**.git");
         this.keepOldDescriptionTemplates = false;
     }
 

@@ -83,7 +83,7 @@ public class ExerciseBuilder {
         subExercise.setNumberAmongSiblingExercises(numberAmongSiblingExercises);
         String fullNumber = parentExercise.getFullIdAsString() + numberAmongSiblingExercises + "_";
         subExercise.setFullIdAsString(fullNumber);
-        subExercise.setFile(parentExercise.getFile());
+        subExercise.setFile(findFile(annotatedNode));
         return subExercise;
     }
 

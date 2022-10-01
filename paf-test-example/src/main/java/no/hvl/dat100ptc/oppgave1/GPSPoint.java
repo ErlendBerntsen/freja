@@ -82,6 +82,9 @@ public class GPSPoint {
                 "(" + Double.toString(latitude) + "," +
                 Double.toString(longitude) + ") " +
                 Double.toString(elevation) + "\n";
+
         return str;
+
+
     }
 }

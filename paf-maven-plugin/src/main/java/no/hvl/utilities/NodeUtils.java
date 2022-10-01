@@ -142,7 +142,7 @@ public class NodeUtils {
                     statementsToBeReplaced, replacementCode.getStatements());
             codeBlock.setStatements(newCodeBlock);
             insertStartTodoComment(replacementCode);
-            insertEndTodoComment(codeBlock, statementsToBeReplaced);
+            insertEndTodoComment(codeBlock, replacementCode, statementsToBeReplaced);
         }else{
             throw new NodeException(codeBlock,
                     String.format("Can not find the statement:%n%s%n%n in the code block:%n%s",
@@ -177,20 +177,28 @@ public class NodeUtils {
         firstStatement.ifPresent(statement -> statement.setLineComment(Replacement.START_COMMENT));
     }
 
-    private static void insertEndTodoComment(BlockStmt codeBlock, List<Statement> statementsToBeReplaced) {
-        insertEndTodoComment(codeBlock, statementsToBeReplaced, Replacement.END_COMMENT);
-    }
-
-    private static void insertEndTodoComment(BlockStmt codeBlock, List<Statement> statementsToBeReplaced,
-                                             String comment) {
+    private static void insertEndTodoComment(BlockStmt codeBlock, BlockStmt replacementCode, List<Statement> statementsToBeReplaced) {
         Statement lastStatementToBeReplaced = statementsToBeReplaced.get(statementsToBeReplaced.size()-1);
-        codeBlock.addOrphanComment(createEndComment(lastStatementToBeReplaced, comment));
+        Statement latestStatement = getStatementWithLatestEnding(lastStatementToBeReplaced, replacementCode);
+        codeBlock.addOrphanComment(createEndComment(latestStatement));
     }
 
-    private static LineComment createEndComment(Statement statement, String comment){
+    private static Statement getStatementWithLatestEnding(Statement lastStatementToBeReplaced, BlockStmt replacementCode){
+        NodeList<Statement> replacementStatements = replacementCode.getStatements();
+        if( replacementStatements.isEmpty()){
+            return lastStatementToBeReplaced;
+        }
+        Statement lastReplacementStatement = replacementStatements.get(replacementStatements.size()-1);
+        if(lastStatementToBeReplaced.getRange().get().end.isAfter(lastReplacementStatement.getRange().get().end)){
+            return lastStatementToBeReplaced;
+        }
+        return lastReplacementStatement;
+    }
+
+    private static LineComment createEndComment(Statement statement){
         Optional<TokenRange> statementTokenRange = statement.getTokenRange();
         if(statementTokenRange.isPresent()){
-            return new LineComment(statementTokenRange.get(), comment);
+            return new LineComment(statementTokenRange.get(), Replacement.END_COMMENT);
         }
         throw new NodeException(statement, String.format("The statement %s does not have a token range", statement));
     }
@@ -198,8 +206,15 @@ public class NodeUtils {
     public static void removeSolution(BlockStmt codeBlock, Solution solution){
         replaceStatements(codeBlock, solution.getStatementsIncludingSolutionMarkers(), new BlockStmt());
         removeEndTodoComment(codeBlock);
-        insertEndTodoComment(codeBlock, solution.getStatementsIncludingSolutionMarkers(),
-                "TODO - Implement your solution here");
+        Statement statement = solution.getStatementsIncludingSolutionMarkers()
+                .get(solution.getStatementsIncludingSolutionMarkers().size()-1);
+        Optional<TokenRange> statementTokenRange = statement.getTokenRange();
+        if(statementTokenRange.isPresent()){
+            codeBlock.addOrphanComment(new LineComment(statementTokenRange.get(),
+                    "TODO - Implement your solution here"));
+        }else{
+            throw new NodeException(statement, String.format("The statement %s does not have a token range", statement));
+        }
     }
 
     private static void removeEndTodoComment(BlockStmt codeBlock) {

@@ -39,7 +39,7 @@ class DescriptionWriterTest {
         Parser parser = new Parser(srcDirPath);
         parser.parse();
         assignment = new AssignmentBuilder(parser).build();
-        descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        descriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 new HashMap<>(),false);
     }
 
@@ -232,7 +232,7 @@ class DescriptionWriterTest {
         Parser parser = new Parser();
         parser.parseDirectory("src/test/java/examples/assignment1");
         Assignment assignment = new AssignmentBuilder(parser).build();
-        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 oldDescriptions, true);
         Exercise rootExercise = assignment.getExercises().get(0);
         String newDescription = newDescriptionWriter.createTemplate(rootExercise);
@@ -246,7 +246,7 @@ class DescriptionWriterTest {
         Parser parser = new Parser();
         parser.parseDirectory("src/test/java/examples/assignment1");
         Assignment assignment = new AssignmentBuilder(parser).build();
-        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 oldDescriptions, false);
         Exercise rootExercise = assignment.getExercises().get(0);
         newDescriptionWriter.createFileContent(rootExercise);
@@ -258,7 +258,7 @@ class DescriptionWriterTest {
     @Test
     void testKeepingOldDescriptionThatIsNonexistent() {
         Exercise rootExercise = assignment.getExercises().get(0);
-        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        var newDescriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 new HashMap<>(), true);
         String expectedDescription = descriptionWriter.createTemplate(rootExercise);
         String actualDescription = newDescriptionWriter.createTemplate(rootExercise);

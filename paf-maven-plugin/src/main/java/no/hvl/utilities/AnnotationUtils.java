@@ -7,6 +7,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.exceptions.MissingAnnotationException;
@@ -90,6 +91,17 @@ public class AnnotationUtils {
         throw new MissingAnnotationException((Node) node, EXERCISE_ID_NAME);
     }
 
+    public static int[] getExercisesValueInDescriptionReferenceAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(DESCRIPTION_REFERENCE_NAME)) {
+            var expression = getAnnotationMemberValue(node, DESCRIPTION_REFERENCE_NAME,
+                    DESCRIPTION_REFERENCE_EXERCISES_NAME);
+            return expression.asArrayInitializerExpr().getValues().stream()
+                    .mapToInt(value -> value.asIntegerLiteralExpr().asNumber().intValue()).toArray();
+        }
+        throw new NodeException((Node) node,
+                String.format("Could not find annotation \"%s\" on the node:%n%s", DESCRIPTION_REFERENCE_NAME, node));
+    }
+
     public static String getReplacementIdInExerciseAnnotation(NodeWithAnnotations<?> node){
         if(node.isAnnotationPresent(EXERCISE_NAME)) {
             Expression expression = getAnnotationMemberValue(node, EXERCISE_NAME, EXERCISE_REPLACEMENT_ID_NAME);
@@ -147,6 +159,19 @@ public class AnnotationUtils {
         file.findAll(BodyDeclaration.class,
                 bodyDeclaration -> bodyDeclaration.getAnnotationByName(annotationName).isPresent())
                 .forEach(annotatedNodes::add);
+        return annotatedNodes;
+    }
+
+
+    public static List<NodeWithAnnotations<?>> getAllNodesWithAnnotation(List<CompilationUnit> files, String annotatationName){
+        List<NodeWithAnnotations<?>> annotatedNodes = new ArrayList<>();
+        for(CompilationUnit file : files){
+            file.findAll(Node.class,
+                    node -> node instanceof NodeWithAnnotations
+                            && node instanceof NodeWithSimpleName
+                            && ((NodeWithAnnotations<?>) node).isAnnotationPresent(annotatationName))
+                    .forEach(node -> annotatedNodes.add((NodeWithAnnotations<?>) node));
+        }
         return annotatedNodes;
     }
 

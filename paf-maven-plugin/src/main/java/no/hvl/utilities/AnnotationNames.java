@@ -6,6 +6,9 @@ public final class AnnotationNames {
         throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
     }
 
+    public static final String DESCRIPTION_REFERENCE_NAME = "DescriptionReference";
+    public static final String DESCRIPTION_REFERENCE_EXERCISES_NAME = "exercises";
+
     public static final String EXERCISE_NAME = "Exercise";
     public static final String EXERCISE_ID_NAME = "id";
     public static final String EXERCISE_REPLACEMENT_ID_NAME = "replacementId";

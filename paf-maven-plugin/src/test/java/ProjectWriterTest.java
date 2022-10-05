@@ -272,7 +272,7 @@ class ProjectWriterTest {
     @Test
     void testSavingExerciseDescriptionsBeforeClearingTargetFolder() throws IOException {
         projectWriter.createSolutionAndStartProject();
-        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 new HashMap<>(), false);
         descriptionWriter.createExerciseDescriptions();
         projectWriter.clearTargetDir();
@@ -284,7 +284,7 @@ class ProjectWriterTest {
     }
 
     private String getDescriptionWithFileName(String fileName) {
-        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment.getExercises(),
+        DescriptionWriter descriptionWriter = new DescriptionWriter(targetDirPath, assignment,
                 new HashMap<>(), false);
         for(Exercise exercise : assignment.getExercises()){
             String exerciseFileName = "Exercise"  + exercise.getNumberAmongSiblingExercises() + ".adoc";

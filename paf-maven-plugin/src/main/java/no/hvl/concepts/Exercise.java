@@ -1,6 +1,7 @@
 package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import no.hvl.concepts.tasks.Task;
 
 import java.util.ArrayList;

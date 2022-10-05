@@ -6,10 +6,15 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import no.hvl.concepts.Assignment;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.NodeException;
+import no.hvl.utilities.AnnotationUtils;
+import no.hvl.utilities.DescriptionReferenceData;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,15 +29,17 @@ public class DescriptionWriter {
     private static final String NEW_LINE = "\n";
     private final String rootFolderPath;
     private String descriptionsDirPath;
+    private final Assignment assignment;
     private final List<Exercise>  exercises;
     private final HashMap<String, String> descriptionsMap;
     private final HashMap<String, String> oldDescriptionsMap;
     private final boolean keepOldTemplates;
 
-    public DescriptionWriter(String rootFolderPath, List<Exercise> exercises,
+    public DescriptionWriter(String rootFolderPath, Assignment assignment,
                              HashMap<String, String> oldDescriptions, boolean keepOldTemplates) {
         this.rootFolderPath = rootFolderPath;
-        this.exercises = exercises;
+        this.assignment = assignment;
+        this.exercises = assignment.getExercises();
         this.oldDescriptionsMap = oldDescriptions;
         this.descriptionsMap = new HashMap<>();
         this.keepOldTemplates = keepOldTemplates;
@@ -80,6 +87,16 @@ public class DescriptionWriter {
         }
         for(Task task : rootExercise.getTasksIncludingAllSubExerciseTasks()){
             exerciseTemplate.append(createTaskAttributes(task));
+        }
+
+        int counter = 1;
+        for(DescriptionReferenceData descriptionReference : assignment.getDescriptionReferences()){
+            int[] rootExerciseNumbers = descriptionReference.getExercises();
+            if(Arrays.stream(rootExerciseNumbers).anyMatch(exerciseRootNumber ->
+                    exerciseRootNumber == rootExercise.getNumberAmongSiblingExercises())){
+                exerciseTemplate.append(createDescriptionReferenceAttribute(descriptionReference.getNode(), counter));
+                counter++;
+            }
         }
         return exerciseTemplate.toString();
     }
@@ -191,6 +208,12 @@ public class DescriptionWriter {
         Node node = task.getNode();
         String className = node.getClass().getSimpleName();
         return className.replace("Declaration", "");
+    }
+
+    private String createDescriptionReferenceAttribute(NodeWithAnnotations<?> descriptionReference, int number){
+        String attributeKeyName = "DescriptionReference_" + number;
+        NodeWithSimpleName<?> simpleNameNode = (NodeWithSimpleName<?>) descriptionReference;
+        return createAttribute(attributeKeyName , simpleNameNode.getNameAsString(), true);
     }
 
     public String createTemplate(Exercise exercise){

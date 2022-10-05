@@ -3,6 +3,9 @@ package no.hvl.concepts;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import no.hvl.utilities.DescriptionReferenceData;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +18,7 @@ public class Assignment {
     private List<Replacement> replacements;
     private List<Exercise> exercises;
     private HashSet<String> fileNamesToRemove;
+    private List<DescriptionReferenceData> descriptionReferences;
 
     public Assignment(){
     }
@@ -81,5 +85,13 @@ public class Assignment {
 
     public void setFileNamesToRemove(HashSet<String> fileNamesToRemove) {
         this.fileNamesToRemove = fileNamesToRemove;
+    }
+
+    public List<DescriptionReferenceData> getDescriptionReferences() {
+        return descriptionReferences;
+    }
+
+    public void setDescriptionReferences(List<DescriptionReferenceData> descriptionReferences) {
+        this.descriptionReferences = descriptionReferences;
     }
 }

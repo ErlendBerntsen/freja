@@ -22,7 +22,7 @@ public class Generator {
         var projectWriter = new ProjectWriter(config, assignment);
         projectWriter.createAllProjects();
         String startCodePath =  config.getTargetPath() + File.separator + ProjectWriter.START_CODE_PROJECT_NAME;
-        var descriptionWriter = new DescriptionWriter(startCodePath, assignment.getExercises(),
+        var descriptionWriter = new DescriptionWriter(startCodePath, assignment,
                 projectWriter.getDescriptionMap(), config.getKeepOldDescriptionTemplates());
         descriptionWriter.createExerciseDescriptions();
     }

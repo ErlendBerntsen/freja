@@ -3,12 +3,15 @@ package no.hvl.concepts.builders;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import no.hvl.Parser;
 import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.NodeException;
+import no.hvl.utilities.DescriptionReferenceData;
 
 import java.util.*;
 
@@ -25,6 +28,8 @@ public class AssignmentBuilder {
     private List<Exercise> exercises;
     private HashSet<String> fileNamesToRemove;
 
+
+
     public AssignmentBuilder(Parser parser) {
         this.parser = parser;
     }
@@ -32,6 +37,7 @@ public class AssignmentBuilder {
     public Assignment build() {
         Assignment assignment = new Assignment();
         parsedFiles = parser.getCompilationUnitCopies();
+        assignment.setDescriptionReferences(findDescriptionReferences());
         assignment.setParsedFiles(parsedFiles);
         assignment.setReplacements(findReplacements());
         assignment.setExercises(findExercises());
@@ -126,8 +132,16 @@ public class AssignmentBuilder {
 
     private void removePafInformation(List<CompilationUnit> files, TargetProject targetProject){
         removeNodesAnnotatedWithRemove(files, targetProject);
-        removeReplacementCodeAnnotations(files);
+        removeAnnotations(files, REPLACEMENT_CODE_NAME);
+        removeDescriptionReferenceAnnotations(files);
         removePafImports(files);
+    }
+
+    private void removeDescriptionReferenceAnnotations(List<CompilationUnit> files) {
+        List<NodeWithAnnotations<?>> nodesWithAnnotations = getAllNodesWithAnnotation(files, DESCRIPTION_REFERENCE_NAME);
+        for(NodeWithAnnotations<?> nodeWithAnnotations : nodesWithAnnotations){
+            removeAnnotationTypeFromNode(nodeWithAnnotations, DESCRIPTION_REFERENCE_NAME);
+        }
     }
 
     private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files, TargetProject targetProject) {
@@ -135,10 +149,10 @@ public class AssignmentBuilder {
         fileNamesToRemove = removeNodesFromFiles(files, nodesAnnotatedWithRemove, targetProject);
     }
 
-    private void removeReplacementCodeAnnotations(List<CompilationUnit> files) {
-        List<BodyDeclaration<?>> nodes = getAllNodesInFilesAnnotatedWith(files, REPLACEMENT_CODE_NAME);
+    private void removeAnnotations(List<CompilationUnit> files, String annotationName) {
+        List<BodyDeclaration<?>> nodes = getAllNodesInFilesAnnotatedWith(files, annotationName);
         for(BodyDeclaration<?> node : nodes){
-            removeAnnotationTypeFromNode(node, REPLACEMENT_CODE_NAME);
+            removeAnnotationTypeFromNode(node, annotationName);
         }
     }
 
@@ -167,5 +181,17 @@ public class AssignmentBuilder {
                     , EXERCISE_NAME, oldTaskNode));
         }
     }
+
+    private List<DescriptionReferenceData> findDescriptionReferences() {
+        List<NodeWithAnnotations<?>> annotatedNodes = getAllNodesWithAnnotation(parsedFiles, DESCRIPTION_REFERENCE_NAME);
+        List<DescriptionReferenceData> descriptionReferences = new ArrayList<>();
+        annotatedNodes.forEach(node -> {
+            var descriptionReference = new DescriptionReferenceData(node, getExercisesValueInDescriptionReferenceAnnotation(node));
+            descriptionReferences.add(descriptionReference);
+        });
+        annotatedNodes.forEach(node -> removeAnnotationTypeFromNode(node, DESCRIPTION_REFERENCE_NAME));
+        return descriptionReferences;
+    }
+
 
 }

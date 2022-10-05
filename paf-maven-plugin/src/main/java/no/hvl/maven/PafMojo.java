@@ -8,10 +8,15 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.COMPILE)
 public class PafMojo extends AbstractMojo {
+
+    private static final List<String> pom = List.of("pom.xml", "*pom.xml", "**pom.xml");
 
     @Parameter(property = "targetPath", required = true)
     private String targetPath;
@@ -31,8 +36,10 @@ public class PafMojo extends AbstractMojo {
         var generator = new Generator(configuration);
         try {
             generator.generate();
-            var mavenWriter = new MavenWriter("pom.xml", targetPath);
-            mavenWriter.createPomFiles();
+            if(ignore.stream().noneMatch(pom::contains)){
+                var mavenWriter = new MavenWriter("pom.xml", targetPath);
+                mavenWriter.createPomFiles();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

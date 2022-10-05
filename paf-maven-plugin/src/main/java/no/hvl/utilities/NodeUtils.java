@@ -16,6 +16,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.annotations.TargetProject;
 import no.hvl.concepts.Replacement;
 import no.hvl.concepts.Solution;
 import no.hvl.exceptions.NoFileFoundException;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
+import static no.hvl.utilities.AnnotationNames.*;
 
 public class NodeUtils {
 
@@ -80,11 +83,11 @@ public class NodeUtils {
     }
 
     public static boolean isStartStatement(Statement statement){
-        return statementHasVariableDeclarationTypeName(statement, AnnotationNames.SOLUTION_START_NAME);
+        return statementHasVariableDeclarationTypeName(statement, SOLUTION_START_NAME);
     }
 
     public static boolean isEndStatement(Statement statement){
-        return statementHasVariableDeclarationTypeName(statement, AnnotationNames.SOLUTION_END_NAME);
+        return statementHasVariableDeclarationTypeName(statement, SOLUTION_END_NAME);
     }
 
     private static boolean statementHasVariableDeclarationTypeName
@@ -238,11 +241,17 @@ public class NodeUtils {
     }
 
     public static HashSet<String> removeNodesFromFiles
-            (List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove){
+            (List<CompilationUnit> files, List<BodyDeclaration<?>> nodesToRemove, TargetProject targetProject){
         HashSet<String> fileNamesToRemove = new HashSet<>();
         for(BodyDeclaration<?> node : nodesToRemove){
             saveFileNameIfTypeDeclaration(node, fileNamesToRemove, files);
-            node.remove();
+            TargetProject removeAnnotationTargetProject = AnnotationUtils.getTargetProjectValueInRemoveAnnotation(node);
+            if(removeAnnotationTargetProject.equals(targetProject)
+                    || removeAnnotationTargetProject.equals(TargetProject.ALL)){
+                node.remove();
+            }else{
+                AnnotationUtils.removeAnnotationTypeFromNode(node, REMOVE_NAME);
+            }
         }
         return fileNamesToRemove;
     }

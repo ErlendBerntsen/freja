@@ -203,6 +203,4 @@ public class Example {
         String x;
     }
 
-
-
 }

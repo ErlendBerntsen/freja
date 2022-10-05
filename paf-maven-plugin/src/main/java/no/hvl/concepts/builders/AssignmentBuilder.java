@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import no.hvl.Parser;
+import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
@@ -92,20 +93,20 @@ public class AssignmentBuilder {
     }
 
     private List<CompilationUnit> createStartCode(){
-        return modifyJavaFiles(false);
+        return modifyJavaFiles(TargetProject.START_CODE);
     }
 
     private List<CompilationUnit> createSolutionCode(){
-        return modifyJavaFiles(true);
+        return modifyJavaFiles(TargetProject.SOLUTION);
     }
 
-    private List<CompilationUnit> modifyJavaFiles(boolean isSolutionCode){
+    private List<CompilationUnit> modifyJavaFiles(TargetProject targetProject){
         List<Task> tasks = getTasksFromExercises(exercises);
         List<CompilationUnit> files = parser.getCompilationUnitCopies();
-        removePafInformation(files);
+        removePafInformation(files, targetProject);
         for(Task task : tasks){
             BodyDeclaration<?> oldTaskNode = findBodyDeclarationCopyInFiles(files, task.getNode());
-            BodyDeclaration<?> newTaskNode = createNewTaskNode(isSolutionCode, task, oldTaskNode);
+            BodyDeclaration<?> newTaskNode = createNewTaskNode(targetProject, task, oldTaskNode);
             if(task.getTransformOption().equals(TransformOption.REMOVE_EVERYTHING)){
                 continue;
             }
@@ -123,15 +124,15 @@ public class AssignmentBuilder {
         return tasks;
     }
 
-    private void removePafInformation(List<CompilationUnit> files){
-        removeNodesAnnotatedWithRemove(files);
+    private void removePafInformation(List<CompilationUnit> files, TargetProject targetProject){
+        removeNodesAnnotatedWithRemove(files, targetProject);
         removeReplacementCodeAnnotations(files);
         removePafImports(files);
     }
 
-    private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files) {
+    private void removeNodesAnnotatedWithRemove(List<CompilationUnit> files, TargetProject targetProject) {
         List<BodyDeclaration<?>> nodesAnnotatedWithRemove = getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
-        fileNamesToRemove = removeNodesFromFiles(files, nodesAnnotatedWithRemove);
+        fileNamesToRemove = removeNodesFromFiles(files, nodesAnnotatedWithRemove, targetProject);
     }
 
     private void removeReplacementCodeAnnotations(List<CompilationUnit> files) {
@@ -147,8 +148,8 @@ public class AssignmentBuilder {
         }
     }
 
-    private BodyDeclaration<?> createNewTaskNode(boolean isSolutionCode, Task task, BodyDeclaration<?> newTaskNode) {
-        if(isSolutionCode){
+    private BodyDeclaration<?> createNewTaskNode(TargetProject targetProject, Task task, BodyDeclaration<?> newTaskNode) {
+        if(targetProject.equals(TargetProject.SOLUTION)){
             newTaskNode = task.createSolutionCode(newTaskNode);
         }else{
             newTaskNode = task.createStartCode(newTaskNode);

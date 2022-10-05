@@ -7,8 +7,10 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.exceptions.MissingAnnotationException;
+import no.hvl.exceptions.MissingAnnotationMemberException;
 import no.hvl.exceptions.NodeException;
 
 import java.util.ArrayList;
@@ -18,8 +20,8 @@ import java.util.Optional;
 import static no.hvl.utilities.AnnotationNames.*;
 
 public class AnnotationUtils {
-    public static final String ANNOTATIONS_PACKAGE_NAME = "no.hvl.annotations";
 
+    public static final String ANNOTATIONS_PACKAGE_NAME = "no.hvl.annotations";
 
     private AnnotationUtils(){
         throw new IllegalStateException("This is an utility class. It is not meant to be instantiated");
@@ -58,9 +60,25 @@ public class AnnotationUtils {
                 }
             }
         }
-        throw new NodeException(annotationExpr,
-                String.format("Could not find annotation member \"%s\" in the annotation:%n%s",
-                        memberName, annotationExpr));
+        throw new MissingAnnotationMemberException(annotationExpr, memberName);
+    }
+
+    public static TargetProject getTargetProjectValueInRemoveAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(REMOVE_NAME)) {
+            try{
+
+                var expression = getAnnotationMemberValue(node, REMOVE_NAME, REMOVE_FROM_NAME);
+                if(expression.isFieldAccessExpr()){
+                    return TargetProject.getTargetProject(expression.asFieldAccessExpr().getNameAsString());
+                }else{
+                    return TargetProject.getTargetProject(expression.asNameExpr().getNameAsString());
+                }
+            }catch (MissingAnnotationMemberException e){
+                return TargetProject.ALL;
+            }
+        }
+        throw new NodeException((Node) node,
+                String.format("Could not find annotation \"%s\" on the node:%n%s", REMOVE_NAME, node));
     }
 
     public static int[] getIdValueInExerciseAnnotation(NodeWithAnnotations<?> node){

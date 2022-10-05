@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import no.hvl.annotations.TargetProject;
 import no.hvl.exceptions.NoFileFoundException;
 import no.hvl.exceptions.NodeException;
 import org.junit.jupiter.api.BeforeEach;
@@ -217,4 +218,5 @@ class NodeUtilsTest extends ExamplesParser {
         Statement endStatement = StaticJavaParser.parseStatement("SolutionEnd e;");
         assertThrows(NoFileFoundException.class, () -> findFile(endStatement));
     }
+
 }

@@ -82,10 +82,6 @@ public class TaskBuilder {
             return getReplacementIdInExerciseAnnotation(nodeAnnotatedWithExercise);
         }catch (NodeException e){
             return DEFAULT_REPLACEMENT;
-//            throw new NodeException(nodeAnnotatedWithExercise,
-//                    String.format("The \"%s\" attribute of @%s must be specified when the \"%s\" is set to %s",
-//                            EXERCISE_REPLACEMENT_ID_NAME, EXERCISE_NAME,
-//                            EXERCISE_TRANSFORM_NAME, transformOption.toString()));
         }
     }
 

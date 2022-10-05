@@ -1,5 +1,6 @@
 package examples.assignment3;
 
+import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.annotations.Exercise;
 import no.hvl.annotations.Remove;

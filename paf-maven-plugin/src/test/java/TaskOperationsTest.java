@@ -381,7 +381,6 @@ class TaskOperationsTest extends ExamplesParser {
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 40);
         ReplaceBodyTask task = (ReplaceBodyTask) new TaskBuilder(node, new Exercise(), replacementMap).build();
         BodyDeclaration<?> startCode = task.createStartCode(node);
-        System.out.println(startCode);
         CallableDeclaration<?> callableDeclaration = startCode.asCallableDeclaration();
         List<String> thrownExceptions = callableDeclaration.getThrownExceptions()
                 .stream()

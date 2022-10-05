@@ -1,9 +1,12 @@
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import no.hvl.Parser;
 import no.hvl.concepts.Assignment;
 import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.exceptions.NodeException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +20,7 @@ import static no.hvl.utilities.AnnotationNames.*;
 import static no.hvl.utilities.AnnotationUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AssignmentBuilderTest {
+class AssignmentBuilderTest {
 
     private Parser parser;
     private final List<String> filesToRemove = List.of("Assignment3RemoveClass", "Assignment3RemoveEnum",
@@ -28,7 +31,6 @@ public class AssignmentBuilderTest {
         parser = new Parser();
     }
 
-    //TODO Test proper assignment with multiple files and all transform options
     @Test
     void testBuildingSimpleAssignment() throws IOException {
         parser.parseDirectory("src/test/java/examples/assignment1");
@@ -39,16 +41,25 @@ public class AssignmentBuilderTest {
     }
 
     @Test
-    void testNodesAnnotatedWithRemoveAreRemoved() throws IOException {
+    void testNodesAnnotatedWithRemoveAreRemovedCorrectly() throws IOException {
         parser.parseDirectory("src/test/java/examples/assignment3");
         Assignment assignment = new AssignmentBuilder(parser).build();
-        assertNodesAreRemoved(assignment.getSolutionCodeFiles());
-        assertNodesAreRemoved(assignment.getStartCodeFiles());
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove = getAllNodesInFilesAnnotatedWith(parser.getCompilationUnitCopies(), REMOVE_NAME);
+        assertNodesAndFilesAreRemoved(assignment.getSolutionCodeFiles(), nodesAnnotatedWithRemove);
+        assertNodesAndFilesAreRemoved(assignment.getStartCodeFiles(), nodesAnnotatedWithRemove);
     }
 
-    private void assertNodesAreRemoved(List<CompilationUnit> files) {
-        List<BodyDeclaration<?>> nodesAnnotatedWithRemove = getAllNodesInFilesAnnotatedWith(files, REMOVE_NAME);
-        assertTrue(nodesAnnotatedWithRemove.isEmpty());
+    private void assertNodesAndFilesAreRemoved(List<CompilationUnit> files, List<BodyDeclaration<?>> nodesAnnotatedWithRemove) {
+        int amountOfNodesThatAreNotRemoved = 0;
+        for(BodyDeclaration<?> node : nodesAnnotatedWithRemove){
+            for(CompilationUnit file : files){
+                Node nodeWithoutRemoveAnnotation = (Node) removeAnnotationTypeFromNode(node.clone(), REMOVE_NAME);
+                if(file.toString().contains(nodeWithoutRemoveAnnotation.toString())){
+                    amountOfNodesThatAreNotRemoved++;
+                }
+            }
+        }
+        assertEquals(0, amountOfNodesThatAreNotRemoved);
         assertEquals(1, files.size());
         for(CompilationUnit file : files){
             assertTrue(file.getClassByName("Assignment3Exercises").isPresent());
@@ -108,6 +119,50 @@ public class AssignmentBuilderTest {
         parser.parseDirectory("src/test/java/examples/assignment2");
         AssignmentBuilder assignmentBuilder = new AssignmentBuilder(parser);
         assertThrows(NodeException.class, assignmentBuilder::build);
+    }
+
+    @Test
+    void testRemovingNodeOnlyFromStartCode() throws IOException {
+        parser.parseDirectory("src/test/java/examples/assignment4");
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
+                getAllNodesInFilesAnnotatedWith(parser.getCompilationUnitCopies(), REMOVE_NAME);
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        assertNodesAndFilesAreRemoved(assignment.getSolutionCodeFiles(),1, nodesAnnotatedWithRemove);
+        assertNodesAndFilesAreRemoved(assignment.getStartCodeFiles(),0, nodesAnnotatedWithRemove);
+    }
+
+    private void assertNodesAndFilesAreRemoved(List<CompilationUnit> files, int amountOfNodesThatShouldNotBeRemoved,
+                                               List<BodyDeclaration<?>> nodesAnnotatedWithRemove) {
+        int amountOfNodesThatAreNotRemoved = 0;
+        for(BodyDeclaration<?> node : nodesAnnotatedWithRemove){
+            for(CompilationUnit file : files){
+                Node nodeWithoutRemoveAnnotation = (Node) removeAnnotationTypeFromNode(node.clone(), REMOVE_NAME);
+                if(file.toString().contains(nodeWithoutRemoveAnnotation.toString())){
+                    amountOfNodesThatAreNotRemoved++;
+                }
+            }
+        }
+        assertEquals(amountOfNodesThatShouldNotBeRemoved,  amountOfNodesThatAreNotRemoved);
+    }
+
+    @Test
+    void testRemovingNodeOnlyFromSolution() throws IOException {
+        parser.parseDirectory("src/test/java/examples/assignment5");
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
+                getAllNodesInFilesAnnotatedWith(parser.getCompilationUnitCopies(), REMOVE_NAME);
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        assertNodesAndFilesAreRemoved(assignment.getSolutionCodeFiles(),0, nodesAnnotatedWithRemove);
+        assertNodesAndFilesAreRemoved(assignment.getStartCodeFiles(),1, nodesAnnotatedWithRemove);
+    }
+
+    @Test
+    void testRemovingNodeFromAllProjects() throws IOException {
+        parser.parseDirectory("src/test/java/examples/assignment6");
+        Assignment assignment = new AssignmentBuilder(parser).build();
+        List<BodyDeclaration<?>> nodesAnnotatedWithRemove =
+                getAllNodesInFilesAnnotatedWith(parser.getCompilationUnitCopies(), REMOVE_NAME);
+        assertNodesAndFilesAreRemoved(assignment.getSolutionCodeFiles(),0, nodesAnnotatedWithRemove);
+        assertNodesAndFilesAreRemoved(assignment.getStartCodeFiles(),0, nodesAnnotatedWithRemove);
     }
 
 

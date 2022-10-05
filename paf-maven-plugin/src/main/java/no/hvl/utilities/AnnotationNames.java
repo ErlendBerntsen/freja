@@ -15,6 +15,7 @@ public final class AnnotationNames {
     public static final String REPLACEMENT_CODE_ID_NAME = "id";
 
     public static final String REMOVE_NAME = "Remove";
+    public static final String REMOVE_FROM_NAME = "removeFrom";
 
     public static final String SOLUTION_START_NAME = "SolutionStart";
 

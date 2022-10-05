@@ -144,7 +144,8 @@ public class NodeUtils {
             NodeList<Statement> newCodeBlock = createNewCodeBlock(startIndex.get(), codeBlockStatements,
                     statementsToBeReplaced, replacementCode.getStatements());
             codeBlock.setStatements(newCodeBlock);
-            insertStartTodoComment(replacementCode);
+            insertReplacementCodeComments(codeBlock, replacementCode, statementsToBeReplaced);
+            insertStartTodoComment(codeBlock, replacementCode, statementsToBeReplaced);
             insertEndTodoComment(codeBlock, replacementCode, statementsToBeReplaced);
         }else{
             throw new NodeException(codeBlock,
@@ -175,9 +176,23 @@ public class NodeUtils {
         return new NodeList<>(newCodeBlock);
     }
 
-    private static void insertStartTodoComment(BlockStmt replacementCode) {
+    private static void insertReplacementCodeComments(BlockStmt codeBlock, BlockStmt replacementCode,
+                                                      List<Statement> statementsToBeReplaced) {
+        replacementCode.getOrphanComments().forEach(comment -> {
+            LineComment newComment = new LineComment(statementsToBeReplaced.get(1).getTokenRange().get(),
+                    comment.getContent());
+            codeBlock.addOrphanComment(newComment);
+        });
+    }
+
+    private static void insertStartTodoComment(BlockStmt codeBlock, BlockStmt replacementCode, List<Statement> statementsToBeReplaced) {
         Optional<Statement> firstStatement = replacementCode.getStatements().getFirst();
-        firstStatement.ifPresent(statement -> statement.setLineComment(Replacement.START_COMMENT));
+        if(firstStatement.isPresent()){
+            firstStatement.get().setLineComment(Replacement.START_COMMENT);
+        }else{
+            codeBlock.addOrphanComment(new LineComment(statementsToBeReplaced.get(0).getTokenRange().get(),
+                    Replacement.START_COMMENT));
+        }
     }
 
     private static void insertEndTodoComment(BlockStmt codeBlock, BlockStmt replacementCode, List<Statement> statementsToBeReplaced) {

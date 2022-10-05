@@ -65,13 +65,6 @@ class ReplacementBuilderTest extends ExamplesParser {
     }
 
     @Test
-    void testBuildingReplacementWithEmptyBody(){
-        BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 12);
-        ReplacementBuilder replacementBuilder = new ReplacementBuilder(node);
-        assertThrows(NodeException.class, replacementBuilder::build);
-    }
-
-    @Test
     void testBuildingReplacementWithoutFile(){
         BodyDeclaration<?> node = StaticJavaParser.parseBodyDeclaration("""
                 @ReplacementCode(id = "2")

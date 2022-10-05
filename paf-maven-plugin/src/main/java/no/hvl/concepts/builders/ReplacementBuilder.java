@@ -48,12 +48,7 @@ public class ReplacementBuilder {
 
     private BlockStmt findReplacementCode(){
         if(nodeHasBlockStmt(annotatedNode)){
-            BlockStmt replacementCodeBlock = getBlockStmtFromBodyDeclaration(annotatedNode);
-            if(replacementCodeBlock.isEmpty()){
-                throw new NodeException(replacementCodeBlock,
-                        String.format("Types annotated with @%s can not have an empty body.", REPLACEMENT_CODE_NAME));
-            }
-            return replacementCodeBlock;
+            return  getBlockStmtFromBodyDeclaration(annotatedNode);
         }
         throw new NodeException(annotatedNode,
                 String.format("Types annotated with @%s must have a body.", REPLACEMENT_CODE_NAME));

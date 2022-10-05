@@ -8,9 +8,6 @@ import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.Replacement;
 import no.hvl.utilities.NodeUtils;
 
-import static no.hvl.utilities.AnnotationNames.EXERCISE_NAME;
-import static no.hvl.utilities.AnnotationUtils.removeAnnotationTypeFromNode;
-
 public class ReplaceBodyTask extends Task {
 
     private final Replacement replacement;
@@ -26,6 +23,7 @@ public class ReplaceBodyTask extends Task {
         BlockStmt codeBlock = NodeUtils.getBlockStmtFromBodyDeclaration(nodeToUpdate);
         BlockStmt replacementCodeBlock = replacement.getReplacementCode();
         codeBlock.setStatements(replacementCodeBlock.getStatements());
+        replacementCodeBlock.getOrphanComments().forEach(codeBlock::addOrphanComment);
         if(replacement.throwsExceptions()){
             CallableDeclaration<?> nodeAsCallableDeclaration = nodeToUpdate.asCallableDeclaration();
             for(String exception : replacement.getThrownExceptions()){

@@ -26,13 +26,6 @@ class TaskBuilderTest extends ExamplesParser {
         init();
     }
 
-    //TODO
-    //Add tests for build methods for:
-    //    REMOVE_EVERYTHING
-    //    REMOVE_BODY
-    //    REPLACE_BODY
-    //    REMOVE_SOLUTION
-
     @Test
     void testBuildingTask(){
         BodyDeclaration<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 6);

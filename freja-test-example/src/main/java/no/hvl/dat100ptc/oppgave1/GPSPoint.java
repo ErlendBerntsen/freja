@@ -8,7 +8,7 @@ import no.hvl.annotations.SolutionStart;
 @SuppressWarnings("ALL")
 public class GPSPoint {
 
-    // TODO - objektvariable
+    // TO DO - objektvariable
 
     @Exercise(id = {1,1}, transformOption = TransformOption.REMOVE_EVERYTHING, replacementId = "")
     private int time;
@@ -22,7 +22,7 @@ public class GPSPoint {
     @Exercise(id = {1,1}, transformOption = TransformOption.REPLACE_SOLUTION, replacementId = "1")
     public GPSPoint(int time, double latitude, double longitude, double elevation) {
 
-        // TODO - konstruktur
+        // TO DO - konstruktur
 
 
         SolutionStart s;
@@ -33,7 +33,7 @@ public class GPSPoint {
         SolutionEnd e;
     }
 
-    // TODO - get/set metoder
+    // TO DO - get/set metoder
     @Exercise(id = {1,2}, transformOption = TransformOption.REPLACE_BODY, replacementId = "2")
     public int getTime() {
         return time;

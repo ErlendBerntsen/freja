@@ -2,19 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>freja</artifactId>
+        <groupId>no.hvl</groupId>
+        <version>1.1</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>freja</artifactId>
-    <groupId>no.hvl</groupId>
-    <version>1.1</version>
-
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>freja-annotations</module>
-        <module>freja-maven-plugin</module>
-        <module>freja-test-example</module>
-    </modules>
+    <artifactId>freja-test-example</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>no.hvl</groupId>
+            <artifactId>freja-annotations</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>

@@ -5,6 +5,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.*;
+import no.hvl.exceptions.MissingAnnotationMemberException;
 import no.hvl.exceptions.NodeException;
 
 import java.util.Map;
@@ -80,7 +81,7 @@ public class TaskBuilder {
     private String getReplacementId(){
         try{
             return getReplacementIdInExerciseAnnotation(nodeAnnotatedWithExercise);
-        }catch (NodeException e){
+        }catch (MissingAnnotationMemberException e){
             return DEFAULT_REPLACEMENT;
         }
     }

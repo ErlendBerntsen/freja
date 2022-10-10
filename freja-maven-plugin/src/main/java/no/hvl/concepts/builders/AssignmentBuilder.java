@@ -5,11 +5,14 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.Parser;
+import no.hvl.annotations.DescriptionReference;
 import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
+import no.hvl.exceptions.MissingAnnotationMemberException;
 import no.hvl.exceptions.NodeException;
+import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.DescriptionReferenceData;
 
 import java.util.*;
@@ -185,7 +188,24 @@ public class AssignmentBuilder {
         List<NodeWithAnnotations<?>> annotatedNodes = getAllNodesWithAnnotation(parsedFiles, DESCRIPTION_REFERENCE_NAME);
         List<DescriptionReferenceData> descriptionReferences = new ArrayList<>();
         annotatedNodes.forEach(node -> {
-            var descriptionReference = new DescriptionReferenceData(node, getExercisesValueInDescriptionReferenceAnnotation(node));
+            String attributeName = "";
+            try{
+                attributeName = getAttributeNameInDescriptionReferenceAnnotation(node);
+                for(DescriptionReferenceData descRefData : descriptionReferences){
+                    if(descRefData.getAttributeName().equals(attributeName)){
+                        throw new NodeException((Node) node, String.format(
+                                "The %s value \"%s\" has already been used for another %s annotation: %n%n%s",
+                                DESCRIPTION_REFERENCE_ATTRIBUTE_NAME, attributeName, DESCRIPTION_REFERENCE_NAME,
+                                descRefData.getNode()));
+                    }
+                }
+
+            }catch (MissingAnnotationMemberException ignored){
+                //Missing annotation member should result in the default value, which is the empty string ""
+            }
+
+            int[] exercisesRootNumber =  getExercisesValueInDescriptionReferenceAnnotation(node);
+            var descriptionReference = new DescriptionReferenceData(node, exercisesRootNumber, attributeName);
             descriptionReferences.add(descriptionReference);
         });
         annotatedNodes.forEach(node -> removeAnnotationTypeFromNode(node, DESCRIPTION_REFERENCE_NAME));

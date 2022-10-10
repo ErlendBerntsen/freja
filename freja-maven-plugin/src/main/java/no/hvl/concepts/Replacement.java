@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +13,7 @@ public class Replacement {
     private String id;
     private CompilationUnit file;
     private BlockStmt replacementCode;
-    private List<ImportDeclaration> requiredImports;
+    private List<ImportDeclaration> requiredImports = new ArrayList<>();
     private List<String> thrownExceptions;
     public static final String START_COMMENT = "TODO - START";
     public static final String END_COMMENT = "TODO - END";

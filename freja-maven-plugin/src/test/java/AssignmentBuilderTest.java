@@ -163,5 +163,12 @@ class AssignmentBuilderTest {
         assertNodesAndFilesAreRemoved(assignment.getStartCodeFiles(),0, nodesAnnotatedWithRemove);
     }
 
+    @Test
+    void testCreatingDuplicateNamedDescriptionReference() throws IOException {
+        Parser parser = new Parser();
+        parser.parseDirectory("src/test/java/examples/assignment7");
+        assertThrows(NodeException.class, () -> new AssignmentBuilder(parser).build());
+    }
+
 
 }

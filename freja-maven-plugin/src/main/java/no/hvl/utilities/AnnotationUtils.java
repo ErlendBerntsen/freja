@@ -110,6 +110,16 @@ public class AnnotationUtils {
         throw new MissingAnnotationException((Node) node, EXERCISE_REPLACEMENT_ID_NAME);
     }
 
+    public static String getAttributeNameInDescriptionReferenceAnnotation(NodeWithAnnotations<?> node){
+        if(node.isAnnotationPresent(DESCRIPTION_REFERENCE_NAME)) {
+            Expression expression =
+                    getAnnotationMemberValue(node, DESCRIPTION_REFERENCE_NAME, DESCRIPTION_REFERENCE_ATTRIBUTE_NAME);
+            return expression.asStringLiteralExpr().asString();
+        }
+        throw new NodeException((Node) node,
+                String.format("Could not find annotation \"%s\" on the node:%n%s", DESCRIPTION_REFERENCE_NAME, node));
+    }
+
     public static void removeAnnotationImportsFromFile(CompilationUnit file){
         NodeList<ImportDeclaration> nonAnnotationImports = new NodeList<>();
         nonAnnotationImports.addAll(getNewListWithoutAnnotationImports(file.getImports()));

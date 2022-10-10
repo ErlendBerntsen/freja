@@ -13,7 +13,6 @@ import no.hvl.concepts.Assignment;
 import no.hvl.concepts.Exercise;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.NodeException;
-import no.hvl.utilities.AnnotationUtils;
 import no.hvl.utilities.DescriptionReferenceData;
 
 import java.io.File;
@@ -94,7 +93,8 @@ public class DescriptionWriter {
             int[] rootExerciseNumbers = descriptionReference.getExercises();
             if(Arrays.stream(rootExerciseNumbers).anyMatch(exerciseRootNumber ->
                     exerciseRootNumber == rootExercise.getNumberAmongSiblingExercises())){
-                exerciseTemplate.append(createDescriptionReferenceAttribute(descriptionReference.getNode(), counter));
+                exerciseTemplate.append(createDescriptionReferenceAttribute(descriptionReference.getNode(), counter,
+                        descriptionReference.getAttributeName()));
                 counter++;
             }
         }
@@ -210,8 +210,9 @@ public class DescriptionWriter {
         return className.replace("Declaration", "");
     }
 
-    private String createDescriptionReferenceAttribute(NodeWithAnnotations<?> descriptionReference, int number){
-        String attributeKeyName = "DescriptionReference_" + number;
+    private String createDescriptionReferenceAttribute(NodeWithAnnotations<?> descriptionReference, int number,
+                                                       String attributeName){
+        String attributeKeyName =  attributeName.isEmpty()? "DescriptionReference_" + number : attributeName;
         NodeWithSimpleName<?> simpleNameNode = (NodeWithSimpleName<?>) descriptionReference;
         return createAttribute(attributeKeyName , simpleNameNode.getNameAsString(), true);
     }

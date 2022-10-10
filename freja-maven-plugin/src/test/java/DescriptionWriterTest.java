@@ -5,6 +5,8 @@ import no.hvl.concepts.Exercise;
 import no.hvl.concepts.builders.AssignmentBuilder;
 import no.hvl.concepts.builders.ExerciseBuilder;
 import no.hvl.concepts.tasks.Task;
+import no.hvl.exceptions.NodeException;
+import no.hvl.utilities.DescriptionReferenceData;
 import no.hvl.writers.DescriptionWriter;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -284,6 +286,32 @@ class DescriptionWriterTest {
                 
                 """;
         assertEquals(expected, template);
+    }
 
+
+    @Test
+    void testCreatingDescriptionReferenceAttribute() {
+        List<String> lines = getAttributeLines(1);
+        assertTrue(lines.contains(":DescriptionReference_1: pass:normal[`+reference+`]"));
+    }
+
+    private List<String> getAttributeLines(int exerciseNumber){
+        Exercise exercise = assignment.getExercises().get(exerciseNumber);
+        String attributes = descriptionWriter.createAttributes(exercise);
+        return  attributes.lines().collect(Collectors.toList());
+    }
+
+    @Test
+    void testCreatingDescriptionReferenceAttributeForMultipleExercises() {
+        List<String> lines = getAttributeLines(1);
+        assertTrue(lines.contains(":DescriptionReference_2: pass:normal[`+reference2+`]"));
+        lines = getAttributeLines(0);
+        assertTrue(lines.contains(":DescriptionReference_1: pass:normal[`+reference2+`]"));
+    }
+
+    @Test
+    void testCreatingNamedDescriptionReference() {
+        List<String> lines = getAttributeLines(1);
+        assertTrue(lines.contains(":NamedReference: pass:normal[`+reference3+`]"));
     }
 }

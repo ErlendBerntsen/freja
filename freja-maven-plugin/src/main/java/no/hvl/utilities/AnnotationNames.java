@@ -8,6 +8,7 @@ public final class AnnotationNames {
 
     public static final String DESCRIPTION_REFERENCE_NAME = "DescriptionReference";
     public static final String DESCRIPTION_REFERENCE_EXERCISES_NAME = "exercises";
+    public static final String DESCRIPTION_REFERENCE_ATTRIBUTE_NAME = "attributeName";
 
     public static final String EXERCISE_NAME = "Exercise";
     public static final String EXERCISE_ID_NAME = "id";

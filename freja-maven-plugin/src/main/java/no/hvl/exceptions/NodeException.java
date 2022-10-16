@@ -17,6 +17,7 @@ public class NodeException extends RuntimeException{
     public NodeException(Node node, String subExceptionMessage){
         createErrorMessage(node);
         message += "Cause: " +  subExceptionMessage;
+        message += "\n\nNode:\n" + node.toString();
     }
 
     private void createErrorMessage(Node node){

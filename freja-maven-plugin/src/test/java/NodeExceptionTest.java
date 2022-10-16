@@ -58,14 +58,19 @@ public class NodeExceptionTest extends ExamplesParser {
             fail("Should throw exception");
         }catch (Exception e){
             assertTrue(e instanceof NodeException);
-            assertEquals(String.format("""
-                There was an error with a node @
-                File name: Example.java
-                Line start: 17
-                Line end: 18
-                                
-                Cause: Node is not annotated with "@%s" and thus can't get "%s" value""",
-                    EXERCISE_NAME, EXERCISE_ID_NAME), e.getMessage());
+            String.format("""
+                    There was an error with a node @
+                    File name: Example.java
+                    Line start: 17
+                    Line end: 18
+
+                    Cause: Node is not annotated with "@%s" and thus can't get "%s" value
+
+                    Node:
+                    @TestId(2)
+                    public int noImplementAnnotation;""", EXERCISE_NAME, EXERCISE_ID_NAME).lines().forEach(line -> {
+                    assertTrue(e.getMessage().lines().anyMatch(x -> x.equals(line)));
+            });
         }
     }
 

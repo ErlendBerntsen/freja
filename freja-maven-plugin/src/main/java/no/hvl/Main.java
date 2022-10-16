@@ -7,7 +7,9 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.utilities.AnnotationNames;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class Main {
     private static final String TARGET_PATH_LAPTOP = "C:\\Users\\Acer\\IntelliJProjects\\FrejaTutorialOutput";
     private static final String TARGET_PATH_DESKTOP = "C:\\Users\\Erlend\\IdeaProjects\\testOutput";
 
-    public static void main (String[] args) throws IOException {
+    public static void main (String[] args) throws Exception {
         Configuration config = new Configuration("C:\\Users\\Erlend\\eclipse-workspace\\TestProject", TARGET_PATH_DESKTOP);
         //countExpressions(config);
         Generator generator = new Generator(config);

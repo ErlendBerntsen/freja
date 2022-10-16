@@ -34,13 +34,19 @@ public class MavenWriter {
         pomDocument.getDocumentElement().normalize();
     }
 
-    public void createPomFiles() throws TransformerException, NoSuchFileException {
-        FileUtils.checkPathExists(targetPath);
-        removeAnnotationDependency();
-        removeFrejalugin();
-        String artifactId = getArtifactId();
-        createPomFile(artifactId, ProjectWriter.SOLUTION_PROJECT_NAME);
-        createPomFile(artifactId, ProjectWriter.START_CODE_PROJECT_NAME);
+    public void createPomFiles() throws TransformerException{
+        try{
+            FileUtils.checkPathExists(targetPath);
+            removeAnnotationDependency();
+            removeFrejalugin();
+            String artifactId = getArtifactId();
+            createPomFile(artifactId, ProjectWriter.SOLUTION_PROJECT_NAME);
+            createPomFile(artifactId, ProjectWriter.START_CODE_PROJECT_NAME);
+        }catch (NoSuchFileException ignore){
+            //Allows for executing Freja from the main method without needing a pom.xml file in the source project
+            return;
+        }
+
     }
 
     public void removeAnnotationDependency(){

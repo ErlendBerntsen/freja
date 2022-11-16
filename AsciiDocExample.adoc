@@ -1,0 +1,19 @@
+:Exercise1_Package: pass:normal[`+no.hvl+`]
+:Exercise1_FileName: pass:normal[`+HelloWorld.java+`]
+:Exercise1_FileSimpleName: pass:normal[`+HelloWorld+`]
+:Task1_1_FullName: public String helloWorld()
+:Task1_1_SimpleName: pass:normal[`+helloWorld+`]
+:Task1_1_Type: pass:normal[`+Method+`]
+:Parameter: pass:normal[`+name+`]
+
+
+= *Exercise 1*
+
+The starting code for this exercise can be found in the file {Exercise1_FileName}, which you can find in the package {Exercise1_Package}. Your task is to implement the following:
+
+* A {Task1_1_Type}:
+
+[source, java, subs="attributes+"]
+----
+{Task1_1_FullName}
+----

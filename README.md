@@ -5,7 +5,7 @@
 
 ## Installment
 
-Copy this project to your computer either by cloning, forking or downloading this repository. This project relies on [Maven](https://maven.apache.org/download.cgi) so make sure you have it installed. Open the project and then a terminal and run the command `mvn clean install` to install the plugin into to your local maven repository. Make sure you run this command in the project's root directory, i.e., .../programmingAssignmentFramework. You may need to configure the JDK source and target version properties in the pom file to be compatible with your development environment. 
+Copy this project to your computer either by cloning, forking or downloading this repository. This project relies on [Maven](https://maven.apache.org/download.cgi) so make sure you have it installed. Open the project and then a terminal and run the command `mvn clean install` to install the plugin into to your local maven repository. Make sure you run this command in the project's root directory, i.e., .../freja. You may need to configure the JDK source and target version properties in the pom file to be compatible with your development environment. 
 
 
 ## Usage
@@ -86,7 +86,12 @@ This is used to mark some construct whose body can be used as a replacement for 
 
 **@Remove**
 
-This annotation is used to remove constructs entirely from the generated start code. This may be useful in cases where you want to remove a solution, but the solution spans several methods. You probably also want to use this annotation in conjunction with the `@ReplacementCode` annotation as to not bloat the start code with unnecessary and confusing code for students. Using this annotation on a class or interface will remove the entire file from all the generated projects. There is annotation member `removeFrom` that can be set to specify that something should only be removed from one of the generated projects. For example `removeFrom = TargetProject.START_CODE` will only remove the annotated construct from the generated start code project. Not setting this option will result in using the default value`TargetProject.ALL`, which will remove the construct from all generated projects. 
+This annotation is used to remove constructs entirely from the generated projects. This may be useful in cases where you want to remove a solution, but the solution spans several methods. You probably also want to use this annotation in conjunction with the `@ReplacementCode` annotation as to not bloat the start code with unnecessary and confusing code for students. Using this annotation on at the class level will remove the entire file from all the generated projects. There is annotation member `removeFrom` that can be set to specify that something should only be removed from one of the generated projects. For example `removeFrom = TargetProject.START_CODE` will only remove the annotated construct from the generated start code project. Not setting this option will result in using the default value`TargetProject.ALL`, which will remove the construct from all generated projects. 
+
+**@DescriptionReference**
+
+This annotation can be used if you want to create a reference to some part of the code in a description text that isn't covered by the generated attributes. It is applicable on any code construct that has a name (e.g. parameters, classes, methods etc.). It has two annotation elements, `int[] exercises` is used to specify the root exercise numbers of the exercise description files to generate the custom attribute in, while `String attributeName` determines the attribute key name. The value of the attribute is the simple name of the annotated construct, for example a method name. 
+
 
 ### Marking Solutions
 
@@ -119,7 +124,7 @@ Solution with a return statement:
 So what is actually generated? There will be created two projects in the target path folder that was given in the configuration. One is called `startcode` and the other `solution`. Both projects will copy every file and folder from the source project except the files and folders that are listed in the `ignore` part of the configuration options.  The Java files are modified according to the annotations. The pom file will also be modified to remove dependencies and plugins related to this framework (other dependencies and plugins will be kept). The `solution` project will keep all solutions, but remove all annotations and everything else that is related to this framework. The `startcode` project is similar, but the constructs annotated with `@Exercise` are handled according to the `transformOption`.
 
 ### Exercise Descriptions
-The `startcode` project will also include a folder called `descriptions` that has a templated description file for each top-level exercise (i.e. each construct that is annotated with `@Exercise` and share the same first digit in `id` will share the same description file). This is done with [AsciiDoc](https://asciidoc.org/) using attributes. These attributes make it possible to quickly refer to information about constructs that are marked with the `@Exercise` annotation. This information includes the construct's simple name, full name, path, filename etc. This information is updated automatically when refactoring the construct, as long as it doesn't change its hierarchical position in the exercise. This ensures consistency between exercise descriptions and source code, since the descriptions are automatically updated when refactoring the source code. An example template description is also included with each exercise. Both PDF and HTML can be generated from the AsciiDoc files. It is highly recommended installing an AsciiDoc plugin for your IDE to make it easier to work it:
+The `startcode` project will also include a folder called `descriptions` that has a templated description file for each top-level exercise (i.e. each construct that is annotated with `@Exercise` and share the same first digit in `id` will share the same description file). This is done with [AsciiDoc](https://asciidoc.org/) using attributes. These attributes make it possible to quickly refer to information about constructs that are marked with the `@Exercise` annotation. This information includes the construct's simple name, full name, path, filename etc. This information is updated automatically when refactoring the construct, as long as it doesn't change its hierarchical position in the exercise. This ensures consistency between exercise descriptions and source code, since the descriptions are automatically updated when refactoring the source code. An example template description is also included with each exercise. Both PDF and HTML can be generated from the AsciiDoc files, but an AsciiDoc file can also be directly displayed in GitHub. It is highly recommended installing an AsciiDoc plugin for your IDE to make it easier to work it:
 * [IntelliJ AsciiDoc plugin](https://plugins.jetbrains.com/plugin/7391-asciidoc)
 * [Eclipse AsciiDoc plugin](https://marketplace.eclipse.org/content/asciidoctor-editor)
 * [VSCode AsciiDoc plugin](https://marketplace.visualstudio.com/items?itemName=asciidoctor.asciidoctor-vscode)
@@ -150,8 +155,9 @@ package no.hvl;
 public class HelloWorld {
 
     @Exercise(id = {1}, transformOption = TransformOption.REMOVE_BODY)
-    public String helloWorld(){
-        return "Hello World";
+    public String helloWorld(@DescriptionReference(exercises = {1}, attributeName = "Parameter") String name){
+        
+        return name.isEmpty() ? "Hello World" : "Hello " + name;
     }
 }
 ```
@@ -163,10 +169,11 @@ Would produce the asciidoc file `Exercise1.adoc` :
 :Task1_1_FullName: public String helloWorld()
 :Task1_1_SimpleName: pass:normal[`+helloWorld+`]
 :Task1_1_Type: pass:normal[`+Method+`]
+:Parameter: pass:normal[`+name+`]
 
 = *Exercise 1*
 
-. The starting code for this exercise can be found in the file {Exercise1_FileName}, which you can find in the package {Exercise1_Package}. Your task is to implement the following:
+The starting code for this exercise can be found in the file {Exercise1_FileName}, which you can find in the package {Exercise1_Package}. Your task is to implement the following:
 
 * A {Task1_1_Type}:
 
@@ -176,19 +183,21 @@ Would produce the asciidoc file `Exercise1.adoc` :
 ----
 ```
 
-The value of the attribute keys may seem a little cryptic. This is just to make the value be in monospace text (this is identical with wrapping some text in backticks in markdown) when swapping out the attribute key. The example description template displays some syntax of asciidoc, such as title, lists, attribute usage, and source code block. Take note of the `subs="attributes+"` in the source code block definition. This allows for using attributes in the source code block. This template description may be a little barebone, but you can edit it however you like. Just make sure to set `keepOldDescriptions` to true in the maven plugin configurations to not overwrite the changes when regenerating artefacts.
+The value of the attribute keys may seem a little cryptic. This is just to make the value be in monospace font (this is identical with wrapping some text in backticks in markdown) when swapping out the attribute key. The example description template displays some syntax of asciidoc, such as title, lists, attribute usage, and source code block. Take note of the `subs="attributes+"` in the source code block definition. This allows for using attributes in the source code block. This template description may be a little barebone, but you can edit it however you like. Just make sure to set `keepOldDescriptions` to true in the maven plugin configurations to not overwrite the changes when regenerating artefacts.
 
-The PDF output of the asciidoc example above can be seen [here](AsciiDocExample.pdf). It would be similar to something like this down below in markdown:
+The output of the asciidoc example above can be seen [here](AsciiDocExample.adoc).
 
-# Exercise 1
+## Things to note
 
-1. The starting code for this exercise can be found in the file `HelloWorld.java`, which you can find in the package `no.hvl`. Your task is to implement the following:
+(Updated 16.11.22)
+### Eclipse
 
-    * A `Method`:
-  ```java
-public String helloWorld()
-```
+If you are using Eclipse, make sure that the text encoding in Eclipse is set to UTF-8, especially if you rely on UTF-8 characters in the description text. Make also sure when opening the generated projects to only have one project as the source folder on the build path at a time. You can right-click a project in the package explorer and select `Build Path` and `Remove from Build Path` to remove a project as a source, and `Use as Source Folder` to make it the source folder again. 
 
+### General
+- Currently the generated descriptions are only available in English
+- Creating Git repositories for the generated projects is possible. However, making changes in the source project and regenerating the projects requires manual intervention if you wish to save the changes in those repositories (for example, git commit or git push).
+- FREJA is limited by the capability of JavaParser. Currently, Javaparser works for Java 1 - 15, which includes preview features to Java 13, with Java 14 preview features work-in-progress. This means that new language features from Java 14 and above can't be used with FREJA. This is only for features that create new terminals/non-terminals in the Java grammar, such as Records. 
 
 
     

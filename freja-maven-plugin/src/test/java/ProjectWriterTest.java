@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +33,11 @@ class ProjectWriterTest {
 
     @Rule
     private final TemporaryFolder tempFolder = new TemporaryFolder();
+
+    private final String rootPath = Path.of(System.getProperty("user.dir")).getParent().toString();
+    private final File testExampleFolder = new File(rootPath + File.separator + "freja-test-example");
+    @Rule
+    public TemporaryFolder relativeFolder = new TemporaryFolder(testExampleFolder);
 
     @BeforeEach
     void setUp() throws IOException {
@@ -313,7 +319,9 @@ class ProjectWriterTest {
 
     @Test
     void testCreatingProjectsUsingRelativeTargetPath() throws IOException {
-        var config = new Configuration(srcDirPath, "output");
+        relativeFolder.create();
+        String targetPath = tempFolder.getRoot().getPath();
+        var config = new Configuration(srcDirPath, targetPath);
         var newProjectWriter = new ProjectWriter(config, assignment);
         newProjectWriter.clearTargetDir();
         List<String> originalFileNames = getAllFileNames(new File(srcDirPath));
@@ -323,10 +331,14 @@ class ProjectWriterTest {
         File targetDir = new File(config.getTargetPath());
         originalFileNames.removeAll(assignment.getFileNamesToRemove());
         for(File file : Objects.requireNonNull(targetDir.listFiles())){
+            if(file.getName().contains("junit")){
+                continue;
+            }
             assertEquals(originalFileNames, getAllFileNames(file));
             assertEquals(originalDirNames, getAllDirectoryNames(file));
         }
         newProjectWriter.clearTargetDir();
+        relativeFolder.delete();
     }
 
 }

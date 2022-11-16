@@ -6,9 +6,11 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.annotations.TransformOption;
 import no.hvl.exceptions.MissingAnnotationException;
 import no.hvl.exceptions.NodeException;
+import no.hvl.utilities.AnnotationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.ExamplesParser;
+import testUtils.TestUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,7 +30,7 @@ class AnnotationUtilsTest extends ExamplesParser {
     }
 
     @Test
-    void testGettingTransformOptionFromNormalImplementAnnotation() {
+    void testGettingTransformOptionFromNormalExerciseAnnotation() {
         NodeWithAnnotations<?> node = getNodeWithId(parser.getCompilationUnitCopies(), 1);
         TransformOption transformOption = getTransformOptionValueInExerciseAnnotation(node);
         assertEquals(TransformOption.REMOVE_EVERYTHING, transformOption);

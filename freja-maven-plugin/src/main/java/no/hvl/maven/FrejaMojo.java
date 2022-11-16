@@ -2,7 +2,6 @@ package no.hvl.maven;
 
 import no.hvl.Configuration;
 import no.hvl.Generator;
-import no.hvl.writers.MavenWriter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -12,7 +11,7 @@ import java.util.List;
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.COMPILE)
 public class FrejaMojo extends AbstractMojo {
 
-    private static final List<String> pom = List.of("pom.xml", "*pom.xml", "**pom.xml");
+
 
     @Parameter(property = "targetPath", required = true)
     private String targetPath;
@@ -32,10 +31,6 @@ public class FrejaMojo extends AbstractMojo {
         var generator = new Generator(configuration);
         try {
             generator.generate();
-            if(ignore.stream().noneMatch(pom::contains)){
-                var mavenWriter = new MavenWriter("pom.xml", targetPath);
-                mavenWriter.createPomFiles();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }

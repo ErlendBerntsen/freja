@@ -2,12 +2,8 @@ package no.hvl.concepts;
 
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.utilities.DescriptionReferenceData;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -25,22 +21,6 @@ public class Assignment {
 
     public List<Replacement> getReplacements() {
         return replacements;
-    }
-
-    public HashMap<String, Replacement> getReplacementsAsHashMap(){
-        HashMap<String, Replacement> replacementsMap  = new HashMap<>();
-        for(Replacement replacement : replacements){
-            replacementsMap.put(replacement.getId(), replacement);
-        }
-        return replacementsMap;
-    }
-
-    public HashSet<ImportDeclaration> getReplacementImportDeclarations(){
-        HashSet<ImportDeclaration> replacementImportDeclarations = new HashSet<>();
-        for(Replacement replacement : replacements){
-            replacementImportDeclarations.addAll(replacement.getRequiredImports());
-        }
-        return replacementImportDeclarations;
     }
 
     public void setReplacements(List<Replacement> replacements) {

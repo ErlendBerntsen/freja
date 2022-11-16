@@ -5,14 +5,12 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import no.hvl.Parser;
-import no.hvl.annotations.DescriptionReference;
 import no.hvl.annotations.TargetProject;
 import no.hvl.annotations.TransformOption;
 import no.hvl.concepts.*;
 import no.hvl.concepts.tasks.Task;
 import no.hvl.exceptions.MissingAnnotationMemberException;
 import no.hvl.exceptions.NodeException;
-import no.hvl.utilities.AnnotationNames;
 import no.hvl.utilities.DescriptionReferenceData;
 
 import java.util.*;
@@ -30,8 +28,6 @@ public class AssignmentBuilder {
     private List<Exercise> exercises;
     private HashSet<String> fileNamesToRemove;
 
-
-
     public AssignmentBuilder(Parser parser) {
         this.parser = parser;
     }
@@ -39,8 +35,8 @@ public class AssignmentBuilder {
     public Assignment build() {
         Assignment assignment = new Assignment();
         parsedFiles = parser.getCompilationUnitCopies();
-        assignment.setDescriptionReferences(findDescriptionReferences());
         assignment.setParsedFiles(parsedFiles);
+        assignment.setDescriptionReferences(findDescriptionReferences());
         assignment.setReplacements(findReplacements());
         assignment.setExercises(findExercises());
         assignment.setStartCodeFiles(createStartCode());
@@ -167,7 +163,7 @@ public class AssignmentBuilder {
     private BodyDeclaration<?> createNewTaskNode(TargetProject targetProject, Task task, BodyDeclaration<?> newTaskNode) {
         if(targetProject.equals(TargetProject.SOLUTION)){
             newTaskNode = task.createSolutionCode(newTaskNode);
-        }else{
+        }else if (targetProject.equals(TargetProject.START_CODE)){
             newTaskNode = task.createStartCode(newTaskNode);
         }
         removeAnnotationTypeFromNode(newTaskNode, EXERCISE_NAME);

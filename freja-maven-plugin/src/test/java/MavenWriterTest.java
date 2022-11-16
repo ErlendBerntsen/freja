@@ -272,16 +272,6 @@ class MavenWriterTest {
     }
 
     @Test
-    void testCreatingPomFilesWithNonexistentTargetPath(){
-        try{
-            mavenWriter.createPomFiles();
-            fail("Should throw exception");
-        }catch (Exception e){
-            assertTrue(e instanceof NoSuchFileException);
-        }
-    }
-
-    @Test
     void testCreatingPomFiles() throws TransformerException, ParserConfigurationException, SAXException, IOException {
         tempFolder.create();
         String targetPath = tempFolder.getRoot().getAbsolutePath();

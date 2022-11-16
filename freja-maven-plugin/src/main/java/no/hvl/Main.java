@@ -1,10 +1,8 @@
 package no.hvl;
 
-import java.io.IOException;
-
 public class Main {
 
-    public static void main (String[] args) throws IOException {
+    public static void main (String[] args) throws Exception {
         Configuration config = new Configuration("", "");
         Generator generator = new Generator(config);
         generator.generate();
